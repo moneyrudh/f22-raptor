@@ -8,6 +8,26 @@ const OBSTACLE_WIDTH = @import("game_state").OBSTACLE_WIDTH;
 const WINDOW_WIDTH = @import("game_state").WINDOW_WIDTH;
 const WINDOW_HEIGHT = @import("game_state").WINDOW_HEIGHT;
 
+fn rotatePoint(point: c.SDL_Point, center: c.SDL_Point, angle_degrees: f32) c.SDL_Point {
+    const angle_rad = angle_degrees * std.math.pi / 180.0;
+    const cos_angle = @cos(angle_rad);
+    const sin_angle = @sin(angle_rad);
+
+    const dx = @as(f32, @floatFromInt(point.x - center.x));
+    const dy = @as(f32, @floatFromInt(point.y - center.y));
+
+    return c.SDL_Point{
+        .x = center.x + @as(i32, @intFromFloat(dx * cos_angle - dy * sin_angle)),
+        .y = center.y + @as(i32, @intFromFloat(dx * sin_angle + dy * cos_angle)),
+    };
+}
+
+fn rotatePoints(points: []c.SDL_Point, center: c.SDL_Point, angle_degrees: f32) void {
+    for (points) |*point| {
+        point.* = rotatePoint(point.*, center, angle_degrees);
+    }
+}
+
 pub fn main() !void {
     // Initialize SDL
     if (c.SDL_Init(c.SDL_INIT_VIDEO) < 0) {
@@ -112,58 +132,8 @@ pub fn main() !void {
         // Draw player (improved F-22 shape)
         const pos = game_state.player.getScreenPosition();
 
-        // Enhanced thrust effect when active
-        if (thrust_active) {
-            const thrust = [27]c.SDL_Point{
-                // Inner flame core (bright orange)
-                .{ .x = pos.x - 60, .y = pos.y + 2 },
-                .{ .x = pos.x - 64, .y = pos.y + 4 },
-                .{ .x = pos.x - 85, .y = pos.y + 2 },
-                .{ .x = pos.x - 64, .y = pos.y + 4 },
-                .{ .x = pos.x - 85, .y = pos.y + 6 },
-                .{ .x = pos.x - 64, .y = pos.y + 4 },
-                .{ .x = pos.x - 60, .y = pos.y + 6 },
-
-                // Middle flame layer (orange)
-                .{ .x = pos.x - 60, .y = pos.y },
-                .{ .x = pos.x - 95, .y = pos.y + 4 },
-                .{ .x = pos.x - 100, .y = pos.y + 4 },
-                .{ .x = pos.x - 95, .y = pos.y + 4 },
-                .{ .x = pos.x - 60, .y = pos.y + 8 },
-
-                // Outer flame effect (yellow)
-                .{ .x = pos.x - 65, .y = pos.y + 4 },
-                .{ .x = pos.x - 60, .y = pos.y - 2 },
-                .{ .x = pos.x - 66, .y = pos.y - 3 },
-                .{ .x = pos.x - 70, .y = pos.y - 3 },
-                .{ .x = pos.x - 80, .y = pos.y - 2 },
-                .{ .x = pos.x - 95, .y = pos.y + 2 },
-                .{ .x = pos.x - 100, .y = pos.y + 4 },
-                .{ .x = pos.x - 125, .y = pos.y + 4 },
-                .{ .x = pos.x - 100, .y = pos.y + 4 },
-                .{ .x = pos.x - 95, .y = pos.y + 6 },
-                .{ .x = pos.x - 80, .y = pos.y + 10 },
-                .{ .x = pos.x - 70, .y = pos.y + 11 },
-                .{ .x = pos.x - 66, .y = pos.y + 11 },
-                .{ .x = pos.x - 60, .y = pos.y + 10 },
-                .{ .x = pos.x - 65, .y = pos.y + 4 },
-            };
-
-            // Draw inner flame (bright orange)
-            _ = c.SDL_SetRenderDrawColor(renderer, 255, 100, 0, 255);
-            _ = c.SDL_RenderDrawLines(renderer, thrust[0..7], 7);
-
-            // Draw middle flame (orange)
-            _ = c.SDL_SetRenderDrawColor(renderer, 255, 150, 50, 255);
-            _ = c.SDL_RenderDrawLines(renderer, thrust[7..12], 5);
-
-            // Draw outer flame (yellow)
-            _ = c.SDL_SetRenderDrawColor(renderer, 255, 200, 0, 255);
-            _ = c.SDL_RenderDrawLines(renderer, thrust[12..], 15);
-        }
-
         // Main F-22 shape with more detail
-        const f22_shape = [32]c.SDL_Point{
+        var f22_shape = [32]c.SDL_Point{
             // Nose section
             .{ .x = pos.x + 50, .y = pos.y }, // nose tip
             .{ .x = pos.x + 45, .y = pos.y - 3 }, // nose tip
@@ -205,20 +175,73 @@ pub fn main() !void {
             .{ .x = pos.x + 48, .y = pos.y + 1 },
             .{ .x = pos.x + 50, .y = pos.y }, // back to nose
         };
+        rotatePoints(&f22_shape, c.SDL_Point{ .x = pos.x, .y = pos.y }, game_state.player.rotation);
+
+        // Enhanced thrust effect when active
+        if (thrust_active) {
+            var thrust = [27]c.SDL_Point{
+                // Inner flame core (bright orange)
+                .{ .x = pos.x - 60, .y = pos.y + 2 },
+                .{ .x = pos.x - 64, .y = pos.y + 4 },
+                .{ .x = pos.x - 85, .y = pos.y + 2 },
+                .{ .x = pos.x - 64, .y = pos.y + 4 },
+                .{ .x = pos.x - 85, .y = pos.y + 6 },
+                .{ .x = pos.x - 64, .y = pos.y + 4 },
+                .{ .x = pos.x - 60, .y = pos.y + 6 },
+
+                // Middle flame layer (orange)
+                .{ .x = pos.x - 60, .y = pos.y },
+                .{ .x = pos.x - 95, .y = pos.y + 4 },
+                .{ .x = pos.x - 100, .y = pos.y + 4 },
+                .{ .x = pos.x - 95, .y = pos.y + 4 },
+                .{ .x = pos.x - 60, .y = pos.y + 8 },
+
+                // Outer flame effect (yellow)
+                .{ .x = pos.x - 65, .y = pos.y + 4 },
+                .{ .x = pos.x - 60, .y = pos.y - 2 },
+                .{ .x = pos.x - 66, .y = pos.y - 3 },
+                .{ .x = pos.x - 70, .y = pos.y - 3 },
+                .{ .x = pos.x - 80, .y = pos.y - 2 },
+                .{ .x = pos.x - 95, .y = pos.y + 2 },
+                .{ .x = pos.x - 100, .y = pos.y + 4 },
+                .{ .x = pos.x - 125, .y = pos.y + 4 },
+                .{ .x = pos.x - 100, .y = pos.y + 4 },
+                .{ .x = pos.x - 95, .y = pos.y + 6 },
+                .{ .x = pos.x - 80, .y = pos.y + 10 },
+                .{ .x = pos.x - 70, .y = pos.y + 11 },
+                .{ .x = pos.x - 66, .y = pos.y + 11 },
+                .{ .x = pos.x - 60, .y = pos.y + 10 },
+                .{ .x = pos.x - 65, .y = pos.y + 4 },
+            };
+            rotatePoints(&thrust, c.SDL_Point{ .x = pos.x, .y = pos.y }, game_state.player.rotation);
+
+            // Draw inner flame (bright orange)
+            _ = c.SDL_SetRenderDrawColor(renderer, 255, 100, 0, 255);
+            _ = c.SDL_RenderDrawLines(renderer, thrust[0..7], 7);
+
+            // Draw middle flame (orange)
+            _ = c.SDL_SetRenderDrawColor(renderer, 255, 150, 50, 255);
+            _ = c.SDL_RenderDrawLines(renderer, thrust[7..12], 5);
+
+            // Draw outer flame (yellow)
+            _ = c.SDL_SetRenderDrawColor(renderer, 255, 200, 0, 255);
+            _ = c.SDL_RenderDrawLines(renderer, thrust[12..], 15);
+        }
 
         _ = c.SDL_SetRenderDrawColor(renderer, 230, 230, 230, 255);
-        _ = c.SDL_RenderDrawLines(renderer, &f22_shape, 32);
+        _ = c.SDL_RenderDrawLines(renderer, &f22_shape, f22_shape.len);
 
         // Add surface detail lines
-        const left_wing = [4]c.SDL_Point{
+        var left_wing = [4]c.SDL_Point{
             .{ .x = pos.x - 5, .y = pos.y - 6 }, // wing root
             .{ .x = pos.x - 12, .y = pos.y - 12 }, // wing mid
             .{ .x = pos.x - 20, .y = pos.y - 12 }, // wing tip
             .{ .x = pos.x - 32, .y = pos.y - 4 }, // wing tip
         };
+        rotatePoints(&left_wing, c.SDL_Point{ .x = pos.x, .y = pos.y }, game_state.player.rotation);
         _ = c.SDL_RenderDrawLines(renderer, &left_wing, 4);
 
-        const left_tail = [6]c.SDL_Point{
+        var left_tail = [6]c.SDL_Point{
             .{ .x = pos.x - 32, .y = pos.y - 4 }, // wing root
             .{ .x = pos.x - 35, .y = pos.y - 20 }, // wing mid
             .{ .x = pos.x - 41, .y = pos.y - 20 }, // wing tip
@@ -226,15 +249,17 @@ pub fn main() !void {
             .{ .x = pos.x - 38, .y = pos.y - 4 }, // wing tip
             .{ .x = pos.x - 32, .y = pos.y - 4 }, // wing tip
         };
+        rotatePoints(&left_tail, c.SDL_Point{ .x = pos.x, .y = pos.y }, game_state.player.rotation);
         _ = c.SDL_RenderDrawLines(renderer, &left_tail, 6);
 
-        const cock_pit = [5]c.SDL_Point{
+        var cock_pit = [5]c.SDL_Point{
             .{ .x = pos.x + 28, .y = pos.y - 8 },
             .{ .x = pos.x + 24, .y = pos.y - 6 },
             .{ .x = pos.x + 20, .y = pos.y - 6 },
             .{ .x = pos.x + 12, .y = pos.y - 7 },
             .{ .x = pos.x + 8, .y = pos.y - 9 },
         };
+        rotatePoints(&cock_pit, c.SDL_Point{ .x = pos.x, .y = pos.y }, game_state.player.rotation);
         _ = c.SDL_RenderDrawLines(renderer, &cock_pit, 5);
 
         // Draw score

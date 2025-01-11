@@ -10,8 +10,8 @@ pub const OBSTACLE_WIDTH = 50;
 pub const OBSTACLE_GAP = 200;
 pub const MAX_OBSTACLES = 5;
 pub const INITIAL_ALTITUDE = F22.fromFloat(22.0);
-pub const GRAVITY = F22.fromFloat(-0.0);
-pub const THRUST = F22.fromFloat(0.0);
+pub const GRAVITY = F22.fromFloat(-0.05);
+pub const THRUST = F22.fromFloat(0.1);
 // Game constants using F22 type
 pub const MAX_ALTITUDE = F22.fromFloat(100.0);
 pub const MIN_ALTITUDE = F22.fromFloat(0.0);
@@ -28,6 +28,7 @@ pub const Player = struct {
         x: F22,
         y: F22,
     },
+    rotation: f32,
 
     pub fn init() Player {
         return .{
@@ -39,6 +40,7 @@ pub const Player = struct {
                 .x = F22.fromFloat(0.0),
                 .y = F22.fromFloat(0.0),
             },
+            .rotation = 0.0,
         };
     }
 
@@ -53,6 +55,17 @@ pub const Player = struct {
 
         // Update position
         self.position.y = self.position.y.add(self.velocity.y);
+
+        // Calculate rotation based on velocity
+        const vel_y = self.velocity.y.toFloat();
+        // Map velocity to rotation angle (-30 to 30 degrees)
+        // Reduce the multiplier to make it less sensitive
+        const target_rotation = vel_y * 50.0; // Reduced from 300.0
+        // Smoothly interpolate current rotation to target
+        // Use a smaller interpolation factor for smoother transitions
+        self.rotation = (self.rotation - target_rotation) * 0.1; // Changed from 0.15
+        // Clamp rotation to prevent extreme angles
+        self.rotation = @max(-30.0, @min(30.0, self.rotation));
 
         // Clamp position to bounds
         if (self.position.y.toFloat() < MIN_ALTITUDE.toFloat()) {
