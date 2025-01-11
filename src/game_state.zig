@@ -10,8 +10,8 @@ pub const OBSTACLE_WIDTH = 50;
 pub const OBSTACLE_GAP = 200;
 pub const MAX_OBSTACLES = 5;
 pub const INITIAL_ALTITUDE = F22.fromFloat(22.0);
-pub const GRAVITY = F22.fromFloat(-0.5);
-pub const THRUST = F22.fromFloat(0.8);
+pub const GRAVITY = F22.fromFloat(-0.0);
+pub const THRUST = F22.fromFloat(0.0);
 // Game constants using F22 type
 pub const MAX_ALTITUDE = F22.fromFloat(100.0);
 pub const MIN_ALTITUDE = F22.fromFloat(0.0);
@@ -132,33 +132,33 @@ pub const GameState = struct {
         self.player.update(thrust_active);
 
         // Update obstacles
-        for (&self.obstacles) |*obstacle| {
-            if (obstacle.active) {
-                obstacle.update();
-            }
-        }
+        // for (&self.obstacles) |*obstacle| {
+        //     if (obstacle.active) {
+        //         obstacle.update();
+        //     }
+        // }
 
-        // Spawn new obstacles
-        if (self.last_obstacle_x.toFloat() - OBSTACLE_GAP >= 0) {
-            if (self.findInactiveObstacle()) |obstacle| {
-                obstacle.active = true;
-                obstacle.x = F22.fromFloat(@as(f32, WINDOW_WIDTH));
-                // Random gap position between 20% and 80% of screen height
-                var random = std.crypto.random;
-                const gap_y = random.float(f32) * 60.0 + 20.0;
-                obstacle.gap_y = F22.fromFloat(gap_y);
-                self.last_obstacle_x = obstacle.x;
-            }
-        }
+        // // Spawn new obstacles
+        // if (self.last_obstacle_x.toFloat() - OBSTACLE_GAP >= 0) {
+        //     if (self.findInactiveObstacle()) |obstacle| {
+        //         obstacle.active = true;
+        //         obstacle.x = F22.fromFloat(@as(f32, WINDOW_WIDTH));
+        //         // Random gap position between 20% and 80% of screen height
+        //         var random = std.crypto.random;
+        //         const gap_y = random.float(f32) * 60.0 + 20.0;
+        //         obstacle.gap_y = F22.fromFloat(gap_y);
+        //         self.last_obstacle_x = obstacle.x;
+        //     }
+        // }
 
-        // Update last obstacle position
-        var min_x = F22.fromFloat(@as(f32, WINDOW_WIDTH));
-        for (&self.obstacles) |*obstacle| {
-            if (obstacle.active and obstacle.x.toFloat() < min_x.toFloat()) {
-                min_x = obstacle.x;
-            }
-        }
-        self.last_obstacle_x = min_x;
+        // // Update last obstacle position
+        // var min_x = F22.fromFloat(@as(f32, WINDOW_WIDTH));
+        // for (&self.obstacles) |*obstacle| {
+        //     if (obstacle.active and obstacle.x.toFloat() < min_x.toFloat()) {
+        //         min_x = obstacle.x;
+        //     }
+        // }
+        // self.last_obstacle_x = min_x;
     }
 
     fn findInactiveObstacle(self: *GameState) ?*Obstacle {
