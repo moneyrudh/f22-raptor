@@ -1,0 +1,28 @@
+# Zig
+.zig-cache/
+zig-cache/
+zig-out/
+/release/
+/debug/
+/build/
+/build-*/
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Build artifacts
+*.o
+*.obj
+*.exe
+*.pdb
+*.lib
+*.dll
+*.so
+*.dylib
+
+# Project specific
+f22-raptor

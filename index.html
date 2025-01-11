@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>F-22 Game</title>
+</head>
+<body>
+    <canvas id="game-canvas"></canvas>
+    <script>
+        WebAssembly.instantiateStreaming(
+            fetch('zig-out/bin/f22-raptor.wasm'),
+            {
+                env: {
+                    // We'll add required imports here
+                }
+            }
+        ).then(obj => {
+            obj.instance.exports.main();
+        });
+    </script>
+</body>
+</html>
