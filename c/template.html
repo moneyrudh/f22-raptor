@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>F-22 Game</title>
+        <style>
+            body {
+                margin: 0;
+                background-color: #1a1a1a;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+            }
+            canvas {
+                background-color: #000;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            }
+            #controls {
+                position: fixed;
+                bottom: 20px;
+                color: white;
+                font-family: monospace;
+                text-align: center;
+                width: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+        <div id="controls">SPACE / UP - Thrust | ESC - Quit</div>
+        <script>
+            var Module = {
+                canvas: (function () {
+                    var canvas = document.getElementById("canvas");
+                    canvas.addEventListener(
+                        "webglcontextlost",
+                        function (e) {
+                            e.preventDefault();
+                        },
+                        false,
+                    );
+                    return canvas;
+                })(),
+            };
+        </script>
+        {{{ SCRIPT }}}
+        <!-- emscripten will replace this -->
+    </body>
+</html>
