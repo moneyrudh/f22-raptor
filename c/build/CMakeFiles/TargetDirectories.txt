@@ -1,0 +1,3 @@
+/Users/ani/Desktop/Anirudh/f22raptor/c/build/CMakeFiles/f22_game.dir
+/Users/ani/Desktop/Anirudh/f22raptor/c/build/CMakeFiles/edit_cache.dir
+/Users/ani/Desktop/Anirudh/f22raptor/c/build/CMakeFiles/rebuild_cache.dir
