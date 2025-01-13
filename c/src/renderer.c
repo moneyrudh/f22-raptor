@@ -126,38 +126,16 @@ void renderer_init_shapes(Renderer* renderer) {
 void renderer_draw_wave(Renderer* renderer, const WaveGenerator* wave) {
     SDL_SetRenderDrawColor(renderer->renderer, 100, 200, 255, 255);
 
-    // Calculate points for the visible portion of the wave
-    renderer->num_wave_points = 0;
-    float step = 1.0f;  // Sample every 2 pixels for smoothness
-
-    for (float x = 0; x < WINDOW_WIDTH; x += step) {
-        F22 world_x = f22_add(wave->last_x, f22_from_float(x));
-        F22 world_y = wave_get_y_at_x(wave, world_x);
-
-        renderer->wave_points[renderer->num_wave_points].x = (int)x;
-        renderer->wave_points[renderer->num_wave_points].y = (int)f22_to_float(world_y);
-        renderer->num_wave_points++;
+    // Just copy the wave points directly to renderer points, shifting x coordinates left
+    renderer->num_wave_points = WINDOW_WIDTH;
+    for (int i = 0; i < WINDOW_WIDTH; i++) {
+        renderer->wave_points[i].x = (int)(f22_to_float(wave->points[i].x));
+        renderer->wave_points[i].y = (int)f22_to_float(wave->points[i].y);
     }
 
-    // Draw the wave segments
-    SDL_RenderDrawLines(renderer->renderer, renderer->wave_points, renderer->num_wave_points);
-
-    // Optional: Draw control points for debugging
-    #ifdef DEBUG_WAVE
-    SDL_SetRenderDrawColor(renderer->renderer, 255, 0, 0, 255);
-    for (int i = 0; i < wave->num_points; i++) {
-        float screen_x = f22_to_float(wave->points[i].x) - f22_to_float(wave->last_x);
-        if (screen_x >= 0 && screen_x < WINDOW_WIDTH) {
-            SDL_Rect point = {
-                .x = (int)screen_x - 2,
-                .y = (int)f22_to_float(wave->points[i].y) - 2,
-                .w = 4,
-                .h = 4
-            };
-            SDL_RenderFillRect(renderer->renderer, &point);
-        }
+    if (renderer->num_wave_points > 1) {
+        SDL_RenderDrawLines(renderer->renderer, renderer->wave_points, renderer->num_wave_points);
     }
-    #endif
 }
 
 void renderer_rotate_points(SDL_Point* points, int num_points, SDL_Point center, float angle) {

@@ -103,8 +103,10 @@ GameState game_state_init(void) {
 
 void game_state_update(GameState* state, bool thrust_active) {
     // Update wave first
+    printf("Game state update called\n");
     wave_update(&state->wave);
 
+    printf("Wave update completed\n");
     // Update player
     player_update(&state->player, thrust_active);
 

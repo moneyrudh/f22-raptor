@@ -1,75 +1,124 @@
 #include "wave.h"
+#include "f22.h"
+#include "game_state.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
 
+// WaveGenerator wave_init(void) {
+//     WaveGenerator wave = {
+//         .num_points = 0,
+//         .current_segment = 0,
+//         .last_x = f22_from_float(0.0f),
+//         .scroll_speed = f22_from_float(2.0f),
+//         .gravity = f22_from_float(0.075f),
+//         .thrust = f22_from_float(0.15f)
+//     };
+
+//     // Generate initial control points
+//     float x = 0;
+//     float y = SCREEN_HEIGHT / 2.0f;  // Start in middle
+
+//     for (int i = 0; i < 4; i++) {
+//         wave.points[i].x = f22_from_float(x);
+//         wave.points[i].y = f22_from_float(y);
+
+//         // Generate next point
+//         float segment_length = MIN_SEGMENT_LENGTH +
+//             (rand() % (MAX_SEGMENT_LENGTH - MIN_SEGMENT_LENGTH));
+//         x += segment_length;
+
+//         // Calculate max possible y change based on physics
+//         float time_in_segment = segment_length / f22_to_float(wave.scroll_speed);
+//         float max_height_change = 0.5f * f22_to_float(wave.thrust) * time_in_segment * time_in_segment;
+
+//         // Random y position within physically possible bounds
+//         float y_change = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f) * max_height_change;
+//         y = fmaxf(100.0f, fminf(SCREEN_HEIGHT - 100.0f, y + y_change));
+
+//         wave.num_points++;
+//     }
+
+//     return wave;
+// }
 WaveGenerator wave_init(void) {
     WaveGenerator wave = {
-        .num_points = 0,
-        .current_segment = 0,
+        .num_points = WINDOW_WIDTH,
         .last_x = f22_from_float(0.0f),
         .scroll_speed = f22_from_float(2.0f),
-        .gravity = f22_from_float(0.075f),
-        .thrust = f22_from_float(0.15f)
+        .ghost = {
+            .x = f22_from_float(WINDOW_WIDTH - 1),
+            .y = f22_from_float(WINDOW_HEIGHT / 2),
+            .velocity_y = f22_from_float(0.0f),
+            .should_thrust = false,
+            .thrust_counter = 0
+        }
     };
 
-    // Generate initial control points
-    float x = 0;
-    float y = SCREEN_HEIGHT / 2.0f;  // Start in middle
-
-    for (int i = 0; i < 4; i++) {
-        wave.points[i].x = f22_from_float(x);
-        wave.points[i].y = f22_from_float(y);
-
-        // Generate next point
-        float segment_length = MIN_SEGMENT_LENGTH +
-            (rand() % (MAX_SEGMENT_LENGTH - MIN_SEGMENT_LENGTH));
-        x += segment_length;
-
-        // Calculate max possible y change based on physics
-        float time_in_segment = segment_length / f22_to_float(wave.scroll_speed);
-        float max_height_change = 0.5f * f22_to_float(wave.thrust) * time_in_segment * time_in_segment;
-
-        // Random y position within physically possible bounds
-        float y_change = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f) * max_height_change;
-        y = fmaxf(100.0f, fminf(SCREEN_HEIGHT - 100.0f, y + y_change));
-
-        wave.num_points++;
+    for (int i = 0; i < WINDOW_WIDTH; i++) {
+        wave.points[i].x = f22_from_float(i);
+        wave.points[i].y = f22_from_float(WINDOW_HEIGHT / 2);
     }
-
     return wave;
 }
 
-void wave_generate_next_point(WaveGenerator* wave) {
-    if (wave->num_points >= MAX_CONTROL_POINTS) {
-        // Shift points left
-        for (int i = 0; i < wave->num_points - 1; i++) {
-            wave->points[i] = wave->points[i + 1];
-        }
-        wave->num_points--;
+void wave_update_ghost(GhostPlayer* ghost) {
+    // Simple pattern: thrust for 30 frames, then rest for 30 frames
+    ghost->thrust_counter++;
+    if (ghost->thrust_counter >= 60) {
+        ghost->thrust_counter = 0;
     }
+    ghost->should_thrust = ghost->thrust_counter < 30;
 
-    // Get last point
-    WavePoint last = wave->points[wave->num_points - 1];
-    WavePoint new_point;
+    // Apply same physics as player
+    ghost->velocity_y = f22_add(ghost->velocity_y, GRAVITY);
+    if (ghost->should_thrust) {
+        ghost->velocity_y = f22_sub(ghost->velocity_y, THRUST);
+    }
+    ghost->y = f22_add(ghost->y, ghost->velocity_y);
 
-    // Generate next x position
-    float segment_length = MIN_SEGMENT_LENGTH +
-        (rand() % (MAX_SEGMENT_LENGTH - MIN_SEGMENT_LENGTH));
-    new_point.x = f22_add(last.x, f22_from_float(segment_length));
+    // Keep ghost within screen bounds
+    float pos_y = f22_to_float(ghost->y);
+    if (pos_y < 100.0f) {
+        ghost->y = f22_from_float(100.0f);
+        ghost->velocity_y = f22_from_float(0.0f);
+    } else if (pos_y > WINDOW_HEIGHT - 100.0f) {
+        ghost->y = f22_from_float(WINDOW_HEIGHT - 100.0f);
+        ghost->velocity_y = f22_from_float(0.0f);
+    }
+}
 
-    // Calculate physically possible y change
-    float time_in_segment = segment_length / f22_to_float(wave->scroll_speed);
-    float max_height_change = 0.5f * f22_to_float(wave->thrust) * time_in_segment * time_in_segment;
-    max_height_change *= 10.0f;
+void wave_generate_next_point(WaveGenerator* wave) {
+    // if (wave->num_points >= MAX_CONTROL_POINTS) {
+    //     // Shift points left
+    //     for (int i = 0; i < wave->num_points - 1; i++) {
+    //         wave->points[i] = wave->points[i + 1];
+    //     }
+    //     wave->num_points--;
+    // }
 
-    // Generate new y within possible bounds
-    float last_y = f22_to_float(last.y);
-    float y_change = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f) * max_height_change;
-    float new_y = fmaxf(100.0f, fminf(SCREEN_HEIGHT - 100.0f, last_y + y_change));
-    new_point.y = f22_from_float(new_y);
+    // // Get last point
+    // WavePoint last = wave->points[wave->num_points - 1];
+    // WavePoint new_point;
 
-    wave->points[wave->num_points] = new_point;
-    wave->num_points++;
+    // // Generate next x position
+    // float segment_length = MIN_SEGMENT_LENGTH +
+    //     (rand() % (MAX_SEGMENT_LENGTH - MIN_SEGMENT_LENGTH));
+    // new_point.x = f22_add(last.x, f22_from_float(segment_length));
+
+    // // Calculate physically possible y change
+    // float time_in_segment = segment_length / f22_to_float(wave->scroll_speed);
+    // float max_height_change = 0.5f * f22_to_float(wave->thrust) * time_in_segment * time_in_segment;
+    // max_height_change *= 10.0f;
+
+    // // Generate new y within possible bounds
+    // float last_y = f22_to_float(last.y);
+    // float y_change = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f) * max_height_change;
+    // float new_y = fmaxf(100.0f, fminf(SCREEN_HEIGHT - 100.0f, last_y + y_change));
+    // new_point.y = f22_from_float(new_y);
+
+    // wave->points[wave->num_points] = new_point;
+    // wave->num_points++;
 }
 
 F22 wave_get_y_at_x(const WaveGenerator* wave, F22 x) {
@@ -114,22 +163,45 @@ F22 wave_get_y_at_x(const WaveGenerator* wave, F22 x) {
     return f22_from_float(y);
 }
 
+// void wave_update(WaveGenerator* wave) {
+//     // Generate new points if needed
+//     while (f22_to_float(wave->points[wave->num_points - 2].x) -
+//            f22_to_float(wave->last_x) < WINDOW_WIDTH * 1.5f) {
+//         wave_generate_next_point(wave);
+//     }
+
+//     // Update scroll position
+//     wave->last_x = f22_add(wave->last_x, wave->scroll_speed);
+
+//     // Remove old points
+//     while (wave->num_points > 6 &&
+//            f22_to_float(wave->points[1].x) < f22_to_float(wave->last_x)) {
+//         for (int i = 0; i < wave->num_points - 1; i++) {
+//             wave->points[i] = wave->points[i + 1];
+//         }
+//         wave->num_points--;
+//     }
+// }
 void wave_update(WaveGenerator* wave) {
-    // Generate new points if needed
-    while (f22_to_float(wave->points[wave->num_points - 2].x) -
-           f22_to_float(wave->last_x) < WINDOW_WIDTH * 1.5f) {
-        wave_generate_next_point(wave);
+    // Update ghost player
+    printf("Current coordinate = (%.2f, %.2f)\n",
+            f22_to_float(wave->points[WINDOW_WIDTH - 1].x),
+            f22_to_float(wave->points[WINDOW_WIDTH - 1].y));
+
+    wave_update_ghost(&wave->ghost);
+
+    // Shift existing points left
+    for (int i = 0; i < WINDOW_WIDTH - 1; i++) {
+        wave->points[i].x = f22_from_float(i);
+        wave->points[i].y = wave->points[i + 1].y;
     }
 
-    // Update scroll position
-    wave->last_x = f22_add(wave->last_x, wave->scroll_speed);
+    // Add new point at ghost's position
+    wave->points[WINDOW_WIDTH - 1].x = f22_from_float(WINDOW_WIDTH - 1);
+    wave->points[WINDOW_WIDTH - 1].y = wave->ghost.y;
 
-    // Remove old points
-    while (wave->num_points > 6 &&
-           f22_to_float(wave->points[1].x) < f22_to_float(wave->last_x)) {
-        for (int i = 0; i < wave->num_points - 1; i++) {
-            wave->points[i] = wave->points[i + 1];
-        }
-        wave->num_points--;
-    }
+    // Also print ghost position for verification
+    printf("Ghost position = (%.2f, %.2f)\n",
+            f22_to_float(wave->ghost.x),
+            f22_to_float(wave->ghost.y));
 }

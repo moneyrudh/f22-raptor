@@ -25,15 +25,23 @@ typedef struct {
     int thrust_counter;
 } GhostPlayer;
 
+// typedef struct {
+//     WavePoint points[MAX_CONTROL_POINTS];
+//     int num_points;
+//     int current_segment;
+//     F22 last_x;
+//     F22 scroll_speed;
+//     // Physics constants matching player
+//     F22 gravity;
+//     F22 thrust;
+// } WaveGenerator;
+
 typedef struct {
-    WavePoint points[MAX_CONTROL_POINTS];
+    WavePoint points[WINDOW_WIDTH];
     int num_points;
-    int current_segment;
     F22 last_x;
     F22 scroll_speed;
-    // Physics constants matching player
-    F22 gravity;
-    F22 thrust;
+    GhostPlayer ghost;
 } WaveGenerator;
 
 // Function declarations only
