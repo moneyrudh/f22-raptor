@@ -123,14 +123,17 @@ void renderer_init_shapes(Renderer* renderer) {
     memcpy(renderer->cock_pit, cock_pit, sizeof(cock_pit));
 }
 
-void renderer_draw_wave(Renderer* renderer, const WaveGenerator* wave) {
+void renderer_draw_wave(Renderer* renderer, const WaveGenerator* wave, F22 camera_y_offset) {
     SDL_SetRenderDrawColor(renderer->renderer, 100, 200, 255, 255);
 
     // Just copy the wave points directly to renderer points, shifting x coordinates left
     renderer->num_wave_points = WINDOW_WIDTH;
     for (int i = 0; i < WINDOW_WIDTH; i++) {
-        renderer->wave_points[i].x = (int)(f22_to_float(wave->points[i].x));
-        renderer->wave_points[i].y = (int)f22_to_float(wave->points[i].y);
+        ScreenPos pos = world_to_screen(wave->points[i].x, wave->points[i].y, camera_y_offset);
+        renderer->wave_points[i].x = pos.x;
+        renderer->wave_points[i].y = pos.y;
+        // renderer->wave_points[i].x = (int)(f22_to_float(wave->points[i].x));
+        // renderer->wave_points[i].y = (int)f22_to_float(wave->points[i].y);
     }
 
     if (renderer->num_wave_points > 1) {
@@ -157,8 +160,8 @@ void renderer_rotate_points(SDL_Point* points, int num_points, SDL_Point center,
     }
 }
 
-void renderer_draw_player(Renderer* renderer, const Player* player, bool thrust_active) {
-    ScreenPos pos = player_get_screen_position(player);
+void renderer_draw_player(Renderer* renderer, const Player* player, F22 camera_y_offset, bool thrust_active) {
+    ScreenPos pos = player_get_screen_position(player, camera_y_offset);
     SDL_Point center = {pos.x, pos.y};
     // Create temporary arrays for rotated points
     SDL_Point rotated_f22[32];
@@ -234,11 +237,11 @@ void renderer_draw_frame(Renderer* renderer, const GameState* state, bool thrust
     SDL_SetRenderDrawColor(renderer->renderer, 10, 10, 10, 255);
     SDL_RenderClear(renderer->renderer);
 
-    renderer_draw_wave(renderer, &state->wave);
+    renderer_draw_wave(renderer, &state->wave, state->camera_y_offset);
 
     // Draw game elements
     renderer_draw_obstacles(renderer, state->obstacles);
-    renderer_draw_player(renderer, &state->player, thrust_active);
+    renderer_draw_player(renderer, &state->player, state->camera_y_offset, thrust_active);
 
     SDL_RenderPresent(renderer->renderer);
 }

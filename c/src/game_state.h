@@ -11,9 +11,9 @@
 #define OBSTACLE_GAP 200
 #define MAX_OBSTACLES 5
 
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 600
 #define WORLD_TO_SCREEN_SCALE 1.0f
+#define MAX_VELOCITY f22_from_float(10.0f)  // adjust this value to feel right
+#define MIN_VELOCITY f22_from_float(-10.0f)
 
 // Position struct to replace Zig's anonymous structs
 typedef struct {
@@ -43,6 +43,8 @@ typedef struct {
 
 // Game state struct
 typedef struct {
+    F22 camera_y_offset;
+    F22 target_y_offset;
     Player player;
     Obstacle obstacles[MAX_OBSTACLES];
     F22 last_obstacle_x;
@@ -53,7 +55,8 @@ typedef struct {
 // Player functions
 Player player_init(void);
 void player_update(Player* player, bool thrust);
-ScreenPos player_get_screen_position(const Player* player);
+ScreenPos world_to_screen(F22 world_x, F22 world_y, F22 camera_y_offset);
+ScreenPos player_get_screen_position(const Player* player, F22 camera_y_offset);
 
 // Obstacle functions
 Obstacle obstacle_init(void);

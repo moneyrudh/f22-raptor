@@ -22,7 +22,11 @@ typedef struct {
     F22 y;
     F22 velocity_y;
     bool should_thrust;
-    int thrust_counter;
+    float current_duration;
+    int optimal_height;
+    float elapsed_time;
+    float phase_start_time;
+    bool is_rest_phase;
 } GhostPlayer;
 
 // typedef struct {
@@ -40,7 +44,8 @@ typedef struct {
     WavePoint points[WINDOW_WIDTH];
     int num_points;
     F22 last_x;
-    F22 scroll_speed;
+    int scroll_speed;
+    float position_offset;
     GhostPlayer ghost;
 } WaveGenerator;
 
@@ -48,6 +53,6 @@ typedef struct {
 WaveGenerator wave_init(void);
 void wave_generate_next_point(WaveGenerator* wave);
 F22 wave_get_y_at_x(const WaveGenerator* wave, F22 x);
-void wave_update(WaveGenerator* wave);
+void wave_update(WaveGenerator* wave, int player_y);
 
 #endif // WAVE_H

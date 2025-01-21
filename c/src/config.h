@@ -2,13 +2,13 @@
 #define CONFIG_H
 
 // Window dimensions
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 600
+#define WINDOW_WIDTH 1500
+#define WINDOW_HEIGHT 800
 
 // Game physics constants
-#define SCROLL_SPEED f22_from_float(2.0f)
+#define SCROLL_SPEED 10
 #define GRAVITY f22_from_float(0.15f)
-#define THRUST f22_from_float(0.25f)
+#define THRUST f22_from_float(0.35f)
 #define MAX_ALTITUDE f22_from_float(100.0f)
 #define MIN_ALTITUDE f22_from_float(0.0f)
 

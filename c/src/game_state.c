@@ -18,6 +18,29 @@ Player player_init(void) {
     return player;
 }
 
+void update_camera(GameState* state) {
+    float player_screen_y = f22_to_float(state->player.position.y) - f22_to_float(state->camera_y_offset);
+
+    const float EDGE_BUFFER = 64.0f;
+    const float RETURN_BUFFER = 128.0f;  // larger than EDGE_BUFFER
+
+    // Start camera follow earlier with EDGE_BUFFER
+    if (player_screen_y < EDGE_BUFFER) {
+        state->target_y_offset = f22_sub(state->player.position.y, f22_from_float(EDGE_BUFFER));
+    } else if (player_screen_y > WINDOW_HEIGHT - EDGE_BUFFER) {
+        state->target_y_offset = f22_sub(state->player.position.y, f22_from_float(WINDOW_HEIGHT - EDGE_BUFFER));
+    }
+    // Only reset target if player is well within bounds
+    else if (player_screen_y > RETURN_BUFFER && player_screen_y < WINDOW_HEIGHT - RETURN_BUFFER) {
+        state->target_y_offset = state->camera_y_offset;  // maintain current offset
+    }
+
+    // Smooth camera movement using lerp
+    F22 diff = f22_sub(state->target_y_offset, state->camera_y_offset);
+    state->camera_y_offset = f22_add(state->camera_y_offset,
+                                    f22_mul(diff, f22_from_float(0.5f))); // adjust 0.1 for smoother/faster
+}
+
 void player_update(Player* player, bool thrust) {
     // Apply gravity
     player->velocity.y = f22_add(player->velocity.y, GRAVITY);
@@ -25,6 +48,13 @@ void player_update(Player* player, bool thrust) {
     // Apply thrust if active
     if (thrust) {
         player->velocity.y = f22_sub(player->velocity.y, THRUST);
+    }
+
+    float current_vel = f22_to_float(player->velocity.y);
+    if (current_vel > f22_to_float(MAX_VELOCITY)) {
+        player->velocity.y = MAX_VELOCITY;
+    } else if (current_vel < f22_to_float(MIN_VELOCITY)) {
+        player->velocity.y = MIN_VELOCITY;
     }
 
     // Update position
@@ -50,12 +80,21 @@ void player_update(Player* player, bool thrust) {
     // }
 }
 
-ScreenPos player_get_screen_position(const Player* player) {
+ScreenPos world_to_screen(F22 world_x, F22 world_y, F22 camera_y_offset) {
     ScreenPos pos = {
-        .x = (int)(f22_to_float(player->position.x) * WORLD_TO_SCREEN_SCALE),
-        .y = (int)(f22_to_float(player->position.y) * WORLD_TO_SCREEN_SCALE)
+        .x = (int)(f22_to_float(world_x) * WORLD_TO_SCREEN_SCALE),
+        .y = (int)((f22_to_float(world_y) - f22_to_float(camera_y_offset)) * WORLD_TO_SCREEN_SCALE)
     };
     return pos;
+}
+
+ScreenPos player_get_screen_position(const Player* player, F22 camera_y_offset) {
+    // ScreenPos pos = {
+    //     .x = (int)(f22_to_float(player->position.x) * WORLD_TO_SCREEN_SCALE),
+    //     .y = (int)(f22_to_float(player->position.y) * WORLD_TO_SCREEN_SCALE)
+    // };
+    // return pos;
+    return world_to_screen(player->position.x, player->position.y, camera_y_offset);
 }
 
 Obstacle obstacle_init(void) {
@@ -70,7 +109,7 @@ Obstacle obstacle_init(void) {
 void obstacle_update(Obstacle* obstacle) {
     if (!obstacle->active) return;
 
-    obstacle->x = f22_sub(obstacle->x, SCROLL_SPEED);
+    obstacle->x = f22_sub(obstacle->x, f22_from_float(SCROLL_SPEED));
 
     // Deactivate if off screen
     if (f22_to_float(obstacle->x) < -OBSTACLE_WIDTH) {
@@ -90,7 +129,10 @@ GameState game_state_init(void) {
     GameState state = {
         .player = player_init(),
         .last_obstacle_x = f22_from_float(WINDOW_WIDTH),
-        .score = 0
+        .score = 0,
+        .camera_y_offset = f22_from_float(0.0f),
+        .target_y_offset = f22_from_float(0.0f),
+        .wave = wave_init()
     };
 
     // Initialize obstacles
@@ -104,11 +146,12 @@ GameState game_state_init(void) {
 void game_state_update(GameState* state, bool thrust_active) {
     // Update wave first
     printf("Game state update called\n");
-    wave_update(&state->wave);
+    ScreenPos player_pos = player_get_screen_position(&state->player, state->camera_y_offset);
+    wave_update(&state->wave, player_pos.y);
 
-    printf("Wave update completed\n");
     // Update player
     player_update(&state->player, thrust_active);
+    update_camera(state);
 
     // Note: Obstacle spawning commented out like in original
     // Update active obstacles
@@ -120,7 +163,7 @@ void game_state_update(GameState* state, bool thrust_active) {
 }
 
 bool game_state_check_collisions(GameState* state) {
-    ScreenPos player_pos = player_get_screen_position(&state->player);
+    ScreenPos player_pos = player_get_screen_position(&state->player, state->camera_y_offset);
     const int player_radius = 15;  // Simplified collision circle
 
     for (int i = 0; i < MAX_OBSTACLES; i++) {

@@ -1,9 +1,11 @@
 #include "wave.h"
+#include "config.h"
 #include "f22.h"
 #include "game_state.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <SDL.h>
 
 // WaveGenerator wave_init(void) {
 //     WaveGenerator wave = {
@@ -45,13 +47,18 @@ WaveGenerator wave_init(void) {
     WaveGenerator wave = {
         .num_points = WINDOW_WIDTH,
         .last_x = f22_from_float(0.0f),
-        .scroll_speed = f22_from_float(2.0f),
+        .scroll_speed = SCROLL_SPEED,
+        .position_offset = 0.0f,
         .ghost = {
             .x = f22_from_float(WINDOW_WIDTH - 1),
             .y = f22_from_float(WINDOW_HEIGHT / 2),
             .velocity_y = f22_from_float(0.0f),
             .should_thrust = false,
-            .thrust_counter = 0
+            .optimal_height = WINDOW_HEIGHT / 2,
+            .current_duration = 0.5f + ((float)rand() / (float)RAND_MAX) * 1.0f,
+            .is_rest_phase = false,
+            .elapsed_time = 0.0f,
+            .phase_start_time = SDL_GetTicks() / 1000.0f
         }
     };
 
@@ -62,30 +69,46 @@ WaveGenerator wave_init(void) {
     return wave;
 }
 
-void wave_update_ghost(GhostPlayer* ghost) {
+void wave_update_ghost(GhostPlayer* ghost, int player_y) {
     // Simple pattern: thrust for 30 frames, then rest for 30 frames
-    ghost->thrust_counter++;
-    if (ghost->thrust_counter >= 60) {
-        ghost->thrust_counter = 0;
+    float current_time = SDL_GetTicks() / 1000.0f;
+    float diff = current_time - ghost->phase_start_time;
+    if (diff >= ghost->current_duration) {
+        ghost->phase_start_time = current_time;
+
+        printf("SWITCHING FROM %f WITH CURRENT TIME %f WITH DIFF %f", f22_to_float(ghost->y), ghost->current_duration, diff);
+        printf("CURRENT GHOST Y %f", f22_to_float(ghost->y));
+        ghost->elapsed_time = 0.0f;
+        if ((int)f22_to_float(ghost->y) <= player_y) {
+            ghost->is_rest_phase = true;
+        } else if ((int)f22_to_float(ghost->y) > player_y) {
+            ghost->is_rest_phase = false;
+        }
+        // ghost->is_rest_phase = !ghost->is_rest_phase;
+
+        if (ghost->is_rest_phase) {
+            ghost->current_duration = ((float)rand() / (float)RAND_MAX) * 1.0f;
+        } else {
+            ghost->current_duration = ((float)rand() / (float)RAND_MAX) * 1.0f;
+        }
     }
-    ghost->should_thrust = ghost->thrust_counter < 30;
+
+    ghost->should_thrust = !ghost->is_rest_phase;
 
     // Apply same physics as player
     ghost->velocity_y = f22_add(ghost->velocity_y, GRAVITY);
     if (ghost->should_thrust) {
         ghost->velocity_y = f22_sub(ghost->velocity_y, THRUST);
     }
-    ghost->y = f22_add(ghost->y, ghost->velocity_y);
 
-    // Keep ghost within screen bounds
-    float pos_y = f22_to_float(ghost->y);
-    if (pos_y < 100.0f) {
-        ghost->y = f22_from_float(100.0f);
-        ghost->velocity_y = f22_from_float(0.0f);
-    } else if (pos_y > WINDOW_HEIGHT - 100.0f) {
-        ghost->y = f22_from_float(WINDOW_HEIGHT - 100.0f);
-        ghost->velocity_y = f22_from_float(0.0f);
+    float current_vel = f22_to_float(ghost->velocity_y);
+    if (current_vel > f22_to_float(MAX_VELOCITY)) {
+        ghost->velocity_y = MAX_VELOCITY;
+    } else if (current_vel < f22_to_float(MIN_VELOCITY)) {
+        ghost->velocity_y = MIN_VELOCITY;
     }
+
+    ghost->y = f22_add(ghost->y, ghost->velocity_y);
 }
 
 void wave_generate_next_point(WaveGenerator* wave) {
@@ -182,26 +205,49 @@ F22 wave_get_y_at_x(const WaveGenerator* wave, F22 x) {
 //         wave->num_points--;
 //     }
 // }
-void wave_update(WaveGenerator* wave) {
-    // Update ghost player
-    printf("Current coordinate = (%.2f, %.2f)\n",
-            f22_to_float(wave->points[WINDOW_WIDTH - 1].x),
-            f22_to_float(wave->points[WINDOW_WIDTH - 1].y));
+void wave_update(WaveGenerator* wave, int player_y) {
+    wave_update_ghost(&wave->ghost, player_y);
 
-    wave_update_ghost(&wave->ghost);
+    // Use scroll speed to determine x position shift
+    int shift = wave->scroll_speed;
 
+    // for (int i = 0; i < WINDOW_WIDTH - 1; i++) {
+    //     wave->points[i].x = f22_from_float(i);
+    //     wave->points[i].y = wave->points[i + 1].y;
+    // }
     // Shift existing points left
-    for (int i = 0; i < WINDOW_WIDTH - 1; i++) {
-        wave->points[i].x = f22_from_float(i);
-        wave->points[i].y = wave->points[i + 1].y;
+    int iterations = (int) WINDOW_WIDTH / (int) shift;
+    int i = 0;
+    while (i < iterations)
+    {
+        int k = 0;
+        while (k < (int) shift)
+        {
+            int index = i * (int) shift + k;
+            wave->points[index].x = f22_from_float(index);
+            wave->points[index].y = wave->points[index+(int)shift].y;
+            k++;
+        }
+        i++;
     }
 
-    // Add new point at ghost's position
+    int index = WINDOW_WIDTH - shift;
+    while (index < WINDOW_WIDTH)
+    {
+        wave->points[index].x = f22_from_float(index);
+        wave->points[index].y = wave->ghost.y;
+        index++;
+    }
+    // New point always starts at window width
     wave->points[WINDOW_WIDTH - 1].x = f22_from_float(WINDOW_WIDTH - 1);
     wave->points[WINDOW_WIDTH - 1].y = wave->ghost.y;
+    // wave_update_ghost(&wave->ghost);
+    // for (int i = 0; i < WINDOW_WIDTH - 1; i++) {
+    //     wave->points[i].x = f22_from_float(i);
+    //     wave->points[i].y = wave->points[i + 1].y;
+    // }
 
-    // Also print ghost position for verification
-    printf("Ghost position = (%.2f, %.2f)\n",
-            f22_to_float(wave->ghost.x),
-            f22_to_float(wave->ghost.y));
+    // // Add new point at ghost's position
+    // wave->points[WINDOW_WIDTH - 1].x = f22_from_float(WINDOW_WIDTH - 1);
+    // wave->points[WINDOW_WIDTH - 1].y = wave->ghost.y;
 }
