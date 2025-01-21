@@ -54,7 +54,7 @@ typedef struct {
 
 // Player functions
 Player player_init(void);
-void player_update(Player* player, bool thrust);
+void player_update(Player* player, const GameState* state, bool thrust);
 ScreenPos world_to_screen(F22 world_x, F22 world_y, F22 camera_y_offset);
 ScreenPos player_get_screen_position(const Player* player, F22 camera_y_offset);
 

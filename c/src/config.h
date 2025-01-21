@@ -17,4 +17,10 @@
 #define OBSTACLE_GAP 200
 #define MAX_OBSTACLES 5
 
+// Safe zone constants
+#define SAFE_ZONE_WIDTH 100
+#define SAFE_ZONE_X (WINDOW_WIDTH / 2)  // center of screen
+#define MAX_HORIZONTAL_MOVEMENT 5.0f     // max pixels per frame to move left
+#define GAME_OVER_X 50
+
 #endif // CONFIG_H

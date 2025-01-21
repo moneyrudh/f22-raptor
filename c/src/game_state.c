@@ -41,7 +41,7 @@ void update_camera(GameState* state) {
                                     f22_mul(diff, f22_from_float(0.5f))); // adjust 0.1 for smoother/faster
 }
 
-void player_update(Player* player, bool thrust) {
+void player_update(Player* player, const GameState* state, bool thrust) {
     // Apply gravity
     player->velocity.y = f22_add(player->velocity.y, GRAVITY);
 
@@ -50,6 +50,7 @@ void player_update(Player* player, bool thrust) {
         player->velocity.y = f22_sub(player->velocity.y, THRUST);
     }
 
+    // Clamp vertical velocity
     float current_vel = f22_to_float(player->velocity.y);
     if (current_vel > f22_to_float(MAX_VELOCITY)) {
         player->velocity.y = MAX_VELOCITY;
@@ -57,8 +58,45 @@ void player_update(Player* player, bool thrust) {
         player->velocity.y = MIN_VELOCITY;
     }
 
-    // Update position
+    // Update vertical position
     player->position.y = f22_add(player->position.y, player->velocity.y);
+
+
+    // Calculate distance from ghost's y position
+    int _x = (int) f22_to_float(state->player.position.x);
+    float ghost_y = f22_to_float(state->wave.points[_x].y);
+    float player_y = f22_to_float(player->position.y);
+    float y_distance = fabsf(ghost_y - player_y);
+
+    // Normalize the distance (0 to 1 scale)
+    float normalized_distance = y_distance / WINDOW_HEIGHT;
+    printf("NORMALIZED DISTANCE AND Y_DISTANCE %f, %f: ", normalized_distance, y_distance);
+
+    float screen_mid = WINDOW_WIDTH / 2.0f;
+    float player_x = f22_to_float(player->position.x);
+    float exp_distance = normalized_distance * normalized_distance;  // x^2
+
+    if (player_x < screen_mid) {
+        // When left of mid-screen:
+        // Close to ghost (small normalized_distance) = move right
+        // Far from ghost (large normalized_distance) = move left
+        float move_amount = (1.0f - normalized_distance) * 1.5f - normalized_distance * 6.0f;
+        // float move_amount = 0.0f;
+        // if (normalized_distance > 0.2f) {
+        //     move_amount = 1.5f;
+        // } else {
+        //     move_amount = -2.0f;
+        // }
+        player->position.x = f22_add(player->position.x, f22_from_float(move_amount));
+    } else {
+        if (normalized_distance > 0.2f) {
+            // Outside safe zone, move left fast
+            player->position.x = f22_sub(player->position.x, f22_from_float(5.0f));
+        } else {
+            // Inside safe zone (within 20% of ghost), move left slowly
+            player->position.x = f22_sub(player->position.x, f22_from_float(0.0f));
+        }
+    }
 
     // Calculate rotation based on velocity
     float vel_y = f22_to_float(player->velocity.y);
@@ -68,16 +106,6 @@ void player_update(Player* player, bool thrust) {
     player->rotation = (player->rotation - target_rotation) * 0.1f;
     // Clamp rotation
     player->rotation = fmaxf(-30.0f, fminf(30.0f, player->rotation));
-
-    // Clamp position
-    // float pos_y = f22_to_float(player->position.y);
-    // if (pos_y < f22_to_float(MIN_ALTITUDE)) {
-    //     player->position.y = MIN_ALTITUDE;
-    //     player->velocity.y = f22_from_float(0.0f);
-    // } else if (pos_y > f22_to_float(MAX_ALTITUDE)) {
-    //     player->position.y = MAX_ALTITUDE;
-    //     player->velocity.y = f22_from_float(0.0f);
-    // }
 }
 
 ScreenPos world_to_screen(F22 world_x, F22 world_y, F22 camera_y_offset) {
@@ -150,7 +178,7 @@ void game_state_update(GameState* state, bool thrust_active) {
     wave_update(&state->wave, player_pos.y);
 
     // Update player
-    player_update(&state->player, thrust_active);
+    player_update(&state->player, state, thrust_active);
     update_camera(state);
 
     // Note: Obstacle spawning commented out like in original
@@ -165,6 +193,11 @@ void game_state_update(GameState* state, bool thrust_active) {
 bool game_state_check_collisions(GameState* state) {
     ScreenPos player_pos = player_get_screen_position(&state->player, state->camera_y_offset);
     const int player_radius = 15;  // Simplified collision circle
+
+    // Check if player hit left side
+    if (f22_to_float(state->player.position.x) < GAME_OVER_X) {
+        return true;
+    }
 
     for (int i = 0; i < MAX_OBSTACLES; i++) {
         if (!state->obstacles[i].active) continue;
