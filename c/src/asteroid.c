@@ -95,15 +95,15 @@ static void spawn_asteroid(AsteroidSystem* system, const WaveGenerator* wave, bo
     if (!asteroid) return;  // no free slots
 
     // Check if enough space from last asteroid
-    // for (int i = 0; i < MAX_ASTEROIDS; i++) {
-    //     if (system->asteroids[i].active) {
-    //         float dx = f22_to_float(system->asteroids[i].x) - WINDOW_WIDTH;
-    //         if (fabsf(dx) < MIN_ASTEROID_SPACING) return;
-    //     }
-    // }
+    for (int i = 0; i < MAX_ASTEROIDS; i++) {
+        if (system->asteroids[i].active) {
+            float dx = f22_to_float(system->asteroids[i].x) - WINDOW_WIDTH;
+            if (fabsf(dx) < MIN_ASTEROID_SPACING) return;
+        }
+    }
 
-    float x_offset = 60.0f + rand() % 15;
-    int spawn_x = WINDOW_WIDTH + ASTEROID_BASE_SIZE + (int)x_offset;
+    int x_offset = 10 + rand() % 90;
+    int spawn_x = WINDOW_WIDTH + ASTEROID_BASE_SIZE + x_offset;
 
     // Get ghost Y at actual spawn point if it's within our simulated range
     float ghost_y;
