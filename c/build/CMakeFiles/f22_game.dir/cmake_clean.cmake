@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/f22_game.dir/src/asteroid.c.o"
+  "CMakeFiles/f22_game.dir/src/asteroid.c.o.d"
   "CMakeFiles/f22_game.dir/src/f22.c.o"
   "CMakeFiles/f22_game.dir/src/f22.c.o.d"
   "CMakeFiles/f22_game.dir/src/game_state.c.o"

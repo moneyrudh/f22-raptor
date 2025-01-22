@@ -45,12 +45,12 @@
 // }
 WaveGenerator wave_init(void) {
     WaveGenerator wave = {
-        .num_points = WINDOW_WIDTH,
+        .num_points = GHOST_WIDTH,
         .last_x = f22_from_float(0.0f),
         .scroll_speed = SCROLL_SPEED,
         .position_offset = 0.0f,
         .ghost = {
-            .x = f22_from_float(WINDOW_WIDTH - 1),
+            .x = f22_from_float(GHOST_WIDTH - 1),
             .y = f22_from_float(WINDOW_HEIGHT / 2),
             .velocity_y = f22_from_float(0.0f),
             .should_thrust = false,
@@ -62,7 +62,7 @@ WaveGenerator wave_init(void) {
         }
     };
 
-    for (int i = 0; i < WINDOW_WIDTH; i++) {
+    for (int i = 0; i < GHOST_WIDTH; i++) {
         wave.points[i].x = f22_from_float(i);
         wave.points[i].y = f22_from_float(WINDOW_HEIGHT / 2);
     }
@@ -189,7 +189,7 @@ F22 wave_get_y_at_x(const WaveGenerator* wave, F22 x) {
 // void wave_update(WaveGenerator* wave) {
 //     // Generate new points if needed
 //     while (f22_to_float(wave->points[wave->num_points - 2].x) -
-//            f22_to_float(wave->last_x) < WINDOW_WIDTH * 1.5f) {
+//            f22_to_float(wave->last_x) < GHOST_WIDTH * 1.5f) {
 //         wave_generate_next_point(wave);
 //     }
 
@@ -211,12 +211,12 @@ void wave_update(WaveGenerator* wave, int player_y) {
     // Use scroll speed to determine x position shift
     int shift = wave->scroll_speed;
 
-    // for (int i = 0; i < WINDOW_WIDTH - 1; i++) {
+    // for (int i = 0; i < GHOST_WIDTH - 1; i++) {
     //     wave->points[i].x = f22_from_float(i);
     //     wave->points[i].y = wave->points[i + 1].y;
     // }
     // Shift existing points left
-    int iterations = (int) WINDOW_WIDTH / (int) shift;
+    int iterations = (int) GHOST_WIDTH / (int) shift;
     int i = 0;
     while (i < iterations)
     {
@@ -231,23 +231,23 @@ void wave_update(WaveGenerator* wave, int player_y) {
         i++;
     }
 
-    int index = WINDOW_WIDTH - shift;
-    while (index < WINDOW_WIDTH)
+    int index = GHOST_WIDTH - shift;
+    while (index < GHOST_WIDTH)
     {
         wave->points[index].x = f22_from_float(index);
         wave->points[index].y = wave->ghost.y;
         index++;
     }
     // New point always starts at window width
-    wave->points[WINDOW_WIDTH - 1].x = f22_from_float(WINDOW_WIDTH - 1);
-    wave->points[WINDOW_WIDTH - 1].y = wave->ghost.y;
+    wave->points[GHOST_WIDTH - 1].x = f22_from_float(GHOST_WIDTH - 1);
+    wave->points[GHOST_WIDTH - 1].y = wave->ghost.y;
     // wave_update_ghost(&wave->ghost);
-    // for (int i = 0; i < WINDOW_WIDTH - 1; i++) {
+    // for (int i = 0; i < GHOST_WIDTH - 1; i++) {
     //     wave->points[i].x = f22_from_float(i);
     //     wave->points[i].y = wave->points[i + 1].y;
     // }
 
     // // Add new point at ghost's position
-    // wave->points[WINDOW_WIDTH - 1].x = f22_from_float(WINDOW_WIDTH - 1);
-    // wave->points[WINDOW_WIDTH - 1].y = wave->ghost.y;
+    // wave->points[GHOST_WIDTH - 1].x = f22_from_float(GHOST_WIDTH - 1);
+    // wave->points[GHOST_WIDTH - 1].y = wave->ghost.y;
 }

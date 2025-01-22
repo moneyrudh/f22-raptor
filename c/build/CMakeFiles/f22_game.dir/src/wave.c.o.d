@@ -16,17 +16,7 @@ CMakeFiles/f22_game.dir/src/wave.c.o: \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/math.h \
   /Users/ani/Desktop/Anirudh/f22raptor/c/src/config.h \
   /Users/ani/Desktop/Anirudh/f22raptor/c/src/game_state.h \
-  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/stdio.h \
-  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/wasi/api.h \
-  /Users/ani/Desktop/Anirudh/emsdk/upstream/lib/clang/20/include/stddef.h \
-  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/stddef.h \
-  /Users/ani/Desktop/Anirudh/emsdk/upstream/lib/clang/20/include/__stddef_header_macro.h \
-  /Users/ani/Desktop/Anirudh/emsdk/upstream/lib/clang/20/include/__stddef_ptrdiff_t.h \
-  /Users/ani/Desktop/Anirudh/emsdk/upstream/lib/clang/20/include/__stddef_size_t.h \
-  /Users/ani/Desktop/Anirudh/emsdk/upstream/lib/clang/20/include/__stddef_wchar_t.h \
-  /Users/ani/Desktop/Anirudh/emsdk/upstream/lib/clang/20/include/__stddef_null.h \
-  /Users/ani/Desktop/Anirudh/emsdk/upstream/lib/clang/20/include/__stddef_max_align_t.h \
-  /Users/ani/Desktop/Anirudh/emsdk/upstream/lib/clang/20/include/__stddef_offsetof.h \
+  /Users/ani/Desktop/Anirudh/f22raptor/c/src/asteroid.h \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL.h \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL_main.h \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL_stdinc.h \
@@ -38,6 +28,17 @@ CMakeFiles/f22_game.dir/src/wave.c.o: \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/sys/types.h \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/endian.h \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/sys/select.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/stdio.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/wasi/api.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/lib/clang/20/include/stddef.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/stddef.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/lib/clang/20/include/__stddef_header_macro.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/lib/clang/20/include/__stddef_ptrdiff_t.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/lib/clang/20/include/__stddef_size_t.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/lib/clang/20/include/__stddef_wchar_t.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/lib/clang/20/include/__stddef_null.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/lib/clang/20/include/__stddef_max_align_t.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/lib/clang/20/include/__stddef_offsetof.h \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/compat/stdarg.h \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/lib/clang/20/include/stdarg.h \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/stdarg.h \
@@ -96,4 +97,5 @@ CMakeFiles/f22_game.dir/src/wave.c.o: \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL_timer.h \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL_version.h \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL_locale.h \
-  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL_misc.h
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL_misc.h \
+  /Users/ani/Desktop/Anirudh/f22raptor/c/src/player.h

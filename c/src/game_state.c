@@ -1,4 +1,5 @@
 #include "game_state.h"
+#include "asteroid.h"
 #include "config.h"
 #include <math.h>
 #include <stdio.h>
@@ -21,8 +22,8 @@ Player player_init(void) {
 void update_camera(GameState* state) {
     float player_screen_y = f22_to_float(state->player.position.y) - f22_to_float(state->camera_y_offset);
 
-    const float EDGE_BUFFER = 64.0f;
-    const float RETURN_BUFFER = 128.0f;  // larger than EDGE_BUFFER
+    const float EDGE_BUFFER = 150.0f;
+    const float RETURN_BUFFER = 200.0f;  // larger than EDGE_BUFFER
 
     // Start camera follow earlier with EDGE_BUFFER
     if (player_screen_y < EDGE_BUFFER) {
@@ -80,7 +81,7 @@ void player_update(Player* player, const GameState* state, bool thrust) {
         // When left of mid-screen:
         // Close to ghost (small normalized_distance) = move right
         // Far from ghost (large normalized_distance) = move left
-        float move_amount = (1.0f - normalized_distance) * 1.5f - normalized_distance * 6.0f;
+        float move_amount = (1.0f - normalized_distance) * 1.0f - normalized_distance * 6.0f;
         // float move_amount = 0.0f;
         // if (normalized_distance > 0.2f) {
         //     move_amount = 1.5f;
@@ -105,7 +106,7 @@ void player_update(Player* player, const GameState* state, bool thrust) {
     // Smooth interpolation
     player->rotation = (player->rotation - target_rotation) * 0.1f;
     // Clamp rotation
-    player->rotation = fmaxf(-30.0f, fminf(30.0f, player->rotation));
+    player->rotation = fmaxf(-45.0f, fminf(45.0f, player->rotation));
 }
 
 ScreenPos world_to_screen(F22 world_x, F22 world_y, F22 camera_y_offset) {
@@ -160,7 +161,8 @@ GameState game_state_init(void) {
         .score = 0,
         .camera_y_offset = f22_from_float(0.0f),
         .target_y_offset = f22_from_float(0.0f),
-        .wave = wave_init()
+        .wave = wave_init(),
+        .asteroid_system = asteroid_system_init()
     };
 
     // Initialize obstacles
@@ -176,6 +178,7 @@ void game_state_update(GameState* state, bool thrust_active) {
     printf("Game state update called\n");
     ScreenPos player_pos = player_get_screen_position(&state->player, state->camera_y_offset);
     wave_update(&state->wave, player_pos.y);
+    asteroid_system_update(&state->asteroid_system, &state->wave);
 
     // Update player
     player_update(&state->player, state, thrust_active);
@@ -196,6 +199,11 @@ bool game_state_check_collisions(GameState* state) {
 
     // Check if player hit left side
     if (f22_to_float(state->player.position.x) < GAME_OVER_X) {
+        return true;
+    }
+
+    if (asteroid_system_check_collision(&state->asteroid_system, &state->player)) {
+        printf("COLLISION DETECTED\n");
         return true;
     }
 

@@ -2,8 +2,9 @@
 #define CONFIG_H
 
 // Window dimensions
-#define WINDOW_WIDTH 1500
+#define WINDOW_WIDTH 1300
 #define WINDOW_HEIGHT 800
+#define GHOST_WIDTH 1700
 
 // Game physics constants
 #define SCROLL_SPEED 10

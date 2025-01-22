@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include "asteroid.h"
 #include <math.h>
 
 #ifdef __EMSCRIPTEN__
@@ -242,6 +243,7 @@ void renderer_draw_frame(Renderer* renderer, const GameState* state, bool thrust
     // Draw game elements
     renderer_draw_obstacles(renderer, state->obstacles);
     renderer_draw_player(renderer, &state->player, state->camera_y_offset, thrust_active);
+    asteroid_system_render(&state->asteroid_system, renderer->renderer, state->camera_y_offset);
 
     SDL_RenderPresent(renderer->renderer);
 }

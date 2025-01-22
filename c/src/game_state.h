@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include "wave.h"
 #include "config.h"
+#include "asteroid.h"
+#include "player.h"
 
 // Game constants
 #define OBSTACLE_WIDTH 50
@@ -14,19 +16,6 @@
 #define WORLD_TO_SCREEN_SCALE 1.0f
 #define MAX_VELOCITY f22_from_float(10.0f)  // adjust this value to feel right
 #define MIN_VELOCITY f22_from_float(-10.0f)
-
-// Position struct to replace Zig's anonymous structs
-typedef struct {
-    F22 x;
-    F22 y;
-} Position;
-
-// Player struct
-typedef struct {
-    Position position;
-    Position velocity;
-    float rotation;
-} Player;
 
 // Obstacle struct
 typedef struct {
@@ -50,6 +39,7 @@ typedef struct {
     F22 last_obstacle_x;
     uint32_t score;
     WaveGenerator wave;
+    AsteroidSystem asteroid_system;
 } GameState;
 
 // Player functions

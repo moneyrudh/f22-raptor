@@ -9,6 +9,7 @@ add_executable(f22_game
     src/game_state.c
     src/renderer.c
     src/wave.c
+    src/asteroid.c
 )
 
 # Emscripten specific settings

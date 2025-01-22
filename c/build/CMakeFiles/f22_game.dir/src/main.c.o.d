@@ -97,6 +97,8 @@ CMakeFiles/f22_game.dir/src/main.c.o: \
   /Users/ani/Desktop/Anirudh/f22raptor/c/src/f22.h \
   /Users/ani/Desktop/Anirudh/f22raptor/c/src/wave.h \
   /Users/ani/Desktop/Anirudh/f22raptor/c/src/config.h \
+  /Users/ani/Desktop/Anirudh/f22raptor/c/src/asteroid.h \
+  /Users/ani/Desktop/Anirudh/f22raptor/c/src/player.h \
   /Users/ani/Desktop/Anirudh/f22raptor/c/src/renderer.h \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/emscripten.h \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/emscripten.h \

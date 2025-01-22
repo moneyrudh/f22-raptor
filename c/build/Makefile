@@ -129,6 +129,30 @@ f22_game/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/build
 .PHONY : f22_game/fast
 
+src/asteroid.o: src/asteroid.c.o
+.PHONY : src/asteroid.o
+
+# target to build an object file
+src/asteroid.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/src/asteroid.c.o
+.PHONY : src/asteroid.c.o
+
+src/asteroid.i: src/asteroid.c.i
+.PHONY : src/asteroid.i
+
+# target to preprocess a source file
+src/asteroid.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/src/asteroid.c.i
+.PHONY : src/asteroid.c.i
+
+src/asteroid.s: src/asteroid.c.s
+.PHONY : src/asteroid.s
+
+# target to generate assembly for a file
+src/asteroid.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/src/asteroid.c.s
+.PHONY : src/asteroid.c.s
+
 src/f22.o: src/f22.c.o
 .PHONY : src/f22.o
 
@@ -258,6 +282,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... f22_game"
+	@echo "... src/asteroid.o"
+	@echo "... src/asteroid.i"
+	@echo "... src/asteroid.s"
 	@echo "... src/f22.o"
 	@echo "... src/f22.i"
 	@echo "... src/f22.s"

@@ -8,6 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/Users/ani/Desktop/Anirudh/f22raptor/c/src/asteroid.c" "CMakeFiles/f22_game.dir/src/asteroid.c.o" "gcc" "CMakeFiles/f22_game.dir/src/asteroid.c.o.d"
   "/Users/ani/Desktop/Anirudh/f22raptor/c/src/f22.c" "CMakeFiles/f22_game.dir/src/f22.c.o" "gcc" "CMakeFiles/f22_game.dir/src/f22.c.o.d"
   "/Users/ani/Desktop/Anirudh/f22raptor/c/src/game_state.c" "CMakeFiles/f22_game.dir/src/game_state.c.o" "gcc" "CMakeFiles/f22_game.dir/src/game_state.c.o.d"
   "/Users/ani/Desktop/Anirudh/f22raptor/c/src/main.c" "CMakeFiles/f22_game.dir/src/main.c.o" "gcc" "CMakeFiles/f22_game.dir/src/main.c.o.d"

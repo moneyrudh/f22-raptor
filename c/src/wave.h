@@ -41,7 +41,7 @@ typedef struct {
 // } WaveGenerator;
 
 typedef struct {
-    WavePoint points[WINDOW_WIDTH];
+    WavePoint points[GHOST_WIDTH];
     int num_points;
     F22 last_x;
     int scroll_speed;
