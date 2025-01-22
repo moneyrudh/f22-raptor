@@ -19,6 +19,10 @@ if(EMSCRIPTEN)
         "-sUSE_SDL=2 \
          -sWASM=1 \
          -sALLOW_MEMORY_GROWTH=1 \
+         -sPRINTF_LONG_DOUBLE=1 \
+         -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap'] \
+         -sEXPORTED_FUNCTIONS=['_main','_malloc','_free'] \
+         -sASYNCIFY \
          --shell-file ${CMAKE_SOURCE_DIR}/template.html"
     )
     

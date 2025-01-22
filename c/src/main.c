@@ -25,6 +25,12 @@ void handle_input(GameContext* ctx) {
                 break;
             case SDL_MOUSEBUTTONDOWN:
                 game_state_handle_click(&ctx->game_state, event.button.x, event.button.y);
+                #ifdef __EMSCRIPTEN__
+                EM_ASM(
+                    Module.setGameState(1);
+                    console.log("GAME HAS BEGUN");
+                );
+                #endif
                 break;
             case SDL_KEYDOWN:
                 switch (event.key.keysym.sym) {
@@ -75,12 +81,16 @@ void main_loop(void* arg) {
     // Render frame
     renderer_draw_frame(&ctx->renderer, &ctx->game_state, ctx->thrust_active);
 
-    #ifndef __EMSCRIPTEN__
-    SDL_Delay(16); // ~60 FPS cap for native builds
+    #ifdef __EMSCRIPTEN__
+    // SDL_Delay(16); // ~60 FPS cap for native builds
     #endif
 }
 
 int main() {
+    #ifdef __EMSCRIPTEN__
+    setvbuf(stdout, NULL, _IOLBF, 0);
+    #endif
+
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         SDL_Log("SDL init failed: %s", SDL_GetError());
         return 1;
@@ -109,6 +119,7 @@ int main() {
     #ifdef EMSCRIPTEN
         // Set up persistent 60 FPS main loop for web
         emscripten_set_main_loop_arg(main_loop, &ctx, 0, 1);
+        setvbuf(stdout, NULL, _IOLBF, 0);
     #else
     // Regular main loop for native builds
     while (!ctx.quit) {

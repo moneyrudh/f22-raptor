@@ -21,4 +21,10 @@ typedef enum {
     GAME_STATE_OVER
 } GameStateEnum;
 
+typedef struct {
+    float score;
+    float current_precision;
+    float score_rate;
+} ScoringSystem;
+
 #endif // PLAYER_H

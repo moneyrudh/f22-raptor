@@ -4,6 +4,10 @@
 #include <math.h>
 #include <stdio.h>
 
+#ifdef __EMSCRIPTEN__
+    #include <emscripten.h>
+#endif
+
 Player player_init(void) {
     Player player = {
         .position = {
@@ -163,7 +167,12 @@ GameState game_state_init(void) {
         .camera_y_offset = f22_from_float(0.0f),
         .target_y_offset = f22_from_float(0.0f),
         .wave = wave_init(),
-        .asteroid_system = asteroid_system_init()
+        .asteroid_system = asteroid_system_init(),
+        .scoring = (ScoringSystem){
+            .score = 0,
+            .current_precision = 0,
+            .score_rate = 0
+        }
     };
 
     // Initialize obstacles
@@ -178,6 +187,7 @@ void game_state_start(GameState* state) {
     state->state = GAME_STATE_PLAYING;
     state->score = 0;
     
+    printf("GAME HAS BEGUN LMFAO");
     // Reset player position to middle
     // state->player.position.x = f22_from_float(WINDOW_WIDTH / 2);
     // state->player.position.y = f22_from_float(WINDOW_HEIGHT / 2);
@@ -192,6 +202,37 @@ void game_state_handle_click(GameState* state, int x, int y) {
     if (state->state == GAME_STATE_WAITING) {
         game_state_start(state);
     }
+}
+
+void update_scoring(GameState* state) {
+    // Calculate precision based on distance from wave
+    float player_y = f22_to_float(state->player.position.y);
+    int player_x = (int)f22_to_float(state->player.position.x);
+    float wave_y = f22_to_float(state->wave.points[player_x].y);
+    float distance = fabsf(wave_y - player_y);
+    
+    // Normalize to -1 to 1 where:
+    // 1.0 = perfect alignment
+    // 0.0 = moderate distance
+    // -1.0 = too far
+    float max_distance = WINDOW_HEIGHT * 0.3f; // adjust this threshold
+    state->scoring.current_precision = 1.0f - (distance / max_distance);
+    state->scoring.current_precision = fmaxf(-1.0f, fminf(1.0f, state->scoring.current_precision));
+
+    // Calculate score rate based on precision
+    if (state->scoring.current_precision > 0.8f) {
+        state->scoring.score_rate = 3.0f;  // max rate
+    } else if (state->scoring.current_precision > 0.3f) {
+        state->scoring.score_rate = 2.0f;  // medium rate
+    } else if (state->scoring.current_precision > -0.3f) {
+        state->scoring.score_rate = 1.0f;  // base rate
+    } else {
+        state->scoring.score_rate = -2.0f; // penalty
+    }
+
+    // Update score (60fps assumed)
+    state->scoring.score += state->scoring.score_rate / 60.0f;
+    if (state->scoring.score < 0) state->scoring.score = 0;
 }
 
 void game_state_update(GameState* state, bool thrust_active) {
@@ -211,6 +252,13 @@ void game_state_update(GameState* state, bool thrust_active) {
     // Update player
     player_update(&state->player, state, thrust_active);
     update_camera(state);
+    update_scoring(state);
+
+    #ifdef __EMSCRIPTEN__
+        EM_ASM({
+            Module.updateScore($0);
+        }, (int)state->scoring.score);
+    #endif
 
     // Note: Obstacle spawning commented out like in original
     // Update active obstacles

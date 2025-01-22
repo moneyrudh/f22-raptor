@@ -86,25 +86,8 @@ void renderer_cleanup(Renderer* renderer) {
 }
 
 void renderer_draw_score(Renderer* renderer, uint32_t score) {
-    // Draw score box at top center
-    SDL_SetRenderDrawColor(renderer->renderer, 50, 50, 50, 200);
-    SDL_Rect score_box = {
-        .x = (WINDOW_WIDTH / 2) - 50,
-        .y = 20,
-        .w = 100,
-        .h = 30
-    };
-    SDL_RenderFillRect(renderer->renderer, &score_box);
-    
     // char score_text[32];
-    // snprintf(score_text, sizeof(score_text), "Score: %u", score);
-    
-    // SDL_Color text_color = {255, 255, 255, 255};  // white
-    // renderer_draw_text(renderer, score_text, 
-    //                   score_box.x + 10,  // padding from left
-    //                   score_box.y + 5,   // padding from top
-    //                   text_color);
-
+    // snprintf(score_text, sizeof(score_text), "SCORE: %d", (int)scoring->score);
 }
 
 void renderer_init_shapes(Renderer* renderer) {

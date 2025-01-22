@@ -41,6 +41,7 @@ typedef struct {
     uint32_t score;
     WaveGenerator wave;
     AsteroidSystem asteroid_system;
+    ScoringSystem scoring;
 } GameState;
 
 // Player functions

@@ -3,6 +3,9 @@
     <head>
         <meta charset="utf-8" />
         <title>F-22 Game</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
         <style>
             body {
                 margin: 0;
@@ -12,9 +15,28 @@
                 align-items: center;
                 height: 100vh;
             }
+            .canvas-container {
+                position: relative;
+                width: fit-content;
+                height: fit-content;
+            }
             canvas {
                 background-color: #000;
                 box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            }
+            #textCanvas {
+                position: absolute;
+                right: 0;
+                top: 0;
+                background-color: transparent;
+                pointer-events: none;
+            }
+            #startTextCanvas {
+                position: absolute;
+                right: 0;
+                top: 40%;
+                background-color: transparent;
+                pointer-events: none;
             }
             #controls {
                 position: fixed;
@@ -27,7 +49,11 @@
         </style>
     </head>
     <body>
-        <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+        <div class="canvas-container">
+            <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+            <canvas id="textCanvas"></canvas>
+            <canvas id="startTextCanvas"></canvas>
+        </div>
         <div id="controls">SPACE / UP - Thrust | ESC - Quit</div>
         <script>
             var Module = {
@@ -38,13 +64,76 @@
                         function (e) {
                             e.preventDefault();
                         },
-                        false,
+                        false
                     );
                     return canvas;
                 })(),
+                onRuntimeInitialized: function() {
+                    const gameCanvas = document.getElementById('canvas');
+                    const textCanvas = document.getElementById('textCanvas');
+                    const startTextCanvas = document.getElementById('startTextCanvas');
+                    let gameStarted = false;
+                    let score = 0;
+                    
+                    // match text canvas size to game canvas
+                    textCanvas.width = gameCanvas.width * 2;
+                    textCanvas.height = gameCanvas.height;
+                    startTextCanvas.width = gameCanvas.width * 2;
+                    startTextCanvas.height = gameCanvas.height;
+                    
+                    const scoreCtx = textCanvas.getContext('2d');
+                    const startCtx = startTextCanvas.getContext('2d');
+                    scoreCtx.imageSmoothingEnabled = false;
+                    startCtx.imageSmoothingEnabled = false;
+
+                    Module.setGameState = function(state) {
+                        console.log("CALLED SET GAME STATE");
+                        if (state === 1) {
+                            startTextCanvas.style.display = 'none';
+                            gameStarted = true;
+                        } else {
+                            startTextCanvas.style.display = 'block';
+                        }
+                    };
+
+                    Module.updateScore = function(_score) {
+                        score = _score;
+                    }
+                    
+                    function drawScore() {
+                        scoreCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
+                        scoreCtx.font = '24px "Press Start 2P"';
+                        scoreCtx.fillStyle = 'white';
+                        scoreCtx.textAlign = 'right';
+                        scoreCtx.textBaseline = 'middle';  // vertical center
+                        
+                        // center both horizontally and vertically
+                        scoreCtx.fillText(`SCORE: ${Math.floor(score)}`, 
+                            textCanvas.width - 40,   // horizontal center 
+                            textCanvas.height / 2   // vertical center
+                        );
+                        requestAnimationFrame(drawScore);
+                    }
+                    
+                    function drawStartText() {
+                        startCtx.clearRect(0, 0, startTextCanvas.width, startTextCanvas.height);
+                        startCtx.font = '24px "Press Start 2P"';
+                        startCtx.fillStyle = 'white';
+                        startCtx.textAlign = 'right';
+                        startCtx.textBaseline = 'middle';
+                        
+                        startCtx.fillText('CLICK TO START', 
+                            startTextCanvas.width - 40,
+                            startTextCanvas.height / 2
+                        );
+                        requestAnimationFrame(drawStartText);
+                    }
+                    
+                    drawScore();
+                    if (!gameStarted) drawStartText();
+                }
             };
         </script>
         <script async type="text/javascript" src="f22_game.js"></script>
-        <!-- emscripten will replace this -->
     </body>
 </html>

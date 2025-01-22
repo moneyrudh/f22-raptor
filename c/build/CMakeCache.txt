@@ -187,8 +187,8 @@ CMAKE_STRIP:FILEPATH=/usr/bin/strip
 //Path to a program.
 CMAKE_TAPI:FILEPATH=CMAKE_TAPI-NOTFOUND
 
-//No help, variable specified on the command line.
-CMAKE_TOOLCHAIN_FILE:UNINITIALIZED=/Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
+//The CMake toolchain file
+CMAKE_TOOLCHAIN_FILE:FILEPATH=/Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
 
 //If this value is on, makefiles will be generated without the
 // .SILENT directive, and all commands will be echoed to the console
@@ -202,12 +202,6 @@ EMSCRIPTEN_FORCE_COMPILERS:BOOL=ON
 //If set, static library targets generate LLVM bitcode files (.bc).
 // If disabled (default), UNIX ar archives (.a) are generated.
 EMSCRIPTEN_GENERATE_BITCODE_STATIC_LIBRARIES:BOOL=OFF
-
-//The directory containing a CMake configuration file for SDL2.
-SDL2_DIR:PATH=/Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/lib/cmake/SDL2
-
-//The directory containing a CMake configuration file for SDL2_ttf.
-SDL2_ttf_DIR:PATH=SDL2_ttf_DIR-NOTFOUND
 
 //Value Computed by CMake
 f22_game_BINARY_DIR:STATIC=/Users/ani/Desktop/Anirudh/f22raptor/c/build

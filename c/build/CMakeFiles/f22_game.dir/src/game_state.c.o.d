@@ -98,4 +98,13 @@ CMakeFiles/f22_game.dir/src/game_state.c.o: \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL_timer.h \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL_version.h \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL_locale.h \
-  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL_misc.h
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL_misc.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/emscripten.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/emscripten.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/em_asm.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/em_macros.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/em_types.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/em_js.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/promise.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/wget.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/emscripten/version.h
