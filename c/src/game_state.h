@@ -30,12 +30,6 @@ typedef struct {
     int y;
 } ScreenPos;
 
-typedef enum {
-    GAME_STATE_WAITING,
-    GAME_STATE_PLAYING,
-    GAME_STATE_OVER
-} GameStateEnum;
-
 // Game state struct
 typedef struct {
     GameStateEnum state;

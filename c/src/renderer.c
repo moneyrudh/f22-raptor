@@ -322,6 +322,7 @@ void renderer_draw_frame(Renderer* renderer, const GameState* state, bool thrust
         //     .h = 40
         // };
         // SDL_RenderFillRect(renderer->renderer, &prompt);
+        asteroid_system_render(&state->asteroid_system, renderer->renderer, state->camera_y_offset);
     } else {
         // Normal game rendering
         // renderer_draw_obstacles(renderer, state->obstacles);

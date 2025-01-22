@@ -206,8 +206,14 @@ F22 wave_get_y_at_x(const WaveGenerator* wave, F22 x) {
 //         wave->num_points--;
 //     }
 // }
-void wave_update(WaveGenerator* wave, int player_y) {
-    wave_update_ghost(&wave->ghost, player_y);
+void wave_update(WaveGenerator* wave, int player_y, GameStateEnum state) {
+
+    if (state == GAME_STATE_PLAYING) {
+        wave_update_ghost(&wave->ghost, player_y);
+    } else {
+        wave->ghost.y = f22_from_float(WINDOW_HEIGHT / 2);
+        return;
+    }
 
     // Use scroll speed to determine x position shift
     int shift = wave->scroll_speed;

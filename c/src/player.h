@@ -15,4 +15,10 @@ typedef struct {
     float rotation;
 } Player;
 
+typedef enum {
+    GAME_STATE_WAITING,
+    GAME_STATE_PLAYING,
+    GAME_STATE_OVER
+} GameStateEnum;
+
 #endif // PLAYER_H

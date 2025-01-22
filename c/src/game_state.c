@@ -198,11 +198,14 @@ void game_state_update(GameState* state, bool thrust_active) {
     if (state->state == GAME_STATE_WAITING) {
         state->player.position.x = f22_from_float(WINDOW_WIDTH / 2);
         state->player.position.y = f22_from_float(WINDOW_HEIGHT / 2);
+
+        wave_update(&state->wave, WINDOW_HEIGHT / 2, state->state);
+        asteroid_system_update(&state->asteroid_system, &state->wave);
         return;
     }
     // Update wave first
     ScreenPos player_pos = player_get_screen_position(&state->player, state->camera_y_offset);
-    wave_update(&state->wave, player_pos.y);
+    wave_update(&state->wave, player_pos.y, state->state);
     asteroid_system_update(&state->asteroid_system, &state->wave);
 
     // Update player

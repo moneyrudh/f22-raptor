@@ -102,7 +102,7 @@ static void spawn_asteroid(AsteroidSystem* system, const WaveGenerator* wave, bo
     //     }
     // }
 
-    float x_offset = 0.0f;// 25.0f + (25.0f * (float)rand() / (float)RAND_MAX);
+    float x_offset = 60.0f + rand() % 15;
     int spawn_x = WINDOW_WIDTH + ASTEROID_BASE_SIZE + (int)x_offset;
 
     // Get ghost Y at actual spawn point if it's within our simulated range
@@ -159,10 +159,10 @@ void asteroid_system_update(AsteroidSystem* system, const WaveGenerator* wave) {
         int num_layers = 0;//rand() % 3;  // 0 = none, 1 = one layer, 2 = two layers
 
         while (num_layers <= 3) {
-            bool spawn_above = (rand() % 2) >= 1;  // 50% chance for above
-            bool spawn_below = (rand() % 2) >= 1;  // 50% chance for below
+            bool spawn_above = (rand() % 3) >= 1;  // 50% chance for above
+            bool spawn_below = (rand() % 3) >= 1;  // 50% chance for below
             if (spawn_above) spawn_asteroid(system, wave, true, num_layers == 0 ? 1.0f: num_layers * 2.0f);
-            if (!spawn_above) spawn_asteroid(system, wave, false, num_layers == 0 ? 1.0f: num_layers * 2.0f);
+            if (spawn_below) spawn_asteroid(system, wave, false, num_layers == 0 ? 1.0f: num_layers * 2.0f);
             num_layers++;
         }
         // if (num_layers >= 0) {

@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "config.h"
+#include "player.h"
 
 #define MAX_CONTROL_POINTS 128
 #define SCREEN_HEIGHT 600
@@ -54,6 +55,6 @@ typedef struct {
 WaveGenerator wave_init(void);
 void wave_generate_next_point(WaveGenerator* wave);
 F22 wave_get_y_at_x(const WaveGenerator* wave, F22 x);
-void wave_update(WaveGenerator* wave, int player_y);
+void wave_update(WaveGenerator* wave, int player_y, GameStateEnum state);
 
 #endif // WAVE_H
