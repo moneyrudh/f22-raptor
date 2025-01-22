@@ -15,6 +15,7 @@
 typedef struct {
     F22 x;
     F22 y;
+    bool activated;
 } WavePoint;
 
 typedef struct {

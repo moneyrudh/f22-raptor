@@ -34,6 +34,20 @@ void renderer_cleanup(Renderer* renderer) {
     SDL_DestroyWindow(renderer->window);
 }
 
+void renderer_draw_score(Renderer* renderer, uint32_t score) {
+    // Draw score box at top center
+    SDL_SetRenderDrawColor(renderer->renderer, 50, 50, 50, 200);
+    SDL_Rect score_box = {
+        .x = (WINDOW_WIDTH / 2) - 50,
+        .y = 20,
+        .w = 100,
+        .h = 30
+    };
+    SDL_RenderFillRect(renderer->renderer, &score_box);
+    
+    // Could add text rendering here if we want to show actual numbers
+}
+
 void renderer_init_shapes(Renderer* renderer) {
     // Initialize F-22 shape points
     SDL_Point f22_base[] = {
@@ -128,13 +142,14 @@ void renderer_draw_wave(Renderer* renderer, const WaveGenerator* wave, F22 camer
     SDL_SetRenderDrawColor(renderer->renderer, 100, 200, 255, 255);
 
     // Just copy the wave points directly to renderer points, shifting x coordinates left
-    renderer->num_wave_points = WINDOW_WIDTH;
+    renderer->num_wave_points = 0;
     for (int i = 0; i < WINDOW_WIDTH; i++) {
-        ScreenPos pos = world_to_screen(wave->points[i].x, wave->points[i].y, camera_y_offset);
-        renderer->wave_points[i].x = pos.x;
-        renderer->wave_points[i].y = pos.y;
-        // renderer->wave_points[i].x = (int)(f22_to_float(wave->points[i].x));
-        // renderer->wave_points[i].y = (int)f22_to_float(wave->points[i].y);
+        if (wave->points[i].activated) {
+            ScreenPos pos = world_to_screen(wave->points[i].x, wave->points[i].y, camera_y_offset);
+            renderer->wave_points[renderer->num_wave_points].x = pos.x;
+            renderer->wave_points[renderer->num_wave_points].y = pos.y;
+            renderer->num_wave_points++;
+        }
     }
 
     if (renderer->num_wave_points > 1) {
@@ -238,12 +253,27 @@ void renderer_draw_frame(Renderer* renderer, const GameState* state, bool thrust
     SDL_SetRenderDrawColor(renderer->renderer, 10, 10, 10, 255);
     SDL_RenderClear(renderer->renderer);
 
-    renderer_draw_wave(renderer, &state->wave, state->camera_y_offset);
+    if (state->state == GAME_STATE_WAITING) {
+        // Draw simple waiting state
+        SDL_SetRenderDrawColor(renderer->renderer, 255, 255, 255, 255);
+        SDL_Rect prompt = {
+            .x = (WINDOW_WIDTH / 2) - 100,
+            .y = (WINDOW_HEIGHT / 2) - 50,
+            .w = 200,
+            .h = 40
+        };
+        SDL_RenderFillRect(renderer->renderer, &prompt);
+    } else {
+        // Normal game rendering
+        // renderer_draw_obstacles(renderer, state->obstacles);
+        renderer_draw_wave(renderer, &state->wave, state->camera_y_offset);
+        asteroid_system_render(&state->asteroid_system, renderer->renderer, state->camera_y_offset);
+    }
 
-    // Draw game elements
-    renderer_draw_obstacles(renderer, state->obstacles);
-    renderer_draw_player(renderer, &state->player, state->camera_y_offset, thrust_active);
-    asteroid_system_render(&state->asteroid_system, renderer->renderer, state->camera_y_offset);
+    // Always draw player and score
+    renderer_draw_player(renderer, &state->player, state->camera_y_offset, state->state == GAME_STATE_PLAYING ? thrust_active : true);
+    renderer_draw_score(renderer, state->score);
 
     SDL_RenderPresent(renderer->renderer);
+
 }

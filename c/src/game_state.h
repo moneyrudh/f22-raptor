@@ -30,8 +30,15 @@ typedef struct {
     int y;
 } ScreenPos;
 
+typedef enum {
+    GAME_STATE_WAITING,
+    GAME_STATE_PLAYING,
+    GAME_STATE_OVER
+} GameStateEnum;
+
 // Game state struct
 typedef struct {
+    GameStateEnum state;
     F22 camera_y_offset;
     F22 target_y_offset;
     Player player;
@@ -55,6 +62,8 @@ ScreenPos obstacle_get_screen_position(const Obstacle* obstacle);
 
 // Game state functions
 GameState game_state_init(void);
+void game_state_start(GameState* state);
+void game_state_handle_click(GameState* state, int x, int y);
 void game_state_update(GameState* state, bool thrust_active);
 bool game_state_check_collisions(GameState* state);
 

@@ -23,6 +23,9 @@ void handle_input(GameContext* ctx) {
             case SDL_QUIT:
                 ctx->quit = true;
                 break;
+            case SDL_MOUSEBUTTONDOWN:
+                game_state_handle_click(&ctx->game_state, event.button.x, event.button.y);
+                break;
             case SDL_KEYDOWN:
                 switch (event.key.keysym.sym) {
                     case SDLK_SPACE:

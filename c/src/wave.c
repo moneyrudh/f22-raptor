@@ -65,6 +65,7 @@ WaveGenerator wave_init(void) {
     for (int i = 0; i < GHOST_WIDTH; i++) {
         wave.points[i].x = f22_from_float(i);
         wave.points[i].y = f22_from_float(WINDOW_HEIGHT / 2);
+        wave.points[i].activated = false;
     }
     return wave;
 }
@@ -226,6 +227,7 @@ void wave_update(WaveGenerator* wave, int player_y) {
             int index = i * (int) shift + k;
             wave->points[index].x = f22_from_float(index);
             wave->points[index].y = wave->points[index+(int)shift].y;
+            wave->points[index].activated = wave->points[index+(int)shift].activated;
             k++;
         }
         i++;
@@ -236,11 +238,9 @@ void wave_update(WaveGenerator* wave, int player_y) {
     {
         wave->points[index].x = f22_from_float(index);
         wave->points[index].y = wave->ghost.y;
+        wave->points[index].activated = true;
         index++;
     }
-    // New point always starts at window width
-    wave->points[GHOST_WIDTH - 1].x = f22_from_float(GHOST_WIDTH - 1);
-    wave->points[GHOST_WIDTH - 1].y = wave->ghost.y;
     // wave_update_ghost(&wave->ghost);
     // for (int i = 0; i < GHOST_WIDTH - 1; i++) {
     //     wave->points[i].x = f22_from_float(i);

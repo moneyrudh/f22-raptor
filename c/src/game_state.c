@@ -156,6 +156,7 @@ ScreenPos obstacle_get_screen_position(const Obstacle* obstacle) {
 
 GameState game_state_init(void) {
     GameState state = {
+        .state = GAME_STATE_WAITING,
         .player = player_init(),
         .last_obstacle_x = f22_from_float(WINDOW_WIDTH),
         .score = 0,
@@ -173,7 +174,32 @@ GameState game_state_init(void) {
     return state;
 }
 
+void game_state_start(GameState* state) {
+    state->state = GAME_STATE_PLAYING;
+    state->score = 0;
+    
+    // Reset player position to middle
+    // state->player.position.x = f22_from_float(WINDOW_WIDTH / 2);
+    // state->player.position.y = f22_from_float(WINDOW_HEIGHT / 2);
+    // state->player.velocity.x = f22_from_float(0);
+    // state->player.velocity.y = f22_from_float(0);
+    
+    // // Reset wave
+    // state->wave = wave_init();
+}
+
+void game_state_handle_click(GameState* state, int x, int y) {
+    if (state->state == GAME_STATE_WAITING) {
+        game_state_start(state);
+    }
+}
+
 void game_state_update(GameState* state, bool thrust_active) {
+    if (state->state == GAME_STATE_WAITING) {
+        state->player.position.x = f22_from_float(WINDOW_WIDTH / 2);
+        state->player.position.y = f22_from_float(WINDOW_HEIGHT / 2);
+        return;
+    }
     // Update wave first
     ScreenPos player_pos = player_get_screen_position(&state->player, state->camera_y_offset);
     wave_update(&state->wave, player_pos.y);
