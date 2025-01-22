@@ -70,7 +70,7 @@ WaveGenerator wave_init(void) {
     return wave;
 }
 
-void wave_update_ghost(GhostPlayer* ghost, int player_y) {
+void wave_update_ghost(GhostPlayer* ghost, int player_y, float delta_time) {
     // Simple pattern: thrust for 30 frames, then rest for 30 frames
     float current_time = SDL_GetTicks() / 1000.0f;
     float diff = current_time - ghost->phase_start_time;
@@ -97,6 +97,10 @@ void wave_update_ghost(GhostPlayer* ghost, int player_y) {
     ghost->should_thrust = !ghost->is_rest_phase;
 
     // Apply same physics as player
+    // ghost->velocity_y = f22_add(ghost->velocity_y, f22_mul(GRAVITY, f22_from_float(delta_time)));
+    // if (ghost->should_thrust) {
+    //     ghost->velocity_y = f22_sub(ghost->velocity_y, f22_mul(THRUST, f22_from_float(delta_time)));
+    // }
     ghost->velocity_y = f22_add(ghost->velocity_y, GRAVITY);
     if (ghost->should_thrust) {
         ghost->velocity_y = f22_sub(ghost->velocity_y, THRUST);
@@ -206,17 +210,17 @@ F22 wave_get_y_at_x(const WaveGenerator* wave, F22 x) {
 //         wave->num_points--;
 //     }
 // }
-void wave_update(WaveGenerator* wave, int player_y, GameStateEnum state) {
+void wave_update(WaveGenerator* wave, int player_y, GameStateEnum state, float delta_time) {
 
     if (state == GAME_STATE_PLAYING) {
-        wave_update_ghost(&wave->ghost, player_y);
+        wave_update_ghost(&wave->ghost, player_y, delta_time);
     } else {
         wave->ghost.y = f22_from_float(WINDOW_HEIGHT / 2);
         return;
     }
 
     // Use scroll speed to determine x position shift
-    int shift = wave->scroll_speed;
+    int shift = (int) wave->scroll_speed;// * fmaxf(delta_time, 0.0001f);
 
     // for (int i = 0; i < GHOST_WIDTH - 1; i++) {
     //     wave->points[i].x = f22_from_float(i);

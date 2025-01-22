@@ -46,11 +46,17 @@ void update_camera(GameState* state) {
                                     f22_mul(diff, f22_from_float(0.5f))); // adjust 0.1 for smoother/faster
 }
 
-void player_update(Player* player, const GameState* state, bool thrust) {
+void player_update(Player* player, const GameState* state, bool thrust, float delta_time) {
     // Apply gravity
-    player->velocity.y = f22_add(player->velocity.y, GRAVITY);
+    // player->velocity.y = f22_add(player->velocity.y, 
+    //     f22_mul(GRAVITY, f22_from_float(delta_time)));
 
-    // Apply thrust if active
+    // if (thrust) {
+    //     player->velocity.y = f22_sub(player->velocity.y, 
+    //         f22_mul(THRUST, f22_from_float(delta_time)));
+    // }
+
+    player->velocity.y = f22_add(player->velocity.y, GRAVITY);
     if (thrust) {
         player->velocity.y = f22_sub(player->velocity.y, THRUST);
     }
@@ -221,11 +227,11 @@ void update_scoring(GameState* state) {
 
     // Calculate score rate based on precision
     if (state->scoring.current_precision > 0.8f) {
-        state->scoring.score_rate = 3.0f;  // max rate
+        state->scoring.score_rate = 1.25f;  // max rate
     } else if (state->scoring.current_precision > 0.3f) {
-        state->scoring.score_rate = 2.0f;  // medium rate
+        state->scoring.score_rate = 0.5f;  // medium rate
     } else if (state->scoring.current_precision > -0.3f) {
-        state->scoring.score_rate = 1.0f;  // base rate
+        state->scoring.score_rate = -0.5f;  // base rate
     } else {
         state->scoring.score_rate = -2.0f; // penalty
     }
@@ -235,22 +241,22 @@ void update_scoring(GameState* state) {
     if (state->scoring.score < 0) state->scoring.score = 0;
 }
 
-void game_state_update(GameState* state, bool thrust_active) {
+void game_state_update(GameState* state, bool thrust_active, float delta_time) {
     if (state->state == GAME_STATE_WAITING) {
         state->player.position.x = f22_from_float(WINDOW_WIDTH / 2);
         state->player.position.y = f22_from_float(WINDOW_HEIGHT / 2);
 
-        wave_update(&state->wave, WINDOW_HEIGHT / 2, state->state);
+        wave_update(&state->wave, WINDOW_HEIGHT / 2, state->state, delta_time);
         asteroid_system_update(&state->asteroid_system, &state->wave);
         return;
     }
     // Update wave first
     ScreenPos player_pos = player_get_screen_position(&state->player, state->camera_y_offset);
-    wave_update(&state->wave, player_pos.y, state->state);
+    wave_update(&state->wave, player_pos.y, state->state, delta_time);
     asteroid_system_update(&state->asteroid_system, &state->wave);
 
     // Update player
-    player_update(&state->player, state, thrust_active);
+    player_update(&state->player, state, thrust_active, delta_time);
     update_camera(state);
     update_scoring(state);
 

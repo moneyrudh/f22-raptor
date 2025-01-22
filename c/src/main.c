@@ -14,6 +14,11 @@ typedef struct {
     bool thrust_active;
     GameState game_state;
     Renderer renderer;
+    uint32_t last_frame_time;  // Track frame timing
+    float delta_time;       
+    float accumulated_time;   // Time between frames in seconds
+    float target_fps;          // Target frame rate
+    float frame_time;          // Target time per frame in ms
 } GameContext;
 
 void handle_input(GameContext* ctx) {
@@ -57,12 +62,24 @@ void handle_input(GameContext* ctx) {
 
 void main_loop(void* arg) {
     GameContext* ctx = (GameContext*)arg;
-
-    handle_input(ctx);
-
-    // Update game state
-    game_state_update(&ctx->game_state, ctx->thrust_active);
-
+    const float FIXED_TIME_STEP = 1.0f / 60.0f;  // Fixed 60Hz physics
+    
+    uint32_t current_time = SDL_GetTicks();
+    float frame_time = (current_time - ctx->last_frame_time) / 1000.0f;
+    ctx->last_frame_time = current_time;
+    
+    // Prevent spiral of death
+    if (frame_time > 0.25f) frame_time = 0.25f;
+    
+    // Accumulate time and update in fixed steps
+    ctx->accumulated_time += frame_time;
+    
+    while (ctx->accumulated_time >= FIXED_TIME_STEP) {
+        handle_input(ctx);
+        game_state_update(&ctx->game_state, ctx->thrust_active, FIXED_TIME_STEP);
+        renderer_draw_frame(&ctx->renderer, &ctx->game_state, ctx->thrust_active);
+        ctx->accumulated_time -= FIXED_TIME_STEP;
+    }
     // Check collisions
     if (game_state_check_collisions(&ctx->game_state)) {
         #ifdef __EMSCRIPTEN__
@@ -77,9 +94,6 @@ void main_loop(void* arg) {
         #endif
         return;
     }
-
-    // Render frame
-    renderer_draw_frame(&ctx->renderer, &ctx->game_state, ctx->thrust_active);
 
     #ifdef __EMSCRIPTEN__
     // SDL_Delay(16); // ~60 FPS cap for native builds
@@ -96,10 +110,16 @@ int main() {
         return 1;
     }
 
+    // Initialize context with new timing variables
     GameContext ctx = {
         .quit = false,
         .thrust_active = false,
-        .game_state = game_state_init()
+        .game_state = game_state_init(),
+        .last_frame_time = SDL_GetTicks(),  // Initialize timing
+        .delta_time = 0.0f,
+        .accumulated_time = 0.0f,
+        .target_fps = 60.0f,  // Set target frame rate
+        .frame_time = 1000.0f / 60.0f  // Calculate ms per frame (33.33ms for 30fps)
     };
 
     if (renderer_init(&ctx.renderer) < 0) {
@@ -117,13 +137,25 @@ int main() {
     SDL_RenderSetLogicalSize(ctx.renderer.renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
 
     #ifdef EMSCRIPTEN
-        // Set up persistent 60 FPS main loop for web
+        // Set up frame-capped main loop for web
+        // The '0' parameter lets Emscripten handle timing
+        // The '1' means to simulate infinite loop
         emscripten_set_main_loop_arg(main_loop, &ctx, 0, 1);
-        setvbuf(stdout, NULL, _IOLBF, 0);
     #else
-    // Regular main loop for native builds
+    // Native build - manual frame timing
     while (!ctx.quit) {
-        main_loop(&ctx);
+        uint32_t current_time = SDL_GetTicks();
+        uint32_t delta = current_time - ctx.last_frame_time;
+        
+        // Only update if enough time has passed
+        if (delta >= ctx.frame_time) {
+            ctx.delta_time = delta / 1000.0f;  // Convert to seconds
+            main_loop(&ctx);
+            ctx.last_frame_time = current_time;
+        } else {
+            // Sleep to avoid maxing CPU
+            SDL_Delay(1);
+        }
     }
     #endif
 
