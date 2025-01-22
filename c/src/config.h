@@ -7,7 +7,7 @@
 #define GHOST_WIDTH 1700
 
 // Game physics constants
-#define SCROLL_SPEED 10
+#define SCROLL_SPEED 20
 #define GRAVITY f22_from_float(0.15f)
 #define THRUST f22_from_float(0.35f)
 #define MAX_ALTITUDE f22_from_float(100.0f)

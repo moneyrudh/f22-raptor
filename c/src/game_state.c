@@ -106,7 +106,7 @@ void player_update(Player* player, const GameState* state, bool thrust) {
     // Smooth interpolation
     player->rotation = (player->rotation - target_rotation) * 0.1f;
     // Clamp rotation
-    player->rotation = fmaxf(-45.0f, fminf(45.0f, player->rotation));
+    player->rotation = fmaxf(-55.0f + SCROLL_SPEED, fminf(55.0f - SCROLL_SPEED, player->rotation));
 }
 
 ScreenPos world_to_screen(F22 world_x, F22 world_y, F22 camera_y_offset) {
@@ -175,7 +175,6 @@ GameState game_state_init(void) {
 
 void game_state_update(GameState* state, bool thrust_active) {
     // Update wave first
-    printf("Game state update called\n");
     ScreenPos player_pos = player_get_screen_position(&state->player, state->camera_y_offset);
     wave_update(&state->wave, player_pos.y);
     asteroid_system_update(&state->asteroid_system, &state->wave);

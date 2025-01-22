@@ -7,7 +7,7 @@
 #include "wave.h"
 #include "player.h"
 
-#define MAX_ASTEROID_POINTS 12
+#define MAX_ASTEROID_POINTS 22
 #define MAX_ASTEROIDS 40
 #define ASTEROID_BASE_SIZE 40
 #define MIN_ASTEROID_SCALE 0.6f
@@ -20,9 +20,12 @@ typedef struct {
     F22 y;
     float scale;
     float rotation;
+    float rotation_speed;
     bool active;
-    SDL_Point points[MAX_ASTEROID_POINTS];
+    SDL_Point points[32];        // increased for more detail
+    SDL_Point craters[32];       // new array for crater details
     int num_points;
+    int num_crater_points;
 } Asteroid;
 
 typedef struct {

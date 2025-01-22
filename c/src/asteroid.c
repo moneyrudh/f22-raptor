@@ -5,10 +5,32 @@
 #define min(a,b) (a < b ? a : b)
 #define max(a,b) (a > b ? a : b)
 
-static const SDL_Point ASTEROID_SHAPE[MAX_ASTEROID_POINTS] = {
-    {20, 0},   {15, -15}, {0, -20},  {-15, -15},
-    {-20, 0},  {-15, 10}, {-5, 20},  {5, 20},
-    {15, 10},  {20, 0}    // last point connects back to first
+static const SDL_Point ASTEROID_SHAPE[22] = {
+    {20, -3},  {17, -8},  {19, -12}, {15, -17},  // top right chunk
+    {10, -15}, {5, -18},  {0, -20},              // top edge
+    {-7, -18}, {-12, -15},{-15, -10},            // top left chunk
+    {-20, -5}, {-18, 0},  {-20, 5},              // left edge
+    {-15, 10}, {-12, 15}, {-7, 18},              // bottom left
+    {0, 20},   {7, 18},   {12, 15},              // bottom edge
+    {17, 8},   {20, 3},   {20, -3}               // back to start
+};
+
+// Multiple craters and surface details
+static const SDL_Point CRATER_DETAILS[] = {
+    // Large semicircular crater top right
+    {10, -13},  {10, -11}, {11, -10}, {14, -8}, {15, -8},
+
+    // Original semicircular crater left
+    {-14, 0},  {-13, -3}, {-10, -4}, {-7, -3},  {-6, 0},
+
+    // Wide semicircular crater bottom
+    {0, 12},   {-2, 10},  {-3, 8},   {-1, 6},   {1, 8},
+
+    // Original small semicircular crater near center
+    {3, -2},   {4, -3},   {5, -3},   {6, -2},   {7, 0},
+
+    // New semicircular crater mid-left
+    {-8, -6},  {-9, -8},  {-8, -10}, {-6, -9},  {-5, -7}
 };
 
 static void generate_asteroid(Asteroid* asteroid, float scale, F22 x, F22 y) {
@@ -16,13 +38,21 @@ static void generate_asteroid(Asteroid* asteroid, float scale, F22 x, F22 y) {
     asteroid->y = y;
     asteroid->scale = scale;
     asteroid->rotation = ((float)rand() / (float)RAND_MAX) * 360.0f;
+    asteroid->rotation_speed = (((float)rand() / (float)RAND_MAX) * -1.0f);
     asteroid->active = true;
-    asteroid->num_points = 10;  // matches ASTEROID_SHAPE
+    asteroid->num_points = sizeof(ASTEROID_SHAPE) / sizeof(ASTEROID_SHAPE[0]);
+    asteroid->num_crater_points = sizeof(CRATER_DETAILS) / sizeof(CRATER_DETAILS[0]);
 
     // Copy and scale base shape
     for (int i = 0; i < asteroid->num_points; i++) {
         asteroid->points[i].x = ASTEROID_SHAPE[i].x * scale;
         asteroid->points[i].y = ASTEROID_SHAPE[i].y * scale;
+    }
+
+    // Copy and scale crater details
+    for (int i = 0; i < asteroid->num_crater_points; i++) {
+        asteroid->craters[i].x = CRATER_DETAILS[i].x * scale;
+        asteroid->craters[i].y = CRATER_DETAILS[i].y * scale;
     }
 }
 
@@ -113,6 +143,9 @@ void asteroid_system_update(AsteroidSystem* system, const WaveGenerator* wave) {
             system->asteroids[i].x,
             f22_from_float(SCROLL_SPEED)
         );
+        system->asteroids[i].rotation += system->asteroids[i].rotation_speed;
+        if (system->asteroids[i].rotation > 360.0f) system->asteroids[i].rotation -= 360.0f;
+        else if (system->asteroids[i].rotation < 0.0f) system->asteroids[i].rotation += 360.0f;
 
         // Deactivate if off screen
         if (f22_to_float(system->asteroids[i].x) < -ASTEROID_BASE_SIZE) {
@@ -122,7 +155,7 @@ void asteroid_system_update(AsteroidSystem* system, const WaveGenerator* wave) {
 
     // Handle spawning
     system->spawn_timer += 1.0f/60.0f;
-    if (system->spawn_timer >= 0.33f) {
+    if (system->spawn_timer >= 0.4f) {
         int num_layers = 0;//rand() % 3;  // 0 = none, 1 = one layer, 2 = two layers
 
         while (num_layers <= 3) {
@@ -158,32 +191,65 @@ void asteroid_system_render(const AsteroidSystem* system, SDL_Renderer* renderer
     for (int i = 0; i < MAX_ASTEROIDS; i++) {
         if (!system->asteroids[i].active) continue;
 
-        // Transform points for rendering
-        SDL_Point transformed[MAX_ASTEROID_POINTS];
+        float angle = system->asteroids[i].rotation * M_PI / 180.0f;
+        float cos_a = cosf(angle);
+        float sin_a = sinf(angle);
+
+        ScreenPos pos = world_to_screen(
+            system->asteroids[i].x,
+            system->asteroids[i].y,
+            camera_y_offset
+        );
+
+        // Draw main asteroid shape
+        SDL_Point transformed_outline[32];  // match the increased array size
         for (int j = 0; j < system->asteroids[i].num_points; j++) {
-            // Rotate
-            float angle = system->asteroids[i].rotation * M_PI / 180.0f;
-            float cos_a = cosf(angle);
-            float sin_a = sinf(angle);
             float px = system->asteroids[i].points[j].x;
             float py = system->asteroids[i].points[j].y;
 
-            ScreenPos pos = world_to_screen(
-                system->asteroids[i].x,
-                system->asteroids[i].y,
-                camera_y_offset
-            );
-
-            transformed[j].x = pos.x + (int)(px * cos_a - py * sin_a);
-            transformed[j].y = pos.y + (int)(px * sin_a + py * cos_a);
-            // transformed[j].x = (int)(f22_to_float(system->asteroids[i].x) +
-            //                        (px * cos_a - py * sin_a));
-            // transformed[j].y = (int)(f22_to_float(system->asteroids[i].y) +
-            //                        (px * sin_a + py * cos_a));
+            transformed_outline[j].x = pos.x + (int)(px * cos_a - py * sin_a);
+            transformed_outline[j].y = pos.y + (int)(px * sin_a + py * cos_a);
         }
 
-        // Draw the asteroid
-        SDL_RenderDrawLines(renderer, transformed, system->asteroids[i].num_points);
+        // Draw the outline (closed shape)
+        SDL_RenderDrawLines(renderer, transformed_outline, system->asteroids[i].num_points);
+        // Connect last point to first to close the shape
+        SDL_RenderDrawLine(renderer,
+            transformed_outline[system->asteroids[i].num_points-1].x,
+            transformed_outline[system->asteroids[i].num_points-1].y,
+            transformed_outline[0].x,
+            transformed_outline[0].y);
+
+        // Draw crater details
+        for (int j = 0; j < system->asteroids[i].num_crater_points; j += 5) {
+            SDL_Point crater[5];
+            for (int k = 0; k < 5; k++) {
+                float px = system->asteroids[i].craters[j + k].x;
+                float py = system->asteroids[i].craters[j + k].y;
+
+                crater[k].x = pos.x + (int)(px * cos_a - py * sin_a);
+                crater[k].y = pos.y + (int)(px * sin_a + py * cos_a);
+            }
+            // Draw the complete crater shape
+            SDL_RenderDrawLines(renderer, crater, 5);
+            // Close the crater shape
+            // SDL_RenderDrawLine(renderer,
+            //     crater[4].x, crater[4].y,
+            //     crater[0].x, crater[0].y);
+        }
+
+        // Draw surface details (lines)
+        // for (int j = system->asteroids[i].num_crater_points - 7; j < system->asteroids[i].num_crater_points; j += 2) {
+        //     SDL_Point detail[2];
+        //     for (int k = 0; k < 2; k++) {
+        //         float px = system->asteroids[i].craters[j + k].x;
+        //         float py = system->asteroids[i].craters[j + k].y;
+
+        //         detail[k].x = pos.x + (int)(px * cos_a - py * sin_a);
+        //         detail[k].y = pos.y + (int)(px * sin_a + py * cos_a);
+        //     }
+        //     SDL_RenderDrawLine(renderer, detail[0].x, detail[0].y, detail[1].x, detail[1].y);
+        // }
     }
 }
 
