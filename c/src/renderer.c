@@ -26,8 +26,59 @@ int renderer_init(Renderer* renderer) {
     SDL_GetRendererInfo(renderer->renderer, &info);
     printf("RENDERER INFO: name=%s, flags=%d\n", info.name, info.flags);
     renderer_init_shapes(renderer);
+
+    // if (TTF_Init() == -1) {
+    //     printf("SDL_ttf could not initialize! Error: %s\n", TTF_GetError());
+    //     return -1;
+    // }
+
+    // renderer_init_font(renderer, "/assets/vt323.ttf", 24);
+
     return 0;
 }
+
+// int renderer_init_font(Renderer* renderer, const char* font_path, int font_size) {
+//     renderer->font = TTF_OpenFont(font_path, font_size);
+//     if (!renderer->font) {
+//         printf("Failed to load font! Error: %s\n", TTF_GetError());
+//         return -1;
+//     }
+//     return 0;
+// }
+
+// void renderer_draw_text(Renderer* renderer, const char* text, int x, int y, SDL_Color color) {
+//     if (!renderer->font) return;
+
+//     SDL_Surface* text_surface = TTF_RenderText_Blended(renderer->font, text, color);
+//     if (!text_surface) {
+//         printf("Failed to render text! Error: %s\n", TTF_GetError());
+//         return;
+//     }
+
+//     SDL_Texture* text_texture = SDL_CreateTextureFromSurface(renderer->renderer, text_surface);
+//     SDL_FreeSurface(text_surface);
+
+//     if (!text_texture) {
+//         printf("Failed to create texture! Error: %s\n", SDL_GetError());
+//         return;
+//     }
+
+//     int text_width, text_height;
+//     SDL_QueryTexture(text_texture, NULL, NULL, &text_width, &text_height);
+//     SDL_Rect dest_rect = {x, y, text_width, text_height};
+    
+//     SDL_RenderCopy(renderer->renderer, text_texture, NULL, &dest_rect);
+//     SDL_DestroyTexture(text_texture);
+// }
+
+// void renderer_cleanup(Renderer* renderer) {
+//     if (renderer->font) {
+//         TTF_CloseFont(renderer->font);
+//     }
+//     TTF_Quit();
+//     SDL_DestroyRenderer(renderer->renderer);
+//     SDL_DestroyWindow(renderer->window);
+// }
 
 void renderer_cleanup(Renderer* renderer) {
     SDL_DestroyRenderer(renderer->renderer);
@@ -45,7 +96,15 @@ void renderer_draw_score(Renderer* renderer, uint32_t score) {
     };
     SDL_RenderFillRect(renderer->renderer, &score_box);
     
-    // Could add text rendering here if we want to show actual numbers
+    // char score_text[32];
+    // snprintf(score_text, sizeof(score_text), "Score: %u", score);
+    
+    // SDL_Color text_color = {255, 255, 255, 255};  // white
+    // renderer_draw_text(renderer, score_text, 
+    //                   score_box.x + 10,  // padding from left
+    //                   score_box.y + 5,   // padding from top
+    //                   text_color);
+
 }
 
 void renderer_init_shapes(Renderer* renderer) {
@@ -255,14 +314,14 @@ void renderer_draw_frame(Renderer* renderer, const GameState* state, bool thrust
 
     if (state->state == GAME_STATE_WAITING) {
         // Draw simple waiting state
-        SDL_SetRenderDrawColor(renderer->renderer, 255, 255, 255, 255);
-        SDL_Rect prompt = {
-            .x = (WINDOW_WIDTH / 2) - 100,
-            .y = (WINDOW_HEIGHT / 2) - 50,
-            .w = 200,
-            .h = 40
-        };
-        SDL_RenderFillRect(renderer->renderer, &prompt);
+        // SDL_SetRenderDrawColor(renderer->renderer, 255, 255, 255, 255);
+        // SDL_Rect prompt = {
+        //     .x = (WINDOW_WIDTH / 2) - 100,
+        //     .y = (WINDOW_HEIGHT / 2) - 50,
+        //     .w = 200,
+        //     .h = 40
+        // };
+        // SDL_RenderFillRect(renderer->renderer, &prompt);
     } else {
         // Normal game rendering
         // renderer_draw_obstacles(renderer, state->obstacles);
@@ -272,7 +331,7 @@ void renderer_draw_frame(Renderer* renderer, const GameState* state, bool thrust
 
     // Always draw player and score
     renderer_draw_player(renderer, &state->player, state->camera_y_offset, state->state == GAME_STATE_PLAYING ? thrust_active : true);
-    renderer_draw_score(renderer, state->score);
+    // renderer_draw_score(renderer, state->score);
 
     SDL_RenderPresent(renderer->renderer);
 

@@ -2,6 +2,7 @@
 #define RENDERER_H
 
 #include <SDL.h>
+// #include <SDL_ttf.h>
 #include "game_state.h"
 
 typedef struct {
@@ -27,5 +28,9 @@ void renderer_init_shapes(Renderer* renderer);
 void renderer_rotate_points(SDL_Point* points, int num_points, SDL_Point center, float angle);
 void renderer_draw_player(Renderer* renderer, const Player* player, F22 camera_y_offset, bool thrust_active);
 void renderer_draw_obstacles(Renderer* renderer, const Obstacle* obstacles);
+
+// void renderer_draw_text(Renderer* renderer, const char* text, int x, int y, SDL_Color color);
+// int renderer_init_font(Renderer* renderer, const char* font_path, int font_size);
+// void renderer_cleanup_font(Renderer* renderer);
 
 #endif // RENDERER_H

@@ -12,21 +12,20 @@ add_executable(f22_game
     src/asteroid.c
 )
 
-# Emscripten specific settings
 if(EMSCRIPTEN)
-    # Enable SDL2
-    set(USE_SDL2 "-sUSE_SDL=2")
-
-    # Set output type and flags
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
-
-    # Combine all necessary emscripten flags
-    set(EMSCRIPTEN_FLAGS "${USE_SDL2} -sWASM=1 -sALLOW_MEMORY_GROWTH=1 --shell-file ${CMAKE_SOURCE_DIR}/template.html")
-
-    # Apply to both compiler and linker
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EMSCRIPTEN_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EMSCRIPTEN_FLAGS}")
-
-    # Add SDL2 include path explicitly
-    include_directories(${EMSCRIPTEN_ROOT_PATH}/cache/sysroot/include)
+    
+    set(COMPILE_FLAGS 
+        "-sUSE_SDL=2 \
+         -sWASM=1 \
+         -sALLOW_MEMORY_GROWTH=1 \
+         --shell-file ${CMAKE_SOURCE_DIR}/template.html"
+    )
+    
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMPILE_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${COMPILE_FLAGS}")
+else()
+    find_package(SDL2 REQUIRED)
+    find_package(SDL2_ttf REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2 SDL2::SDL2main SDL2_ttf::SDL2_ttf)
 endif()
