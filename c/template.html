@@ -23,20 +23,23 @@
             canvas {
                 background-color: #000;
                 box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+                outline: 2px solid rgb(247, 247, 247);
             }
             #textCanvas {
                 position: absolute;
-                right: 0;
-                top: 0;
+                right: 2px;
+                top: 2px;
                 background-color: transparent;
                 pointer-events: none;
+                outline: none;
             }
             #startTextCanvas {
                 position: absolute;
-                right: 0;
+                right: 2px;
                 top: 40%;
                 background-color: transparent;
                 pointer-events: none;
+                outline: none;
             }
             #controls {
                 position: fixed;
@@ -46,6 +49,67 @@
                 text-align: center;
                 width: 100%;
             }
+            #submit-modal {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%); /* Slightly above center */
+                width: 1300px;
+                height: 796px;
+                background: rgba(0, 0, 0, 0.85);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                font-family: 'Press Start 2P', monospace;
+            }
+
+            #submit-modal.hidden {
+                display: none;
+            }
+
+            #username-input {
+                width: 300px;
+                padding: 12px;
+                background: #000;
+                border: 2px solid #fff;
+                color: #fff;
+                font-family: 'Press Start 2P', monospace;
+                font-size: 16px;
+                text-align: center;
+                margin-bottom: 20px;
+                outline: none;
+            }
+
+            .button-container {
+                display: flex;
+                gap: 12px;
+                width: 300px;
+            }
+
+            .modal-btn {
+                flex: 1;
+                padding: 12px;
+                font-family: 'Press Start 2P', monospace;
+                font-size: 14px;
+                border: none;
+                cursor: pointer;
+                transition: opacity 0.2s;
+            }
+
+            .modal-btn:hover {
+                opacity: 0.9;
+            }
+
+            .no-btn {
+                background: #fff;
+                color: #000;
+            }
+
+            .submit-btn {
+                background: #ff3e3e;
+                color: #fff;
+            }
         </style>
     </head>
     <body>
@@ -53,6 +117,13 @@
             <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
             <canvas id="textCanvas"></canvas>
             <canvas id="startTextCanvas"></canvas>
+            <div id="submit-modal" class="hidden">
+                <input type="text" id="username-input" placeholder="Enter X username" />
+                <div class="button-container">
+                  <button class="modal-btn no-btn">NO</button>
+                  <button class="modal-btn submit-btn">SUBMIT</button>
+                </div>
+            </div>
         </div>
         <div id="controls">SPACE / UP - Thrust | ESC - Quit</div>
         <script>
@@ -69,6 +140,21 @@
                     return canvas;
                 })(),
                 onRuntimeInitialized: function() {
+                    const modal = document.getElementById('submit-modal');
+                    modal.classList.add('hidden');
+                    
+                    // Handle No button
+                    document.querySelector('.no-btn').addEventListener('click', () => {
+                        modal.classList.remove('hidden');
+                        // We'll add restart logic here later
+                    });
+                    
+                    // Handle Submit button
+                    document.querySelector('.submit-btn').addEventListener('click', () => {
+                        // We'll add submission logic here later
+                        const username = document.getElementById('username-input').value;
+                        console.log('Submit score:', finalScore, 'for user:', username);
+                    });
                     const gameCanvas = document.getElementById('canvas');
                     const textCanvas = document.getElementById('textCanvas');
                     const startTextCanvas = document.getElementById('startTextCanvas');
@@ -98,7 +184,11 @@
 
                     Module.updateScore = function(_score) {
                         score = _score;
-                    }
+                    };
+
+                    Module.showGameOver = function(_score) {
+                        modal.classList.remove('hidden');
+                    };
                     
                     function drawScore() {
                         scoreCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);

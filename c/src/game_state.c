@@ -1,5 +1,6 @@
 #include "game_state.h"
 #include "asteroid.h"
+#include "player.h"
 #include "config.h"
 #include <math.h>
 #include <stdio.h>
@@ -278,6 +279,7 @@ void game_state_update(GameState* state, bool thrust_active, float delta_time) {
 bool game_state_check_collisions(GameState* state) {
     ScreenPos player_pos = player_get_screen_position(&state->player, state->camera_y_offset);
     const int player_radius = 15;  // Simplified collision circle
+    if (state->state == GAME_STATE_OVER) return true;
 
     // Check if player hit left side
     if (f22_to_float(state->player.position.x) < GAME_OVER_X) {
@@ -286,6 +288,7 @@ bool game_state_check_collisions(GameState* state) {
 
     if (asteroid_system_check_collision(&state->asteroid_system, &state->player)) {
         printf("COLLISION DETECTED\n");
+        state->state = GAME_STATE_OVER;
         return true;
     }
 

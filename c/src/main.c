@@ -84,10 +84,9 @@ void main_loop(void* arg) {
     if (game_state_check_collisions(&ctx->game_state)) {
         #ifdef __EMSCRIPTEN__
         emscripten_cancel_main_loop();
-        EM_ASM(
-            console.log('Game Over! Score: ' + $0),
-            ctx->game_state.score
-        );
+        EM_ASM({
+        Module.showGameOver($0);
+        }, ctx->game_state.score);
         #else
         ctx->quit = true;
         printf("Game Over! Score: %u\n", ctx->game_state.score);
