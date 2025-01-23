@@ -86,7 +86,7 @@ void main_loop(void* arg) {
         emscripten_cancel_main_loop();
         EM_ASM({
         Module.showGameOver($0);
-        }, ctx->game_state.score);
+        }, (int)ctx->game_state.scoring.score);
         #else
         ctx->quit = true;
         printf("Game Over! Score: %u\n", ctx->game_state.score);

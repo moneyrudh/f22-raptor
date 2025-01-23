@@ -117,12 +117,18 @@
             <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
             <canvas id="textCanvas"></canvas>
             <canvas id="startTextCanvas"></canvas>
-            <div id="submit-modal" class="hidden">
-                <input type="text" id="username-input" placeholder="Enter X username" />
-                <div class="button-container">
-                  <button class="modal-btn no-btn">NO</button>
-                  <button class="modal-btn submit-btn">SUBMIT</button>
-                </div>
+        </div>
+        <div id="submit-modal" class="hidden">
+            <input 
+                type="text" 
+                id="username-input" 
+                placeholder="Enter X username" 
+                autocomplete="off"
+                spellcheck="false"
+            />
+            <div class="button-container">
+              <button class="modal-btn no-btn">NO</button>
+              <button class="modal-btn submit-btn">SUBMIT</button>
             </div>
         </div>
         <div id="controls">SPACE / UP - Thrust | ESC - Quit</div>
@@ -141,19 +147,54 @@
                 })(),
                 onRuntimeInitialized: function() {
                     const modal = document.getElementById('submit-modal');
+                    const usernameInput = document.getElementById('username-input');
+                    let finalScore = 0;
+                    
                     modal.classList.add('hidden');
                     
                     // Handle No button
                     document.querySelector('.no-btn').addEventListener('click', () => {
-                        modal.classList.remove('hidden');
-                        // We'll add restart logic here later
+                        location.reload();
                     });
                     
                     // Handle Submit button
-                    document.querySelector('.submit-btn').addEventListener('click', () => {
-                        // We'll add submission logic here later
-                        const username = document.getElementById('username-input').value;
-                        console.log('Submit score:', finalScore, 'for user:', username);
+                    document.querySelector('.submit-btn').addEventListener('click', async () => {
+                        const username = usernameInput.value.trim();
+                        if (!username) return;
+                        
+                        try {
+                            // First verify the user exists
+                            const verifyRes = await fetch(`http://localhost:3000/verify/${username.toString()}`);
+                            const verifyData = await verifyRes.json();
+                            
+                            if (!verifyData.valid) {
+                                alert('User not found on X - check the username and try again');
+                                return;
+                            }
+
+                            // If verified, submit the score
+                            const submitRes = await fetch('http://localhost:3000/submission', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ 
+                                    username, 
+                                    score: finalScore 
+                                })
+                            });
+
+                            if (!submitRes.ok) {
+                                const error = await submitRes.json();
+                                alert(error.message || 'Failed to submit score');
+                                return;
+                            }
+
+                            // Success! Reload the game
+                            location.reload();
+                            
+                        } catch (err) {
+                            console.error('Submit error:', err);
+                            alert('Something went wrong - try again?');
+                        }
                     });
                     const gameCanvas = document.getElementById('canvas');
                     const textCanvas = document.getElementById('textCanvas');
@@ -187,7 +228,13 @@
                     };
 
                     Module.showGameOver = function(_score) {
+                        console.log("SETTING FINAL SCORE AS:", _score);
+                        finalScore = parseInt(_score);
                         modal.classList.remove('hidden');
+                        usernameInput.disabled = false;
+                        setTimeout(() => {
+                            usernameInput.focus();
+                        }, 100);
                     };
                     
                     function drawScore() {
