@@ -110,6 +110,40 @@
                 background: #ff3e3e;
                 color: #fff;
             }
+
+            .score-display {
+                margin-bottom: 32px;
+                text-align: center;
+            }
+
+            .score-label {
+                font-size: 32px;
+                color: #fff;
+                margin-bottom: 8px;
+            }
+
+            .score-value {
+                font-size: 60px;
+                color: #fff;
+            }
+
+            #success-message {
+                margin-top: 16px;
+                color: #50cb13;
+                font-size: 14px;
+                text-align: center;
+            }
+
+            #error-message {
+                margin-top: 16px;
+                color: #ff3e3e;
+                font-size: 12px;
+                text-align: center;
+            }
+
+            #error-message.hidden {
+                display: none;
+            }
         </style>
     </head>
     <body>
@@ -119,6 +153,10 @@
             <canvas id="startTextCanvas"></canvas>
         </div>
         <div id="submit-modal" class="hidden">
+            <div class="score-display">
+                <div class="score-label">SCORE</div>
+                <div class="score-value">0</div>
+            </div>        
             <input 
                 type="text" 
                 id="username-input" 
@@ -130,6 +168,7 @@
               <button class="modal-btn no-btn">NO</button>
               <button class="modal-btn submit-btn">SUBMIT</button>
             </div>
+            <div id="error-message" class="hidden"></div>
         </div>
         <div id="controls">SPACE / UP - Thrust | ESC - Quit</div>
         <script>
@@ -149,18 +188,47 @@
                     const modal = document.getElementById('submit-modal');
                     const usernameInput = document.getElementById('username-input');
                     let finalScore = 0;
+                    let inputValue = '';
                     
                     modal.classList.add('hidden');
+                    modal.addEventListener('mousedown', (e) => {
+                        e.stopPropagation();
+                    });
+
+                    usernameInput.disabled = true;
+
+                    const keyHandler = (e) => {
+                        e.preventDefault();
+
+                        if (e.key === 'Backspace') {
+                            inputValue = inputValue.slice(0, -1);
+                            usernameInput.value = inputValue;
+                            return;
+                        }
+
+                        if (/^[a-zA-Z0-9_]$/.test(e.key) && inputValue.length < 15) {
+                            inputValue += e.key;
+                            usernameInput.value = inputValue;
+                        }
+                    }
                     
                     // Handle No button
                     document.querySelector('.no-btn').addEventListener('click', () => {
                         location.reload();
                     });
                     
+                    document.addEventListener('keydown', keyHandler);
                     // Handle Submit button
                     document.querySelector('.submit-btn').addEventListener('click', async () => {
                         const username = usernameInput.value.trim();
-                        if (!username) return;
+                        const errorMsg = document.getElementById('error-message');
+                        errorMsg.classList.add('hidden');
+
+                        if (username === undefined || username === '') {
+                            errorMsg.textContent = 'enter a username';
+                            errorMsg.classList.remove('hidden');
+                            return;
+                        }
                         
                         try {
                             // First verify the user exists
@@ -168,7 +236,8 @@
                             const verifyData = await verifyRes.json();
                             
                             if (!verifyData.valid) {
-                                alert('User not found on X - check the username and try again');
+                                errorMsg.textContent = 'User not found on X - check the username and try again';
+                                errorMsg.classList.remove('hidden');
                                 return;
                             }
 
@@ -184,16 +253,20 @@
 
                             if (!submitRes.ok) {
                                 const error = await submitRes.json();
-                                alert(error.message || 'Failed to submit score');
+                                errorMsg.textContent = error.error || 'Failed to submit score';
+                                errorMsg.classList.remove('hidden');
                                 return;
                             }
 
                             // Success! Reload the game
+                            document.getElementById('canvas').style.pointerEvents = 'auto';
+                            document.removeEventListener('keydown', keyHandler);
                             location.reload();
                             
                         } catch (err) {
                             console.error('Submit error:', err);
-                            alert('Something went wrong - try again?');
+                            errorMsg.textContent = 'Something went wrong - try again?';
+                            errorMsg.classList.remove('hidden'); 
                         }
                     });
                     const gameCanvas = document.getElementById('canvas');
@@ -231,6 +304,8 @@
                         console.log("SETTING FINAL SCORE AS:", _score);
                         finalScore = parseInt(_score);
                         modal.classList.remove('hidden');
+                        document.querySelector('.score-value').textContent = finalScore;
+                        document.getElementById('canvas').style.pointerEvents = 'none';
                         usernameInput.disabled = false;
                         setTimeout(() => {
                             usernameInput.focus();

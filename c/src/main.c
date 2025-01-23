@@ -22,6 +22,7 @@ typedef struct {
 } GameContext;
 
 void handle_input(GameContext* ctx) {
+    if (ctx->game_state.state == GAME_STATE_OVER) return;
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
