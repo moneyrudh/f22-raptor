@@ -175,6 +175,7 @@ GameState game_state_init(void) {
         .target_y_offset = f22_from_float(0.0f),
         .wave = wave_init(),
         .asteroid_system = asteroid_system_init(),
+        // .missile_system = missile_system_init(),
         .scoring = (ScoringSystem){
             .score = 0,
             .current_precision = 0,
@@ -255,6 +256,9 @@ void game_state_update(GameState* state, bool thrust_active, float delta_time) {
     ScreenPos player_pos = player_get_screen_position(&state->player, state->camera_y_offset);
     wave_update(&state->wave, player_pos.y, state->state, delta_time);
     asteroid_system_update(&state->asteroid_system, &state->wave);
+
+    // // Update missile system
+    // missile_system_update(&state->missile_system, &state->player, &state->asteroid_system, delta_time);
 
     // Update player
     player_update(&state->player, state, thrust_active, delta_time);

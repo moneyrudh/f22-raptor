@@ -7,6 +7,7 @@
 #include "config.h"
 #include "asteroid.h"
 #include "player.h"
+#include "missile.h"
 
 // Game constants
 #define OBSTACLE_WIDTH 50
@@ -41,6 +42,7 @@ typedef struct {
     uint32_t score;
     WaveGenerator wave;
     AsteroidSystem asteroid_system;
+    MissileSystem missile_system;
     ScoringSystem scoring;
 } GameState;
 

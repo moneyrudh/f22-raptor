@@ -7,6 +7,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/f22_game.dir/src/game_state.c.o.d"
   "CMakeFiles/f22_game.dir/src/main.c.o"
   "CMakeFiles/f22_game.dir/src/main.c.o.d"
+  "CMakeFiles/f22_game.dir/src/missile.c.o"
+  "CMakeFiles/f22_game.dir/src/missile.c.o.d"
   "CMakeFiles/f22_game.dir/src/renderer.c.o"
   "CMakeFiles/f22_game.dir/src/renderer.c.o.d"
   "CMakeFiles/f22_game.dir/src/wave.c.o"

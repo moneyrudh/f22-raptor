@@ -432,15 +432,17 @@ void renderer_draw_frame(Renderer* renderer, const GameState* state, bool thrust
         //     .h = 40
         // };
         // SDL_RenderFillRect(renderer->renderer, &prompt);
-        asteroid_system_render(&state->asteroid_system, renderer->renderer, state->camera_y_offset);
+        asteroid_system_render(&state->asteroid_system, renderer->renderer, state->camera_y_offset, &state->player);
     } else {
         // Normal game rendering
         // renderer_draw_obstacles(renderer, state->obstacles);
         renderer_draw_wave(renderer, &state->wave, &state->player, state->camera_y_offset);
-        asteroid_system_render(&state->asteroid_system, renderer->renderer, state->camera_y_offset);
+        asteroid_system_render(&state->asteroid_system, renderer->renderer, state->camera_y_offset, &state->player);
+        // missile_system_render(&state->missile_system, renderer->renderer, state->camera_y_offset);
     }
 
     // Always draw player and score
+    missile_system_render_ui(&state->missile_system, renderer->renderer);
     renderer_draw_player(renderer, &state->player, state->camera_y_offset, state->state == GAME_STATE_PLAYING ? thrust_active : true);
     // renderer_draw_score(renderer, state->score);
 

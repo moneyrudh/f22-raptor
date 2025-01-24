@@ -225,6 +225,30 @@ src/main.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/src/main.c.s
 .PHONY : src/main.c.s
 
+src/missile.o: src/missile.c.o
+.PHONY : src/missile.o
+
+# target to build an object file
+src/missile.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/src/missile.c.o
+.PHONY : src/missile.c.o
+
+src/missile.i: src/missile.c.i
+.PHONY : src/missile.i
+
+# target to preprocess a source file
+src/missile.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/src/missile.c.i
+.PHONY : src/missile.c.i
+
+src/missile.s: src/missile.c.s
+.PHONY : src/missile.s
+
+# target to generate assembly for a file
+src/missile.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/src/missile.c.s
+.PHONY : src/missile.c.s
+
 src/renderer.o: src/renderer.c.o
 .PHONY : src/renderer.o
 
@@ -294,6 +318,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/missile.o"
+	@echo "... src/missile.i"
+	@echo "... src/missile.s"
 	@echo "... src/renderer.o"
 	@echo "... src/renderer.i"
 	@echo "... src/renderer.s"

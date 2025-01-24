@@ -2,6 +2,7 @@
 #include <SDL.h>
 #include "game_state.h"
 #include "renderer.h"
+#include "missile.h"
 #include <stdio.h>
 
 #ifdef __EMSCRIPTEN__
@@ -47,6 +48,11 @@ void handle_input(GameContext* ctx) {
                     case SDLK_ESCAPE:
                         ctx->quit = true;
                         break;
+                    // case SDLK_f:
+                    //     if (ctx->game_state.state == GAME_STATE_PLAYING) {
+                    //         missile_system_fire(&ctx->game_state.missile_system, &ctx->game_state.player);
+                    //     }
+                    //     break;
                 }
                 break;
             case SDL_KEYUP:

@@ -88,9 +88,9 @@ void wave_update_ghost(GhostPlayer* ghost, int player_y, float delta_time) {
         // ghost->is_rest_phase = !ghost->is_rest_phase;
 
         if (ghost->is_rest_phase) {
-            ghost->current_duration = ((float)rand() / (float)RAND_MAX) * 1.0f;
+            ghost->current_duration = ((float)rand() / (float)RAND_MAX) * 1.5f;
         } else {
-            ghost->current_duration = ((float)rand() / (float)RAND_MAX) * 1.0f;
+            ghost->current_duration = ((float)rand() / (float)RAND_MAX) * 1.5f;
         }
     }
 
