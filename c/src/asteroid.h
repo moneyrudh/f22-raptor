@@ -14,6 +14,25 @@
 #define MAX_ASTEROID_SCALE 4.4f
 #define ASTEROID_SPAWN_BUFFER 150  // min distance from ghost path
 #define MIN_ASTEROID_SPACING 60   // min distance between asteroids
+#define MAX_PARTICLES 1000         // max particles across all asteroids
+#define PARTICLE_LIFETIME 1.0f     // how long particles live in seconds
+#define PARTICLE_SPAWN_RATE 0.016f // spawn every ~1 frame at 60fps
+
+
+typedef struct {
+    float x, y;
+    float vx, vy;
+    float lifetime;
+    float max_lifetime;
+    bool active;
+    uint8_t r, g, b;
+    float scale;
+} Particle;
+
+typedef struct {
+    SDL_Point points[5];  // Points for one trail shape
+    float alpha;          // Transparency for animation
+} TrailSegment;
 
 typedef struct {
     F22 x;
@@ -32,6 +51,9 @@ typedef struct {
     Asteroid asteroids[MAX_ASTEROIDS];
     SDL_Point base_shape[MAX_ASTEROID_POINTS];
     float spawn_timer;
+    float particle_spawn_timer;
+    uint32_t last_particle_spawn;
+    int active_particle_count;
 } AsteroidSystem;
 
 AsteroidSystem asteroid_system_init(void);

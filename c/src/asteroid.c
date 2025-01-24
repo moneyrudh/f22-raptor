@@ -134,7 +134,7 @@ static void spawn_asteroid(AsteroidSystem* system, const WaveGenerator* wave, bo
 }
 
 void asteroid_system_update(AsteroidSystem* system, const WaveGenerator* wave) {
-    // Update existing asteroids
+    float dt = 1.0f/60.0f;
     for (int i = 0; i < MAX_ASTEROIDS; i++) {
         if (!system->asteroids[i].active) continue;
 
@@ -165,22 +165,6 @@ void asteroid_system_update(AsteroidSystem* system, const WaveGenerator* wave) {
             if (spawn_below) spawn_asteroid(system, wave, false, num_layers == 0 ? 1.0f: num_layers * 2.0f);
             num_layers++;
         }
-        // if (num_layers >= 0) {
-        //     // first layer
-        //     bool spawn_above = (rand() % 2) >= 1;  // 50% chance for above
-        //     bool spawn_below = (rand() % 2) >= 1;  // 50% chance for below
-        //     if (spawn_above) spawn_asteroid(system, wave, true, 1.0f);
-        //     if (!spawn_above) spawn_asteroid(system, wave, false, 1.0f);
-        // }
-
-        // if (num_layers >= 1) {
-        //     // second layer, further out
-        //     bool spawn_above = (rand() % 2) >= 1;
-        //     bool spawn_below = (rand() % 2) >= 1;
-        //     if (spawn_above) spawn_asteroid(system, wave, true, 2.5f);
-        //     if (!spawn_above) spawn_asteroid(system, wave, false, 2.5f);
-        // }
-
         system->spawn_timer = 0;
     }
 }
@@ -190,46 +174,86 @@ static inline uint8_t lerp(uint8_t a, uint8_t b, float t) {
 }
 
 void asteroid_system_render(const AsteroidSystem* system, SDL_Renderer* renderer, F22 camera_y_offset) {
-    SDL_SetRenderDrawColor(renderer, 150, 150, 150, 255);
-    float screen_center = WINDOW_WIDTH / 2.0f;
-
+    static uint32_t animation_timer = 0;
+    animation_timer++;
+    
     for (int i = 0; i < MAX_ASTEROIDS; i++) {
         if (!system->asteroids[i].active) continue;
 
         float angle = system->asteroids[i].rotation * M_PI / 180.0f;
         float cos_a = cosf(angle);
         float sin_a = sinf(angle);
+        float radius = ASTEROID_BASE_SIZE * system->asteroids[i].scale * 0.5f;
+        ScreenPos pos = world_to_screen(system->asteroids[i].x, system->asteroids[i].y, camera_y_offset);
 
-        ScreenPos pos = world_to_screen(
-            system->asteroids[i].x,
-            system->asteroids[i].y,
-            camera_y_offset
-        );
+        // Create the continuous trail that wraps around the asteroid
+        const int TRAIL_POINTS = 100;  // Reduced point count for sharper look
+        SDL_Point trail[TRAIL_POINTS];
+        
+        float time = animation_timer * 0.025f;
+        float base_amplitude = radius * 0.2f;  // Reduced wave height
+        float wave_frequency = 5.8f;  // Slightly increased for tighter waves
+        for(int j = 0; j < TRAIL_POINTS; j++) {
+            float t = j / (float)(TRAIL_POINTS - 1);
+            float phi = t * 2.0f * M_PI;
+            
+            // Key size change here: reduced multiplier from 1.5f to 0.8f
+            float path_x = cosf(phi) * radius * 0.9f;  
+            float path_y = sinf(phi) * radius * 0.7f;
+            
+            // Enhanced wake segments by increasing amplitude at specific angles
+            float wake_boost = 0;
+            if (phi > 2.8f && phi < 3.5f) {  // Left wake
+                wake_boost = radius * 0.4f;
+            } else if (phi < 0.7f) {  // Right wake
+                wake_boost = radius * 0.4f;
+            }
+            
+            float wave_amp = base_amplitude * (1.0f + sinf(phi + M_PI)) + wake_boost;
+            float wave_phase = -time + t * 8.0f;
+            float displacement = wave_amp * sinf(wave_phase * wave_frequency);
+            
+            float tangent_x = -sinf(phi);
+            float tangent_y = cosf(phi);
+            float norm = sqrtf(tangent_x * tangent_x + tangent_y * tangent_y);
+            tangent_x /= norm;
+            tangent_y /= norm;
+            
+            // Reduced stretch factor
+            float stretch = 1.0f + powf(sinf(phi * 0.5f), 2) * 1.2f;
+            
+            trail[j].x = pos.x + (path_x * stretch + displacement * tangent_x) + 10 * system->asteroids[i].scale;
+            trail[j].y = pos.y + (path_y * stretch + displacement * tangent_y);
+        }
+
+        // Draw trail with enhanced contrast for wake segments
+        for(int j = 0; j < TRAIL_POINTS - 1; j++) {
+            float t = j / (float)(TRAIL_POINTS - 1);
+            float phi = t * 2.0f * M_PI;
+            
+            // Brighter alpha for wake segments
+            uint8_t alpha = (uint8_t)(180.0f * (1.0f - powf(t, 0.5f)));
+            if ((phi > 2.8f && phi < 3.5f) || (phi < 0.7f)) {
+                alpha = (uint8_t)min(255, alpha * 1.5f);
+            }
+            
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, alpha);
+            SDL_RenderDrawLine(renderer, 
+                trail[j].x, trail[j].y,
+                trail[j + 1].x, trail[j + 1].y);
+        }
 
         // Draw main asteroid shape
-        SDL_Point transformed_outline[32];  // match the increased array size
+        SDL_Point transformed_outline[32];
         for (int j = 0; j < system->asteroids[i].num_points; j++) {
             float px = system->asteroids[i].points[j].x;
             float py = system->asteroids[i].points[j].y;
-
             transformed_outline[j].x = pos.x + (int)(px * cos_a - py * sin_a);
             transformed_outline[j].y = pos.y + (int)(px * sin_a + py * cos_a);
         }
 
-        float dist_from_center = fabsf(pos.x - screen_center);
-        float factor = 1.0f - (dist_from_center / screen_center);
-        // Clamp factor between 0 and 1
-        factor = fmaxf(0.0f, fminf(1.0f, factor));
-        
-        // Now factor is 1.0 at center, 0.0 at edges
-        uint8_t r = lerp(255, 0, factor);
-        uint8_t g = lerp(0, 255, factor);
-        uint8_t b = 255;
-        // SDL_SetRenderDrawColor(renderer, r, g, b, 255);
-
-        // Draw the outline (closed shape)
+        SDL_SetRenderDrawColor(renderer, 150, 150, 150, 255);
         SDL_RenderDrawLines(renderer, transformed_outline, system->asteroids[i].num_points);
-        // Connect last point to first to close the shape
         SDL_RenderDrawLine(renderer,
             transformed_outline[system->asteroids[i].num_points-1].x,
             transformed_outline[system->asteroids[i].num_points-1].y,
@@ -242,32 +266,98 @@ void asteroid_system_render(const AsteroidSystem* system, SDL_Renderer* renderer
             for (int k = 0; k < 5; k++) {
                 float px = system->asteroids[i].craters[j + k].x;
                 float py = system->asteroids[i].craters[j + k].y;
-
                 crater[k].x = pos.x + (int)(px * cos_a - py * sin_a);
                 crater[k].y = pos.y + (int)(px * sin_a + py * cos_a);
             }
-            // Draw the complete crater shape
             SDL_RenderDrawLines(renderer, crater, 5);
-            // Close the crater shape
-            // SDL_RenderDrawLine(renderer,
-            //     crater[4].x, crater[4].y,
-            //     crater[0].x, crater[0].y);
         }
-
-        // Draw surface details (lines)
-        // for (int j = system->asteroids[i].num_crater_points - 7; j < system->asteroids[i].num_crater_points; j += 2) {
-        //     SDL_Point detail[2];
-        //     for (int k = 0; k < 2; k++) {
-        //         float px = system->asteroids[i].craters[j + k].x;
-        //         float py = system->asteroids[i].craters[j + k].y;
-
-        //         detail[k].x = pos.x + (int)(px * cos_a - py * sin_a);
-        //         detail[k].y = pos.y + (int)(px * sin_a + py * cos_a);
-        //     }
-        //     SDL_RenderDrawLine(renderer, detail[0].x, detail[0].y, detail[1].x, detail[1].y);
-        // }
     }
 }
+
+// void asteroid_system_render(const AsteroidSystem* system, SDL_Renderer* renderer, F22 camera_y_offset) {
+//     SDL_SetRenderDrawColor(renderer, 150, 150, 150, 255);
+//     float screen_center = WINDOW_WIDTH / 2.0f;
+//     static uint32_t animation_timer = 0;
+//     animation_timer++;
+//     const float trail_length = 4.0f;  // Length multiplier for the trail
+    
+//     for (int i = 0; i < MAX_ASTEROIDS; i++) {
+//         if (!system->asteroids[i].active) continue;
+
+//         float angle = system->asteroids[i].rotation * M_PI / 180.0f;
+//         float cos_a = cosf(angle);
+//         float sin_a = sinf(angle);
+//         float radius = ASTEROID_BASE_SIZE * system->asteroids[i].scale * 0.5f;
+
+//         ScreenPos pos = world_to_screen(system->asteroids[i].x, system->asteroids[i].y, camera_y_offset);
+
+//         // Create two alternating trails for animation
+//         TrailSegment trails[2] = {0};
+//         float wave_offset = sinf(animation_timer * 0.1f) * radius * 0.2f;
+        
+//         // Front trail (ahead of asteroid)
+//         trails[0].points[0] = (SDL_Point){pos.x + radius * 1.2f, pos.y - radius * 0.5f};
+//         trails[0].points[1] = (SDL_Point){pos.x + radius * (2.0f + trail_length), pos.y - radius * 0.8f + wave_offset};
+//         trails[0].points[2] = (SDL_Point){pos.x + radius * (2.2f + trail_length), pos.y + wave_offset};
+//         trails[0].points[3] = (SDL_Point){pos.x + radius * (2.0f + trail_length), pos.y + radius * 0.8f + wave_offset};
+//         trails[0].points[4] = (SDL_Point){pos.x + radius * 1.2f, pos.y + radius * 0.5f};
+
+//         wave_offset = sinf((animation_timer + 10) * 0.1f) * radius * 0.2f;
+//         trails[1].points[0] = (SDL_Point){pos.x + radius * 1.1f, pos.y - radius * 0.6f};
+//         trails[1].points[1] = (SDL_Point){pos.x + radius * (1.8f + trail_length), pos.y - radius * 0.9f + wave_offset};
+//         trails[1].points[2] = (SDL_Point){pos.x + radius * (2.0f + trail_length), pos.y + wave_offset};
+//         trails[1].points[3] = (SDL_Point){pos.x + radius * (1.8f + trail_length), pos.y + radius * 0.9f + wave_offset};
+//         trails[1].points[4] = (SDL_Point){pos.x + radius * 1.1f, pos.y + radius * 0.6f};
+
+//         // Render trails with alternating alpha
+//         float base_alpha = (sinf(animation_timer * 0.1f) + 1.0f) * 0.5f;
+//         SDL_SetRenderDrawColor(renderer, 150, 150, 150, (uint8_t)(base_alpha * 255));
+//         SDL_RenderDrawLines(renderer, trails[0].points, 5);
+//         SDL_SetRenderDrawColor(renderer, 150, 150, 150, (uint8_t)((1.0f - base_alpha) * 255));
+//         SDL_RenderDrawLines(renderer, trails[1].points, 5);
+
+//         // Back trail (behind asteroid)
+//         wave_offset = sinf(animation_timer * 0.1f) * radius * 0.15f;
+//         SDL_Point back_trail[] = {
+//             {pos.x - radius * 1.2f, pos.y - radius * 0.5f},
+//             {pos.x - radius * (2.0f + trail_length), pos.y - radius * 0.4f + wave_offset},
+//             {pos.x - radius * (2.5f + trail_length), pos.y + wave_offset},
+//             {pos.x - radius * (2.0f + trail_length), pos.y + radius * 0.4f + wave_offset},
+//             {pos.x - radius * 1.2f, pos.y + radius * 0.5f}
+//         };
+//         SDL_SetRenderDrawColor(renderer, 150, 150, 150, 128);
+//         SDL_RenderDrawLines(renderer, back_trail, 5);
+
+//         // Draw main asteroid shape
+//         SDL_Point transformed_outline[32];
+//         for (int j = 0; j < system->asteroids[i].num_points; j++) {
+//             float px = system->asteroids[i].points[j].x;
+//             float py = system->asteroids[i].points[j].y;
+//             transformed_outline[j].x = pos.x + (int)(px * cos_a - py * sin_a);
+//             transformed_outline[j].y = pos.y + (int)(px * sin_a + py * cos_a);
+//         }
+
+//         SDL_SetRenderDrawColor(renderer, 150, 150, 150, 255);
+//         SDL_RenderDrawLines(renderer, transformed_outline, system->asteroids[i].num_points);
+//         SDL_RenderDrawLine(renderer,
+//             transformed_outline[system->asteroids[i].num_points-1].x,
+//             transformed_outline[system->asteroids[i].num_points-1].y,
+//             transformed_outline[0].x,
+//             transformed_outline[0].y);
+
+//         // Draw crater details
+//         for (int j = 0; j < system->asteroids[i].num_crater_points; j += 5) {
+//             SDL_Point crater[5];
+//             for (int k = 0; k < 5; k++) {
+//                 float px = system->asteroids[i].craters[j + k].x;
+//                 float py = system->asteroids[i].craters[j + k].y;
+//                 crater[k].x = pos.x + (int)(px * cos_a - py * sin_a);
+//                 crater[k].y = pos.y + (int)(px * sin_a + py * cos_a);
+//             }
+//             SDL_RenderDrawLines(renderer, crater, 5);
+//         }
+//     }
+// }
 
 bool asteroid_system_check_collision(const AsteroidSystem* system, const Player* player) {
     const float PLAYER_RADIUS = 15.0f;  // match with game_state collision radius
