@@ -22,6 +22,8 @@ int renderer_init(Renderer* renderer) {
 
     if (!renderer->renderer) return -1;
 
+    renderer->last_particle_spawn = SDL_GetTicks();
+
     SDL_RendererInfo info;
     SDL_GetRendererInfo(renderer->renderer, &info);
     printf("RENDERER INFO: name=%s, flags=%d\n", info.name, info.flags);
@@ -180,24 +182,149 @@ void renderer_init_shapes(Renderer* renderer) {
     memcpy(renderer->cock_pit, cock_pit, sizeof(cock_pit));
 }
 
-void renderer_draw_wave(Renderer* renderer, const WaveGenerator* wave, F22 camera_y_offset) {
-    SDL_SetRenderDrawColor(renderer->renderer, 100, 200, 255, 255);
+// void renderer_draw_wave(Renderer* renderer, const WaveGenerator* wave, F22 camera_y_offset) {
+//     SDL_SetRenderDrawColor(renderer->renderer, 100, 200, 255, 255);
+    
+//     // Time-based animation
+//     float time = SDL_GetTicks() / 1000.0f;
+//     float wave_speed = 1.0f;  // controls how fast the wave moves
+//     float amplitude = 45.0f;  // controls size of oscillation
+//     float frequency = 0.05f;   // controls how tight the spiral is
+    
+//     renderer->num_wave_points = 0;
+//     for (int i = 0; i < WINDOW_WIDTH; i++) {
+//         if (wave->points[i].activated) {
+//             ScreenPos base_pos = world_to_screen(wave->points[i].x, wave->points[i].y, camera_y_offset);
+            
+//             // Phase offset based on x position creates the moving spiral
+//             float phase = i * frequency + time * wave_speed;
+            
+//             // Calculate offset for both x and y to create circular motion
+//             // float x_offset = fabsf(amplitude * (float)sin(phase));
+//             // float y_offset = fabsf(amplitude * (float)cos(phase));
+//             float x_offset = (amplitude * (float)sin(phase));
+//             float y_offset = (amplitude * (float)cos(phase));
+//             // float x_offset = amplitude * sin(phase) + (amplitude/2) * sin(phase * 2);
+//             // float y_offset = amplitude * cos(phase) + (amplitude/2) * cos(phase * 2);
+            
+//             renderer->wave_points[renderer->num_wave_points].x = base_pos.x + (int)x_offset;
+//             renderer->wave_points[renderer->num_wave_points].y = base_pos.y + (int)y_offset;
+//             renderer->num_wave_points++;
+//         }
+//     }
 
-    // Just copy the wave points directly to renderer points, shifting x coordinates left
+//     if (renderer->num_wave_points > 1) {
+//         SDL_RenderDrawLines(renderer->renderer, renderer->wave_points, renderer->num_wave_points);
+//     }
+// }
+
+static inline uint8_t lerp(uint8_t a, uint8_t b, float t) {
+    return (uint8_t)(a + t * (b - a));
+}
+
+void renderer_draw_wave(Renderer* renderer, const WaveGenerator* wave, const Player* player, F22 camera_y_offset) {
+    // SDL_SetRenderDrawColor(renderer->renderer, 255, 255, 255, 255);
+    float time = SDL_GetTicks() / 1000.0f;
+    float wave_speed = 2.0f;
+    float max_amplitude = 25.0f;
+    float frequency = 0.06f;
+    
+    // Get player position in screen coordinates for distance check
+    ScreenPos player_pos = player_get_screen_position(player, camera_y_offset);
+    const float EFFECT_RADIUS = 200.0f;  // how far the effect spreads from player
+    const float TRANSITION_RADIUS = 100.0f; // smooth transition zone
+    const float COLOR_RADIUS = 250.0f; 
+
     renderer->num_wave_points = 0;
     for (int i = 0; i < WINDOW_WIDTH; i++) {
         if (wave->points[i].activated) {
-            ScreenPos pos = world_to_screen(wave->points[i].x, wave->points[i].y, camera_y_offset);
-            renderer->wave_points[renderer->num_wave_points].x = pos.x;
-            renderer->wave_points[renderer->num_wave_points].y = pos.y;
+            ScreenPos base_pos = world_to_screen(wave->points[i].x, wave->points[i].y, camera_y_offset);
+            
+            // Calculate distance from this point to player
+            float dx = base_pos.x - player_pos.x;
+            float dy = base_pos.y - player_pos.y;
+            float dist = sqrtf(dx * dx + dy * dy);
+            
+            // Smoothly fade the amplitude based on distance
+            float amplitude_factor = 1.0f;
+            if (dist > EFFECT_RADIUS - TRANSITION_RADIUS) {
+                amplitude_factor = fmaxf(0.0f, 
+                    1.0f - (dist - (EFFECT_RADIUS - TRANSITION_RADIUS)) / TRANSITION_RADIUS);
+            }
+            
+            float phase = i * frequency + time * wave_speed;
+            float x_offset = max_amplitude * amplitude_factor * sin(phase);
+            float y_offset = max_amplitude * amplitude_factor * cos(phase);
+            
+            renderer->wave_points[renderer->num_wave_points].x = base_pos.x + (int)x_offset;
+            renderer->wave_points[renderer->num_wave_points].y = base_pos.y + (int)y_offset;
             renderer->num_wave_points++;
         }
     }
 
-    if (renderer->num_wave_points > 1) {
-        SDL_RenderDrawLines(renderer->renderer, renderer->wave_points, renderer->num_wave_points);
+    // Second pass: draw each segment with its own color
+    for (int i = 0; i < renderer->num_wave_points - 1; i++) {
+        // Calculate color for this segment (use midpoint between points)
+        float mid_x = (renderer->wave_points[i].x + renderer->wave_points[i + 1].x) / 2.0f;
+        float mid_y = (renderer->wave_points[i].y + renderer->wave_points[i + 1].y) / 2.0f;
+        
+        float dx = mid_x - player_pos.x;
+        float dy = mid_y - player_pos.y;
+        float dist = sqrtf(dx * dx + dy * dy);
+        
+        float amplitude_factor = 1.0f;
+        if (dist > EFFECT_RADIUS - TRANSITION_RADIUS) {
+            amplitude_factor = fmaxf(0.0f, 
+                1.0f - (dist - (EFFECT_RADIUS - TRANSITION_RADIUS)) / TRANSITION_RADIUS);
+        }
+        
+        // Calculate color based on x-distance
+        float x_distance = fabsf(mid_x - player_pos.x);
+        float color_factor = fmaxf(0.0f, 1.0f - x_distance / COLOR_RADIUS);
+        
+        // Combine phase and color factors
+        float gradient_t = color_factor * amplitude_factor;
+        
+        // Cyberpunk color scheme (cyan to magenta)
+        uint8_t r = amplitude_factor > 0.001f ? lerp(0, 255, amplitude_factor) : 10;    // cyan to magenta
+        uint8_t g = amplitude_factor > 0.001f ? lerp(255, 0, amplitude_factor) : x_distance < COLOR_RADIUS * 2 ? 255 : 10;
+        // uint8_t b = amplitude_factor > 0.001f ? lerp(255, 0, amplitude_factor) : x_distance < COLOR_RADIUS * 2 ? 255 : 0;
+        uint8_t b = x_distance < COLOR_RADIUS * 2 ? 255 : 10;
+        
+        SDL_SetRenderDrawColor(renderer->renderer, r, g, b, 255);
+        SDL_RenderDrawLine(renderer->renderer,
+            renderer->wave_points[i].x, 
+            renderer->wave_points[i].y,
+            renderer->wave_points[i + 1].x, 
+            renderer->wave_points[i + 1].y);
     }
+
+    // if (renderer->num_wave_points > 1) {
+    //     SDL_RenderDrawLines(renderer->renderer, 
+    //         renderer->wave_points, 
+    //         renderer->num_wave_points
+    //     );
+    // }
 }
+
+// void renderer_draw_wave(Renderer* renderer, const WaveGenerator* wave, F22 camera_y_offset) {
+//     SDL_SetRenderDrawColor(renderer->renderer, 255, 255, 255, 255);
+
+//     // Just copy the wave points directly to renderer points, shifting x coordinates left
+//     renderer->num_wave_points = 0;
+//     for (int i = 0; i < WINDOW_WIDTH; i++) {
+//         if (wave->points[i].activated) {
+//             ScreenPos pos = world_to_screen(wave->points[i].x, wave->points[i].y, camera_y_offset);
+//             renderer->wave_points[renderer->num_wave_points].x = pos.x;
+//             renderer->wave_points[renderer->num_wave_points].y = pos.y;
+//             renderer->num_wave_points++;
+//         }
+//     }
+
+//     if (renderer->num_wave_points > 1) {
+//         SDL_RenderDrawLines(renderer->renderer, renderer->wave_points, renderer->num_wave_points);
+//     }
+// }
 
 void renderer_rotate_points(SDL_Point* points, int num_points, SDL_Point center, float angle) {
     float angle_rad = angle * M_PI / 180.0f;
@@ -309,7 +436,7 @@ void renderer_draw_frame(Renderer* renderer, const GameState* state, bool thrust
     } else {
         // Normal game rendering
         // renderer_draw_obstacles(renderer, state->obstacles);
-        renderer_draw_wave(renderer, &state->wave, state->camera_y_offset);
+        renderer_draw_wave(renderer, &state->wave, &state->player, state->camera_y_offset);
         asteroid_system_render(&state->asteroid_system, renderer->renderer, state->camera_y_offset);
     }
 

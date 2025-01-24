@@ -6,6 +6,12 @@
 #include "game_state.h"
 
 typedef struct {
+    float x, y;
+    float alpha;
+    float lifetime;
+} WaveParticle;
+
+typedef struct {
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Point f22_shape[32];     // Store F22 shape points
@@ -14,6 +20,9 @@ typedef struct {
     SDL_Point left_tail[6];
     SDL_Point cock_pit[5];
     SDL_Point wave_points[WINDOW_WIDTH];
+    WaveParticle particles[1000];
+    int num_particles;
+    uint32_t last_particle_spawn;
     int num_wave_points;
 } Renderer;
 
@@ -21,7 +30,7 @@ typedef struct {
 int renderer_init(Renderer* renderer);
 void renderer_cleanup(Renderer* renderer);
 void renderer_draw_frame(Renderer* renderer, const GameState* state, bool thrust_active);
-void renderer_draw_wave(Renderer* renderer, const WaveGenerator* wave, F22 camera_offset);
+void renderer_draw_wave(Renderer* renderer, const WaveGenerator* wave, const Player* player, F22 camera_offset);
 
 // Helper functions
 void renderer_init_shapes(Renderer* renderer);

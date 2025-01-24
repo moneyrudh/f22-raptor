@@ -185,8 +185,13 @@ void asteroid_system_update(AsteroidSystem* system, const WaveGenerator* wave) {
     }
 }
 
+static inline uint8_t lerp(uint8_t a, uint8_t b, float t) {
+    return (uint8_t)(a + t * (b - a));
+}
+
 void asteroid_system_render(const AsteroidSystem* system, SDL_Renderer* renderer, F22 camera_y_offset) {
     SDL_SetRenderDrawColor(renderer, 150, 150, 150, 255);
+    float screen_center = WINDOW_WIDTH / 2.0f;
 
     for (int i = 0; i < MAX_ASTEROIDS; i++) {
         if (!system->asteroids[i].active) continue;
@@ -210,6 +215,17 @@ void asteroid_system_render(const AsteroidSystem* system, SDL_Renderer* renderer
             transformed_outline[j].x = pos.x + (int)(px * cos_a - py * sin_a);
             transformed_outline[j].y = pos.y + (int)(px * sin_a + py * cos_a);
         }
+
+        float dist_from_center = fabsf(pos.x - screen_center);
+        float factor = 1.0f - (dist_from_center / screen_center);
+        // Clamp factor between 0 and 1
+        factor = fmaxf(0.0f, fminf(1.0f, factor));
+        
+        // Now factor is 1.0 at center, 0.0 at edges
+        uint8_t r = lerp(255, 0, factor);
+        uint8_t g = lerp(0, 255, factor);
+        uint8_t b = 255;
+        // SDL_SetRenderDrawColor(renderer, r, g, b, 255);
 
         // Draw the outline (closed shape)
         SDL_RenderDrawLines(renderer, transformed_outline, system->asteroids[i].num_points);
