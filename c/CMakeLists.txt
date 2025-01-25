@@ -11,6 +11,8 @@ add_executable(f22_game
     src/wave.c
     src/asteroid.c
     src/missile.c
+    src/explosion.c
+    src/smoke.c
 )
 
 if(EMSCRIPTEN)

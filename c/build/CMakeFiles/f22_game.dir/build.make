@@ -167,6 +167,34 @@ CMakeFiles/f22_game.dir/src/missile.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/f22_game.dir/src/missile.c.s"
 	/Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/emcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/ani/Desktop/Anirudh/f22raptor/c/src/missile.c -o CMakeFiles/f22_game.dir/src/missile.c.s
 
+CMakeFiles/f22_game.dir/src/explosion.c.o: CMakeFiles/f22_game.dir/flags.make
+CMakeFiles/f22_game.dir/src/explosion.c.o: /Users/ani/Desktop/Anirudh/f22raptor/c/src/explosion.c
+CMakeFiles/f22_game.dir/src/explosion.c.o: CMakeFiles/f22_game.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/ani/Desktop/Anirudh/f22raptor/c/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building C object CMakeFiles/f22_game.dir/src/explosion.c.o"
+	/Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/emcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/f22_game.dir/src/explosion.c.o -MF CMakeFiles/f22_game.dir/src/explosion.c.o.d -o CMakeFiles/f22_game.dir/src/explosion.c.o -c /Users/ani/Desktop/Anirudh/f22raptor/c/src/explosion.c
+
+CMakeFiles/f22_game.dir/src/explosion.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/f22_game.dir/src/explosion.c.i"
+	/Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/emcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/ani/Desktop/Anirudh/f22raptor/c/src/explosion.c > CMakeFiles/f22_game.dir/src/explosion.c.i
+
+CMakeFiles/f22_game.dir/src/explosion.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/f22_game.dir/src/explosion.c.s"
+	/Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/emcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/ani/Desktop/Anirudh/f22raptor/c/src/explosion.c -o CMakeFiles/f22_game.dir/src/explosion.c.s
+
+CMakeFiles/f22_game.dir/src/smoke.c.o: CMakeFiles/f22_game.dir/flags.make
+CMakeFiles/f22_game.dir/src/smoke.c.o: /Users/ani/Desktop/Anirudh/f22raptor/c/src/smoke.c
+CMakeFiles/f22_game.dir/src/smoke.c.o: CMakeFiles/f22_game.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/ani/Desktop/Anirudh/f22raptor/c/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building C object CMakeFiles/f22_game.dir/src/smoke.c.o"
+	/Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/emcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/f22_game.dir/src/smoke.c.o -MF CMakeFiles/f22_game.dir/src/smoke.c.o.d -o CMakeFiles/f22_game.dir/src/smoke.c.o -c /Users/ani/Desktop/Anirudh/f22raptor/c/src/smoke.c
+
+CMakeFiles/f22_game.dir/src/smoke.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/f22_game.dir/src/smoke.c.i"
+	/Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/emcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/ani/Desktop/Anirudh/f22raptor/c/src/smoke.c > CMakeFiles/f22_game.dir/src/smoke.c.i
+
+CMakeFiles/f22_game.dir/src/smoke.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/f22_game.dir/src/smoke.c.s"
+	/Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/emcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/ani/Desktop/Anirudh/f22raptor/c/src/smoke.c -o CMakeFiles/f22_game.dir/src/smoke.c.s
+
 # Object files for target f22_game
 f22_game_OBJECTS = \
 "CMakeFiles/f22_game.dir/src/main.c.o" \
@@ -175,7 +203,9 @@ f22_game_OBJECTS = \
 "CMakeFiles/f22_game.dir/src/renderer.c.o" \
 "CMakeFiles/f22_game.dir/src/wave.c.o" \
 "CMakeFiles/f22_game.dir/src/asteroid.c.o" \
-"CMakeFiles/f22_game.dir/src/missile.c.o"
+"CMakeFiles/f22_game.dir/src/missile.c.o" \
+"CMakeFiles/f22_game.dir/src/explosion.c.o" \
+"CMakeFiles/f22_game.dir/src/smoke.c.o"
 
 # External object files for target f22_game
 f22_game_EXTERNAL_OBJECTS =
@@ -187,10 +217,12 @@ f22_game.html: CMakeFiles/f22_game.dir/src/renderer.c.o
 f22_game.html: CMakeFiles/f22_game.dir/src/wave.c.o
 f22_game.html: CMakeFiles/f22_game.dir/src/asteroid.c.o
 f22_game.html: CMakeFiles/f22_game.dir/src/missile.c.o
+f22_game.html: CMakeFiles/f22_game.dir/src/explosion.c.o
+f22_game.html: CMakeFiles/f22_game.dir/src/smoke.c.o
 f22_game.html: CMakeFiles/f22_game.dir/build.make
 f22_game.html: CMakeFiles/f22_game.dir/objects1.rsp
 f22_game.html: CMakeFiles/f22_game.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/ani/Desktop/Anirudh/f22raptor/c/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking C executable f22_game.html"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/ani/Desktop/Anirudh/f22raptor/c/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking C executable f22_game.html"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/f22_game.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

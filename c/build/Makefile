@@ -153,6 +153,30 @@ src/asteroid.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/src/asteroid.c.s
 .PHONY : src/asteroid.c.s
 
+src/explosion.o: src/explosion.c.o
+.PHONY : src/explosion.o
+
+# target to build an object file
+src/explosion.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/src/explosion.c.o
+.PHONY : src/explosion.c.o
+
+src/explosion.i: src/explosion.c.i
+.PHONY : src/explosion.i
+
+# target to preprocess a source file
+src/explosion.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/src/explosion.c.i
+.PHONY : src/explosion.c.i
+
+src/explosion.s: src/explosion.c.s
+.PHONY : src/explosion.s
+
+# target to generate assembly for a file
+src/explosion.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/src/explosion.c.s
+.PHONY : src/explosion.c.s
+
 src/f22.o: src/f22.c.o
 .PHONY : src/f22.o
 
@@ -273,6 +297,30 @@ src/renderer.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/src/renderer.c.s
 .PHONY : src/renderer.c.s
 
+src/smoke.o: src/smoke.c.o
+.PHONY : src/smoke.o
+
+# target to build an object file
+src/smoke.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/src/smoke.c.o
+.PHONY : src/smoke.c.o
+
+src/smoke.i: src/smoke.c.i
+.PHONY : src/smoke.i
+
+# target to preprocess a source file
+src/smoke.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/src/smoke.c.i
+.PHONY : src/smoke.c.i
+
+src/smoke.s: src/smoke.c.s
+.PHONY : src/smoke.s
+
+# target to generate assembly for a file
+src/smoke.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/src/smoke.c.s
+.PHONY : src/smoke.c.s
+
 src/wave.o: src/wave.c.o
 .PHONY : src/wave.o
 
@@ -309,6 +357,9 @@ help:
 	@echo "... src/asteroid.o"
 	@echo "... src/asteroid.i"
 	@echo "... src/asteroid.s"
+	@echo "... src/explosion.o"
+	@echo "... src/explosion.i"
+	@echo "... src/explosion.s"
 	@echo "... src/f22.o"
 	@echo "... src/f22.i"
 	@echo "... src/f22.s"
@@ -324,6 +375,9 @@ help:
 	@echo "... src/renderer.o"
 	@echo "... src/renderer.i"
 	@echo "... src/renderer.s"
+	@echo "... src/smoke.o"
+	@echo "... src/smoke.i"
+	@echo "... src/smoke.s"
 	@echo "... src/wave.o"
 	@echo "... src/wave.i"
 	@echo "... src/wave.s"

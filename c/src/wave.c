@@ -211,6 +211,42 @@ F22 wave_get_y_at_x(const WaveGenerator* wave, F22 x) {
 //     }
 // }
 void wave_update(WaveGenerator* wave, int player_y, GameStateEnum state, float delta_time) {
+    if (state == GAME_STATE_OVER) {
+        const int shift = SCROLL_SPEED;
+
+        for (int i = GHOST_WIDTH - shift - 1; i >= 0; i--) {
+            wave->points[i + shift].activated = wave->points[i].activated;
+        }
+        
+        // Deactivate the leftmost points
+        for (int i = 0; i < shift; i++) {
+            wave->points[i].activated = false;
+        }
+        
+        return;
+
+        // int iterations = (int) GHOST_WIDTH / (int) shift;
+        // int i = iterations - 1;
+        // while (i >= 0)
+        // {
+        //     int k = shift - 1;
+        //     while (k >= 0)
+        //     {
+        //         int index = i * (int) shift + k;
+        //         wave->points[index+(int)shift].activated = wave->points[index].activated;
+        //         k--;
+        //     }
+        //     i--;
+        // }
+
+        // int index = 0;
+        // while (index < shift)
+        // {
+        //     wave->points[index].activated = false;
+        //     index++;
+        // }
+        // return;
+    }
 
     if (state == GAME_STATE_PLAYING) {
         wave_update_ghost(&wave->ghost, player_y, delta_time);
@@ -218,6 +254,7 @@ void wave_update(WaveGenerator* wave, int player_y, GameStateEnum state, float d
         wave->ghost.y = f22_from_float(WINDOW_HEIGHT / 2);
         return;
     }
+
 
     // Use scroll speed to determine x position shift
     int shift = (int) wave->scroll_speed;// * fmaxf(delta_time, 0.0001f);

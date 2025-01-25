@@ -14,7 +14,6 @@
 #define MAX_ASTEROID_SCALE 4.4f
 #define ASTEROID_SPAWN_BUFFER 150  // min distance from ghost path
 #define MIN_ASTEROID_SPACING 60   // min distance between asteroids
-#define MAX_PARTICLES 1000         // max particles across all asteroids
 #define PARTICLE_LIFETIME 1.0f     // how long particles live in seconds
 #define PARTICLE_SPAWN_RATE 0.016f // spawn every ~1 frame at 60fps
 

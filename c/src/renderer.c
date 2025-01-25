@@ -222,6 +222,147 @@ static inline uint8_t lerp(uint8_t a, uint8_t b, float t) {
     return (uint8_t)(a + t * (b - a));
 }
 
+// Simple 1D perlin-like noise for smooth random movement
+float smooth_noise(float y, float time, float frequency, float camera_offset) {
+    float scaled_offset = camera_offset * 0.25f;  // adjust this multiplier to taste
+    
+    // Add camera offset to both y and time for a flowing effect
+    float y_offset = (y + scaled_offset) * frequency;
+    float t_offset = time * 2.0f;
+    
+    return sinf(y_offset) * 0.3f + 
+           sinf(y_offset * 1.7f + t_offset) * 0.2f +
+           sinf(y_offset * 2.3f - t_offset * 0.8f) * 0.1f;
+}
+
+void renderer_draw_barrier(SDL_Renderer* renderer, float time, F22 camera_y_offset) {
+    const int NUM_POINTS = 200;  // number of points per line
+    const int BASE_X = GAME_OVER_X - 20;  // base x position for both lines
+    const int LINE_SPACING = 25;  // space between the two lines
+    SDL_Point line1[NUM_POINTS];
+    SDL_Point line2[NUM_POINTS];
+    
+    // Generate points for both lines with smooth noise offsets
+    for(int i = 0; i < NUM_POINTS; i++) {
+        float y = (float)i * WINDOW_HEIGHT / (NUM_POINTS - 1);
+        
+        // Calculate noise offsets for each line
+        float camera_y = f22_to_float(camera_y_offset);
+        float noise1 = smooth_noise(y, time, 0.03f, camera_y) * 50.0f;
+        float noise2 = smooth_noise(y, time + 100.0f, 0.03f, camera_y) * 50.0f;
+        
+        // Set points with noise offset
+        line1[i].x = BASE_X + (int)noise1;
+        line1[i].y = (int)y;
+        
+        line2[i].x = BASE_X + LINE_SPACING + (int)noise2;
+        line2[i].y = (int)y;
+    }
+    
+    // Draw the lines with the wave color scheme
+    for(int i = 0; i < NUM_POINTS - 1; i++) {
+        // Calculate color based on height (like the wave)
+        float height_factor = (float)i / NUM_POINTS;
+        uint8_t r = lerp(0, 255, height_factor);
+        uint8_t g = lerp(255, 0, height_factor);
+        uint8_t b = 255;
+        
+        SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+        
+        // Draw line segments
+        SDL_RenderDrawLine(renderer, 
+            line1[i].x, line1[i].y, 
+            line1[i+1].x, line1[i+1].y);
+        SDL_RenderDrawLine(renderer, 
+            line2[i].x, line2[i].y, 
+            line2[i+1].x, line2[i+1].y);
+            
+        // Draw connecting segments occasionally for "energy" effect
+        // if(i % 20 == 0) {
+        //     SDL_SetRenderDrawColor(renderer, r, g, b, 100);
+        //     SDL_RenderDrawLine(renderer,
+        //         line1[i].x, line1[i].y,
+        //         line2[i].x, line2[i].y);
+        // }
+    }
+}
+void renderer_end_wave(Renderer* renderer, const WaveGenerator* wave, const Player* player, F22 camera_y_offset) {
+    float time = SDL_GetTicks() / 1000.0f;
+    float wave_speed = 2.0f;
+    float max_amplitude = 25.0f;
+    float frequency = 0.06f;
+    
+    // Get player position in screen coordinates for distance check
+    ScreenPos player_pos = player_get_screen_position(player, camera_y_offset);
+    const float EFFECT_RADIUS = 200.0f;  // how far the effect spreads from player
+    const float TRANSITION_RADIUS = 100.0f; // smooth transition zone
+    const float COLOR_RADIUS = 250.0f; 
+    
+    renderer->num_wave_points = 0;
+    for (int i = 0; i < WINDOW_WIDTH; i++) {
+        if (wave->points[i].activated) {
+            ScreenPos base_pos = world_to_screen(wave->points[i].x, wave->points[i].y, camera_y_offset);
+            
+            // Calculate distance from this point to player
+            float dx = base_pos.x - player_pos.x;
+            float dy = base_pos.y - player_pos.y;
+            float dist = sqrtf(dx * dx + dy * dy);
+            
+            // Smoothly fade the amplitude based on distance
+            float amplitude_factor = 1.0f;
+            if (dist > EFFECT_RADIUS - TRANSITION_RADIUS) {
+                amplitude_factor = fmaxf(0.0f, 
+                    1.0f - (dist - (EFFECT_RADIUS - TRANSITION_RADIUS)) / TRANSITION_RADIUS);
+            }
+            
+            float phase = i * frequency + time * wave_speed;
+            float x_offset = max_amplitude * amplitude_factor * sin(phase);
+            float y_offset = max_amplitude * amplitude_factor * cos(phase);
+            
+            renderer->wave_points[renderer->num_wave_points].x = base_pos.x + (int)x_offset;
+            renderer->wave_points[renderer->num_wave_points].y = base_pos.y + (int)y_offset;
+            renderer->num_wave_points++;
+        }
+    }
+
+    for (int i = 0; i < WINDOW_WIDTH - 1; i++) {
+        if (wave->points[i].activated) {
+            float mid_x = (renderer->wave_points[i].x + renderer->wave_points[i + 1].x) / 2.0f;
+            float mid_y = (renderer->wave_points[i].y + renderer->wave_points[i + 1].y) / 2.0f;
+            
+            float dx = mid_x - player_pos.x;
+            float dy = mid_y - player_pos.y;
+            float dist = sqrtf(dx * dx + dy * dy);
+            
+            float amplitude_factor = 1.0f;
+            if (dist > EFFECT_RADIUS - TRANSITION_RADIUS) {
+                amplitude_factor = fmaxf(0.0f, 
+                    1.0f - (dist - (EFFECT_RADIUS - TRANSITION_RADIUS)) / TRANSITION_RADIUS);
+            }
+            
+            // Calculate color based on x-distance
+            float x_distance = fabsf(mid_x - player_pos.x);
+            float color_factor = fmaxf(0.0f, 1.0f - x_distance / COLOR_RADIUS);
+            
+            // Combine phase and color factors
+            float gradient_t = color_factor * amplitude_factor;
+            
+            // Cyberpunk color scheme (cyan to magenta)
+            uint8_t r = amplitude_factor > 0.001f ? lerp(0, 255, amplitude_factor) : 10;    // cyan to magenta
+            uint8_t g = amplitude_factor > 0.001f ? lerp(255, 0, amplitude_factor) : x_distance < COLOR_RADIUS * 2 ? 255 : 10;
+            // uint8_t b = amplitude_factor > 0.001f ? lerp(255, 0, amplitude_factor) : x_distance < COLOR_RADIUS * 2 ? 255 : 0;
+            uint8_t b = x_distance < COLOR_RADIUS * 2 ? 255 : 10;
+            
+            SDL_SetRenderDrawColor(renderer->renderer, r, g, b, 255);
+            SDL_RenderDrawLine(renderer->renderer,
+                renderer->wave_points[i].x, 
+                renderer->wave_points[i].y,
+                renderer->wave_points[i + 1].x, 
+                renderer->wave_points[i + 1].y);
+        }
+    }
+}
+
 void renderer_draw_wave(Renderer* renderer, const WaveGenerator* wave, const Player* player, F22 camera_y_offset) {
     // SDL_SetRenderDrawColor(renderer->renderer, 255, 255, 255, 255);
     float time = SDL_GetTicks() / 1000.0f;
@@ -263,7 +404,7 @@ void renderer_draw_wave(Renderer* renderer, const WaveGenerator* wave, const Pla
     }
 
     // Second pass: draw each segment with its own color
-    for (int i = 0; i < renderer->num_wave_points - 1; i++) {
+    for (int i = 0; i < renderer->num_wave_points - 2; i++) {
         // Calculate color for this segment (use midpoint between points)
         float mid_x = (renderer->wave_points[i].x + renderer->wave_points[i + 1].x) / 2.0f;
         float mid_y = (renderer->wave_points[i].y + renderer->wave_points[i + 1].y) / 2.0f;
@@ -345,6 +486,78 @@ void renderer_rotate_points(SDL_Point* points, int num_points, SDL_Point center,
     }
 }
 
+void renderer_draw_thrust(SDL_Renderer* sdl_renderer, const SDL_Point center, float rotation, float time, const SDL_Point* thrust_shape) {
+    SDL_Point animated_thrust[27];  // same size as original thrust array
+    
+    // Copy the base thrust points
+    memcpy(animated_thrust, thrust_shape, 27 * sizeof(SDL_Point));
+    
+    // Animate the points before rotation
+    float wave_speed = 15.0f;  // controls how fast the flames "flicker"
+    float wave_size = 3.0f;   // controls how much the flames move
+    
+    // Inner flame (points 0-6)
+    for(int i = 0; i < 7; i++) {
+        // Add some vertical waviness
+        float phase = time * wave_speed + i * 0.5f;
+        animated_thrust[i].y += (int)(wave_size * sinf(phase));
+        
+        // Randomly adjust length
+        if(i % 2 == 1) {  // only adjust every other point for "stretchy" effect
+            animated_thrust[i].x -= (rand() % 5) - 2;
+        }
+    }
+    
+    // Middle flame (points 7-11)
+    for(int i = 7; i < 12; i++) {
+        float phase = time * wave_speed * 1.2f + i * 0.3f;
+        animated_thrust[i].y += (int)(wave_size * 1.5f * sinf(phase));
+        if(i % 2 == 1) {
+            animated_thrust[i].x -= (rand() % 8) - 3;
+        }
+    }
+    
+    // Outer flame (points 12-26)
+    for(int i = 12; i < 27; i++) {
+        float phase = time * wave_speed * 0.8f + i * 0.2f;
+        animated_thrust[i].y += (int)(wave_size * 2.0f * sinf(phase));
+        if(i % 2 == 1) {
+            animated_thrust[i].x -= (rand() % 10) - 4;
+        }
+    }
+    
+    // Now rotate all points
+    renderer_rotate_points(animated_thrust, 27, center, rotation);
+
+    // Draw the animated flames with the original color scheme
+    SDL_SetRenderDrawColor(sdl_renderer, 255, 100, 0, 255);
+    SDL_RenderDrawLines(sdl_renderer, animated_thrust, 7);
+
+    SDL_SetRenderDrawColor(sdl_renderer, 255, 150, 50, 255);
+    SDL_RenderDrawLines(sdl_renderer, animated_thrust + 7, 5);
+
+    SDL_SetRenderDrawColor(sdl_renderer, 255, 200, 0, 255);
+    SDL_RenderDrawLines(sdl_renderer, animated_thrust + 12, 15);
+
+    // Add some random spark particles
+    SDL_SetRenderDrawColor(sdl_renderer, 255, 255, 200, 255);
+    for(int i = 0; i < 5; i++) {
+        // Generate spark position near the engine
+        float spark_angle = ((float)rand() / (float)RAND_MAX) * M_PI - M_PI/2;  // -90 to 90 degrees
+        float distance = 60 + (rand() % 40);  // 60-100 pixels from center
+        
+        float cos_rot = cosf((rotation + 180) * M_PI / 180.0f);  // +180 to point backwards
+        float sin_rot = sinf((rotation + 180) * M_PI / 180.0f);
+        
+        int spark_x = center.x + (int)(distance * cos_rot);
+        int spark_y = center.y + (int)(distance * sin_rot);
+        
+        // Draw a small cross for each spark
+        SDL_RenderDrawLine(sdl_renderer, spark_x-1, spark_y-1, spark_x+1, spark_y+1);
+        SDL_RenderDrawLine(sdl_renderer, spark_x-1, spark_y+1, spark_x+1, spark_y-1);
+    }
+}
+
 void renderer_draw_player(Renderer* renderer, const Player* player, F22 camera_y_offset, bool thrust_active) {
     ScreenPos pos = player_get_screen_position(player, camera_y_offset);
     SDL_Point center = {pos.x, pos.y};
@@ -373,19 +586,21 @@ void renderer_draw_player(Renderer* renderer, const Player* player, F22 camera_y
     SDL_RenderDrawLines(renderer->renderer, rotated_cock_pit, 5);
 
     if (thrust_active) {
-        SDL_Point rotated_thrust[27];
-        memcpy(rotated_thrust, renderer->thrust_shape, sizeof(renderer->thrust_shape));
-        renderer_rotate_points(rotated_thrust, 27, center, player->rotation);
+        float time = SDL_GetTicks() / 1000.0f;  // get current time for animation
+        renderer_draw_thrust(renderer->renderer, center, player->rotation, time, renderer->thrust_shape);
+        // SDL_Point rotated_thrust[27];
+        // memcpy(rotated_thrust, renderer->thrust_shape, sizeof(renderer->thrust_shape));
+        // renderer_rotate_points(rotated_thrust, 27, center, player->rotation);
 
-        // Draw thrust effects
-        SDL_SetRenderDrawColor(renderer->renderer, 255, 100, 0, 255);
-        SDL_RenderDrawLines(renderer->renderer, rotated_thrust, 7);
+        // // Draw thrust effects
+        // SDL_SetRenderDrawColor(renderer->renderer, 255, 100, 0, 255);
+        // SDL_RenderDrawLines(renderer->renderer, rotated_thrust, 7);
 
-        SDL_SetRenderDrawColor(renderer->renderer, 255, 150, 50, 255);
-        SDL_RenderDrawLines(renderer->renderer, rotated_thrust + 7, 5);
+        // SDL_SetRenderDrawColor(renderer->renderer, 255, 150, 50, 255);
+        // SDL_RenderDrawLines(renderer->renderer, rotated_thrust + 7, 5);
 
-        SDL_SetRenderDrawColor(renderer->renderer, 255, 200, 0, 255);
-        SDL_RenderDrawLines(renderer->renderer, rotated_thrust + 12, 15);
+        // SDL_SetRenderDrawColor(renderer->renderer, 255, 200, 0, 255);
+        // SDL_RenderDrawLines(renderer->renderer, rotated_thrust + 12, 15);
     }
 }
 
@@ -436,14 +651,24 @@ void renderer_draw_frame(Renderer* renderer, const GameState* state, bool thrust
     } else {
         // Normal game rendering
         // renderer_draw_obstacles(renderer, state->obstacles);
-        renderer_draw_wave(renderer, &state->wave, &state->player, state->camera_y_offset);
+        if (state->state == GAME_STATE_PLAYING) {
+            renderer_draw_wave(renderer, &state->wave, &state->player, state->camera_y_offset);
+        } else {
+            renderer_end_wave(renderer, &state->wave, &state->player, state->camera_y_offset);
+        }
+        
         asteroid_system_render(&state->asteroid_system, renderer->renderer, state->camera_y_offset, &state->player);
         // missile_system_render(&state->missile_system, renderer->renderer, state->camera_y_offset);
     }
 
     // Always draw player and score
-    missile_system_render_ui(&state->missile_system, renderer->renderer);
-    renderer_draw_player(renderer, &state->player, state->camera_y_offset, state->state == GAME_STATE_PLAYING ? thrust_active : true);
+    // missile_system_render_ui(&state->missile_system, renderer->renderer);
+    float time = SDL_GetTicks() / 1000.0f;
+    renderer_draw_barrier(renderer->renderer, time, state->camera_y_offset);
+    if (!state->explosion.active) {
+        renderer_draw_player(renderer, &state->player, state->camera_y_offset, state->state == GAME_STATE_PLAYING ? thrust_active : true);
+    }
+    explosion_render(&state->explosion, renderer->renderer, state->camera_y_offset);
     // renderer_draw_score(renderer, state->score);
 
     SDL_RenderPresent(renderer->renderer);

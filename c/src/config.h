@@ -26,4 +26,13 @@
 #define MAX_HORIZONTAL_MOVEMENT 5.0f     // max pixels per frame to move left
 #define GAME_OVER_X 50
 
+// Game constants
+#define OBSTACLE_WIDTH 50
+#define OBSTACLE_GAP 200
+#define MAX_OBSTACLES 5
+
+#define WORLD_TO_SCREEN_SCALE 1.0f
+#define MAX_VELOCITY f22_from_float(10.0f)  // adjust this value to feel right
+#define MIN_VELOCITY f22_from_float(-10.0f)
+
 #endif // CONFIG_H

@@ -175,6 +175,8 @@ GameState game_state_init(void) {
         .target_y_offset = f22_from_float(0.0f),
         .wave = wave_init(),
         .asteroid_system = asteroid_system_init(),
+        .explosion = explosion_init(),
+        .smoke_system = smoke_system_init(),
         // .missile_system = missile_system_init(),
         .scoring = (ScoringSystem){
             .score = 0,
@@ -255,6 +257,8 @@ void game_state_update(GameState* state, bool thrust_active, float delta_time) {
     // Update wave first
     ScreenPos player_pos = player_get_screen_position(&state->player, state->camera_y_offset);
     wave_update(&state->wave, player_pos.y, state->state, delta_time);
+    explosion_update(&state->explosion, delta_time);
+    if (state->state == GAME_STATE_OVER) return;
     asteroid_system_update(&state->asteroid_system, &state->wave);
 
     // // Update missile system
@@ -262,6 +266,7 @@ void game_state_update(GameState* state, bool thrust_active, float delta_time) {
 
     // Update player
     player_update(&state->player, state, thrust_active, delta_time);
+    
     update_camera(state);
     update_scoring(state);
 
@@ -287,12 +292,16 @@ bool game_state_check_collisions(GameState* state) {
 
     // Check if player hit left side
     if (f22_to_float(state->player.position.x) < GAME_OVER_X) {
+        state->state = GAME_STATE_OVER;
+        explosion_start(&state->explosion, &state->player);
+        smoke_system_start(&state->smoke_system, &state->player);
         return true;
     }
 
     if (asteroid_system_check_collision(&state->asteroid_system, &state->player)) {
-        printf("COLLISION DETECTED\n");
         state->state = GAME_STATE_OVER;
+        explosion_start(&state->explosion, &state->player);
+        smoke_system_start(&state->smoke_system, &state->player);
         return true;
     }
 

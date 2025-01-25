@@ -9,6 +9,12 @@ typedef struct {
     F22 y;
 } Position;
 
+// Screen position helpers
+typedef struct {
+    int x;
+    int y;
+} ScreenPos;
+
 typedef struct {
     Position position;
     Position velocity;

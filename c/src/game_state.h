@@ -7,16 +7,8 @@
 #include "config.h"
 #include "asteroid.h"
 #include "player.h"
-#include "missile.h"
-
-// Game constants
-#define OBSTACLE_WIDTH 50
-#define OBSTACLE_GAP 200
-#define MAX_OBSTACLES 5
-
-#define WORLD_TO_SCREEN_SCALE 1.0f
-#define MAX_VELOCITY f22_from_float(10.0f)  // adjust this value to feel right
-#define MIN_VELOCITY f22_from_float(-10.0f)
+#include "explosion.h"
+#include "smoke.h"
 
 // Obstacle struct
 typedef struct {
@@ -24,12 +16,6 @@ typedef struct {
     F22 gap_y;
     bool active;
 } Obstacle;
-
-// Screen position helpers
-typedef struct {
-    int x;
-    int y;
-} ScreenPos;
 
 // Game state struct
 typedef struct {
@@ -42,7 +28,8 @@ typedef struct {
     uint32_t score;
     WaveGenerator wave;
     AsteroidSystem asteroid_system;
-    MissileSystem missile_system;
+    ExplosionSystem explosion;
+    SmokeSystem smoke_system;
     ScoringSystem scoring;
 } GameState;
 

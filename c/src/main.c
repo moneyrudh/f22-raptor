@@ -69,41 +69,42 @@ void handle_input(GameContext* ctx) {
 
 void main_loop(void* arg) {
     GameContext* ctx = (GameContext*)arg;
-    const float FIXED_TIME_STEP = 1.0f / 60.0f;  // Fixed 60Hz physics
+    const float FIXED_TIME_STEP = 1.0f / 60.0f;
     
     uint32_t current_time = SDL_GetTicks();
     float frame_time = (current_time - ctx->last_frame_time) / 1000.0f;
     ctx->last_frame_time = current_time;
     
-    // Prevent spiral of death
     if (frame_time > 0.25f) frame_time = 0.25f;
-    
-    // Accumulate time and update in fixed steps
     ctx->accumulated_time += frame_time;
     
     while (ctx->accumulated_time >= FIXED_TIME_STEP) {
         handle_input(ctx);
         game_state_update(&ctx->game_state, ctx->thrust_active, FIXED_TIME_STEP);
+        
+        // Check collisions - but now we KEEP rendering
+        if (game_state_check_collisions(&ctx->game_state)) {
+            #ifdef __EMSCRIPTEN__
+            // Don't cancel the loop immediately
+            if (ctx->game_state.explosion.time >= EXPLOSION_DURATION) {
+                emscripten_cancel_main_loop();
+                EM_ASM({
+                    Module.showGameOver($0);
+                }, (int)ctx->game_state.scoring.score);
+                return;
+            }
+            #else
+            if (ctx->game_state.explosion.time >= EXPLOSION_DURATION) {
+                ctx->quit = true;
+                printf("Game Over! Score: %u\n", ctx->game_state.score);
+                return;
+            }
+            #endif
+        }
+
         renderer_draw_frame(&ctx->renderer, &ctx->game_state, ctx->thrust_active);
         ctx->accumulated_time -= FIXED_TIME_STEP;
     }
-    // Check collisions
-    if (game_state_check_collisions(&ctx->game_state)) {
-        #ifdef __EMSCRIPTEN__
-        emscripten_cancel_main_loop();
-        EM_ASM({
-        Module.showGameOver($0);
-        }, (int)ctx->game_state.scoring.score);
-        #else
-        ctx->quit = true;
-        printf("Game Over! Score: %u\n", ctx->game_state.score);
-        #endif
-        return;
-    }
-
-    #ifdef __EMSCRIPTEN__
-    // SDL_Delay(16); // ~60 FPS cap for native builds
-    #endif
 }
 
 int main() {

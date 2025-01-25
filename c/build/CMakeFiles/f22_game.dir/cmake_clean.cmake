@@ -1,6 +1,8 @@
 file(REMOVE_RECURSE
   "CMakeFiles/f22_game.dir/src/asteroid.c.o"
   "CMakeFiles/f22_game.dir/src/asteroid.c.o.d"
+  "CMakeFiles/f22_game.dir/src/explosion.c.o"
+  "CMakeFiles/f22_game.dir/src/explosion.c.o.d"
   "CMakeFiles/f22_game.dir/src/f22.c.o"
   "CMakeFiles/f22_game.dir/src/f22.c.o.d"
   "CMakeFiles/f22_game.dir/src/game_state.c.o"
@@ -11,6 +13,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/f22_game.dir/src/missile.c.o.d"
   "CMakeFiles/f22_game.dir/src/renderer.c.o"
   "CMakeFiles/f22_game.dir/src/renderer.c.o.d"
+  "CMakeFiles/f22_game.dir/src/smoke.c.o"
+  "CMakeFiles/f22_game.dir/src/smoke.c.o.d"
   "CMakeFiles/f22_game.dir/src/wave.c.o"
   "CMakeFiles/f22_game.dir/src/wave.c.o.d"
   "f22_game.html"
