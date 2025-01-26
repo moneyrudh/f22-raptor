@@ -22,6 +22,7 @@ jobs:
 
       - name: Setup public directory
         run: |
+          rm -rf public/*
           mkdir -p public
           cp build/f22_game.* public/
           cp -r assets public/
@@ -31,3 +32,4 @@ jobs:
         with:
           folder: public
           branch: master
+          clean: true
