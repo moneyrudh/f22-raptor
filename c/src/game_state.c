@@ -2,6 +2,7 @@
 #include "asteroid.h"
 #include "player.h"
 #include "config.h"
+#include "sound.h"
 #include <math.h>
 #include <stdio.h>
 
@@ -177,6 +178,7 @@ GameState game_state_init(void) {
         .asteroid_system = asteroid_system_init(),
         .explosion = explosion_init(),
         .smoke_system = smoke_system_init(),
+        .sound_system = sound_system_create(),
         // .missile_system = missile_system_init(),
         .scoring = (ScoringSystem){
             .score = 0,
@@ -184,6 +186,10 @@ GameState game_state_init(void) {
             .score_rate = 0
         }
     };
+
+    set_sound_system(&state.sound_system);
+    sound_system_init(&state.sound_system);
+    sound_system_start_engine(&state.sound_system);
 
     // Initialize obstacles
     for (int i = 0; i < MAX_OBSTACLES; i++) {
@@ -198,6 +204,8 @@ void game_state_start(GameState* state) {
     state->score = 0;
     
     printf("GAME HAS BEGUN LMFAO");
+    sound_system_stop_engine(&state->sound_system);
+    play_random();
     // Reset player position to middle
     // state->player.position.x = f22_from_float(WINDOW_WIDTH / 2);
     // state->player.position.y = f22_from_float(WINDOW_HEIGHT / 2);
@@ -293,15 +301,23 @@ bool game_state_check_collisions(GameState* state) {
     // Check if player hit left side
     if (f22_to_float(state->player.position.x) < GAME_OVER_X) {
         state->state = GAME_STATE_OVER;
+        sound_system_stop_engine(&state->sound_system);
         explosion_start(&state->explosion, &state->player);
         smoke_system_start(&state->smoke_system, &state->player);
+        sound_system_play_collision(&state->sound_system);
+        sound_system_stop_music(&state->sound_system);
+        sound_system_play_game_over(&state->sound_system);
         return true;
     }
 
     if (asteroid_system_check_collision(&state->asteroid_system, &state->player)) {
         state->state = GAME_STATE_OVER;
+        sound_system_stop_engine(&state->sound_system);
         explosion_start(&state->explosion, &state->player);
         smoke_system_start(&state->smoke_system, &state->player);
+        sound_system_play_collision(&state->sound_system);
+        sound_system_stop_music(&state->sound_system);
+        sound_system_play_game_over(&state->sound_system);
         return true;
     }
 

@@ -16,8 +16,6 @@ CMakeFiles/f22_game.dir/src/wave.c.o: \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/math.h \
   /Users/ani/Desktop/Anirudh/f22raptor/c/src/config.h \
   /Users/ani/Desktop/Anirudh/f22raptor/c/src/player.h \
-  /Users/ani/Desktop/Anirudh/f22raptor/c/src/game_state.h \
-  /Users/ani/Desktop/Anirudh/f22raptor/c/src/asteroid.h \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL.h \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL_main.h \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL_stdinc.h \
@@ -99,5 +97,9 @@ CMakeFiles/f22_game.dir/src/wave.c.o: \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL_version.h \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL_locale.h \
   /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL_misc.h \
+  /Users/ani/Desktop/Anirudh/f22raptor/c/src/game_state.h \
+  /Users/ani/Desktop/Anirudh/f22raptor/c/src/asteroid.h \
   /Users/ani/Desktop/Anirudh/f22raptor/c/src/explosion.h \
+  /Users/ani/Desktop/Anirudh/f22raptor/c/src/sound.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL_mixer.h \
   /Users/ani/Desktop/Anirudh/f22raptor/c/src/smoke.h

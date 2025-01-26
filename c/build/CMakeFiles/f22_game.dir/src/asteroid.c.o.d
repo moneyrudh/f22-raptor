@@ -101,4 +101,6 @@ CMakeFiles/f22_game.dir/src/asteroid.c.o: \
   /Users/ani/Desktop/Anirudh/f22raptor/c/src/renderer.h \
   /Users/ani/Desktop/Anirudh/f22raptor/c/src/game_state.h \
   /Users/ani/Desktop/Anirudh/f22raptor/c/src/explosion.h \
+  /Users/ani/Desktop/Anirudh/f22raptor/c/src/sound.h \
+  /Users/ani/Desktop/Anirudh/emsdk/upstream/emscripten/cache/sysroot/include/SDL2/SDL_mixer.h \
   /Users/ani/Desktop/Anirudh/f22raptor/c/src/smoke.h

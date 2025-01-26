@@ -15,6 +15,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/f22_game.dir/src/renderer.c.o.d"
   "CMakeFiles/f22_game.dir/src/smoke.c.o"
   "CMakeFiles/f22_game.dir/src/smoke.c.o.d"
+  "CMakeFiles/f22_game.dir/src/sound.c.o"
+  "CMakeFiles/f22_game.dir/src/sound.c.o.d"
   "CMakeFiles/f22_game.dir/src/wave.c.o"
   "CMakeFiles/f22_game.dir/src/wave.c.o.d"
   "f22_game.html"

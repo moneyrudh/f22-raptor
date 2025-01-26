@@ -321,6 +321,30 @@ src/smoke.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/src/smoke.c.s
 .PHONY : src/smoke.c.s
 
+src/sound.o: src/sound.c.o
+.PHONY : src/sound.o
+
+# target to build an object file
+src/sound.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/src/sound.c.o
+.PHONY : src/sound.c.o
+
+src/sound.i: src/sound.c.i
+.PHONY : src/sound.i
+
+# target to preprocess a source file
+src/sound.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/src/sound.c.i
+.PHONY : src/sound.c.i
+
+src/sound.s: src/sound.c.s
+.PHONY : src/sound.s
+
+# target to generate assembly for a file
+src/sound.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/f22_game.dir/build.make CMakeFiles/f22_game.dir/src/sound.c.s
+.PHONY : src/sound.c.s
+
 src/wave.o: src/wave.c.o
 .PHONY : src/wave.o
 
@@ -378,6 +402,9 @@ help:
 	@echo "... src/smoke.o"
 	@echo "... src/smoke.i"
 	@echo "... src/smoke.s"
+	@echo "... src/sound.o"
+	@echo "... src/sound.i"
+	@echo "... src/sound.s"
 	@echo "... src/wave.o"
 	@echo "... src/wave.i"
 	@echo "... src/wave.s"

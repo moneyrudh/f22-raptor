@@ -6,6 +6,22 @@
 #include "game_state.h"
 
 typedef struct {
+    float x, y;      // Star position
+    float size;      // Size of the star (0-2 pixels)
+    float speed;     // Movement speed
+    float hue;       // Color variation
+    int brightness;
+} Star;
+
+typedef struct {
+    Star stars[250];
+    float gradient_opacity;
+    int gradient_direction;
+    uint32_t last_frame;
+    SDL_Texture* star_texture;  // Add texture to store star layer
+} Background;
+
+typedef struct {
     float x, y;
     float alpha;
     float lifetime;
@@ -14,17 +30,24 @@ typedef struct {
 typedef struct {
     SDL_Window* window;
     SDL_Renderer* renderer;
+    Background* background;
     SDL_Point f22_shape[32];     // Store F22 shape points
     SDL_Point thrust_shape[27];  // Store thrust effect points
     SDL_Point left_wing[4];
     SDL_Point left_tail[6];
     SDL_Point cock_pit[5];
+    SDL_Point pilot_circle[16];
     SDL_Point wave_points[WINDOW_WIDTH];
     WaveParticle particles[1000];
     int num_particles;
     uint32_t last_particle_spawn;
     int num_wave_points;
 } Renderer;
+
+Background* background_init(SDL_Renderer* renderer);
+void update_star_texture(SDL_Renderer* renderer, Background* bg);
+void draw_background(SDL_Renderer* renderer, Background* bg, const GameState* const);
+void DrawCircle(SDL_Renderer* renderer, int cx, int cy, int radius);
 
 // Core rendering functions
 int renderer_init(Renderer* renderer);

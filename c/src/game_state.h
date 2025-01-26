@@ -8,6 +8,7 @@
 #include "asteroid.h"
 #include "player.h"
 #include "explosion.h"
+#include "sound.h"
 #include "smoke.h"
 
 // Obstacle struct
@@ -30,6 +31,7 @@ typedef struct {
     AsteroidSystem asteroid_system;
     ExplosionSystem explosion;
     SmokeSystem smoke_system;
+    SoundSystem sound_system;
     ScoringSystem scoring;
 } GameState;
 

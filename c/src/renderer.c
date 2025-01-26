@@ -1,5 +1,6 @@
 #include "renderer.h"
 #include "asteroid.h"
+#include "player.h"
 #include <math.h>
 
 #ifdef __EMSCRIPTEN__
@@ -23,12 +24,13 @@ int renderer_init(Renderer* renderer) {
     if (!renderer->renderer) return -1;
 
     renderer->last_particle_spawn = SDL_GetTicks();
+    renderer->background = background_init(renderer->renderer);
 
     SDL_RendererInfo info;
     SDL_GetRendererInfo(renderer->renderer, &info);
     printf("RENDERER INFO: name=%s, flags=%d\n", info.name, info.flags);
     renderer_init_shapes(renderer);
-
+    SDL_SetRenderDrawBlendMode(renderer->renderer, SDL_BLENDMODE_BLEND);
     // if (TTF_Init() == -1) {
     //     printf("SDL_ttf could not initialize! Error: %s\n", TTF_GetError());
     //     return -1;
@@ -39,52 +41,134 @@ int renderer_init(Renderer* renderer) {
     return 0;
 }
 
-// int renderer_init_font(Renderer* renderer, const char* font_path, int font_size) {
-//     renderer->font = TTF_OpenFont(font_path, font_size);
-//     if (!renderer->font) {
-//         printf("Failed to load font! Error: %s\n", TTF_GetError());
-//         return -1;
-//     }
-//     return 0;
-// }
-
-// void renderer_draw_text(Renderer* renderer, const char* text, int x, int y, SDL_Color color) {
-//     if (!renderer->font) return;
-
-//     SDL_Surface* text_surface = TTF_RenderText_Blended(renderer->font, text, color);
-//     if (!text_surface) {
-//         printf("Failed to render text! Error: %s\n", TTF_GetError());
-//         return;
-//     }
-
-//     SDL_Texture* text_texture = SDL_CreateTextureFromSurface(renderer->renderer, text_surface);
-//     SDL_FreeSurface(text_surface);
-
-//     if (!text_texture) {
-//         printf("Failed to create texture! Error: %s\n", SDL_GetError());
-//         return;
-//     }
-
-//     int text_width, text_height;
-//     SDL_QueryTexture(text_texture, NULL, NULL, &text_width, &text_height);
-//     SDL_Rect dest_rect = {x, y, text_width, text_height};
+Background* background_init(SDL_Renderer* renderer) {
+    static Background bg;
     
-//     SDL_RenderCopy(renderer->renderer, text_texture, NULL, &dest_rect);
-//     SDL_DestroyTexture(text_texture);
-// }
+    // Create a texture the size of our window
+    bg.star_texture = SDL_CreateTexture(renderer,
+        SDL_PIXELFORMAT_RGBA8888,
+        SDL_TEXTUREACCESS_TARGET,
+        WINDOW_WIDTH, WINDOW_HEIGHT);
+    
+    // Set initial star positions
+    for(int i = 0; i < 50; i++) {
+        bg.stars[i] = (Star){
+            .x = rand() % WINDOW_WIDTH,
+            .y = rand() % WINDOW_HEIGHT,
+            .size = 1 + (rand() % 5),
+            .speed = 1 + (rand() % 2),
+            .brightness = 150 + (rand() % 100)
+        };
+    }
+    
+    // Draw initial star positions to texture
+    update_star_texture(renderer, &bg);
+    
+    bg.gradient_opacity = 0;
+    bg.gradient_direction = 1;
+    bg.last_frame = SDL_GetTicks();
+    return &bg;
+}
 
-// void renderer_cleanup(Renderer* renderer) {
-//     if (renderer->font) {
-//         TTF_CloseFont(renderer->font);
-//     }
-//     TTF_Quit();
-//     SDL_DestroyRenderer(renderer->renderer);
-//     SDL_DestroyWindow(renderer->window);
-// }
+void update_star_texture(SDL_Renderer* renderer, Background* bg) {
+    // Switch render target to our texture
+    SDL_SetRenderTarget(renderer, bg->star_texture);
+    
+    // Clear the texture
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+    SDL_RenderClear(renderer);
+    
+    // Draw all stars to the texture
+    for(int i = 0; i < 50; i++) {
+        int _rand = rand() % 2;
+        if (_rand == 0) {
+            SDL_SetRenderDrawColor(renderer, 
+                bg->stars[i].brightness,
+                bg->stars[i].brightness,
+                bg->stars[i].brightness,
+                255);
+        } else {
+            SDL_SetRenderDrawColor(renderer, 
+                bg->stars[i].brightness,
+                bg->stars[i].brightness / 5,
+                255,
+                255);
+        }
+            
+        if(bg->stars[i].size > 1) {
+            SDL_Rect star = {
+                (int)bg->stars[i].x,
+                (int)bg->stars[i].y,
+                2, 2
+            };
+            SDL_RenderFillRect(renderer, &star);
+        } else {
+            SDL_RenderDrawPoint(renderer,
+                (int)bg->stars[i].x,
+                (int)bg->stars[i].y);
+        }
+    }
+    
+    // Switch back to default render target
+    SDL_SetRenderTarget(renderer, NULL);
+}
+
+void draw_background(SDL_Renderer* renderer, Background* bg, const GameState* state) {
+    uint32_t current_time = SDL_GetTicks();
+    float delta = (current_time - bg->last_frame) / 1000.0f;
+    bg->last_frame = current_time;
+
+    // Don't update stars if game is over
+    if (state->state != GAME_STATE_OVER) {
+        static int update_counter = 0;
+        if(++update_counter >= 3) {
+            // Calculate player's movement influence
+            float player_x = f22_to_float(state->player.position.x);
+            float player_movement = 0.0f;
+            
+            if (player_x < WINDOW_WIDTH / 2.0f) {
+                // Calculate normalized distance from ghost path
+                float ghost_y = f22_to_float(state->wave.points[(int)player_x].y);
+                float player_y = f22_to_float(state->player.position.y);
+                float y_distance = fabsf(ghost_y - player_y) / WINDOW_HEIGHT;
+                
+                // Player moves faster left when far from path, and right when close
+                player_movement = (1.0f - y_distance) * 1.0f - y_distance * 6.0f;
+            }
+            
+            // Update star positions with combined movement
+            for(int i = 0; i < 50; i++) {
+                // Base movement plus player influence
+                float total_speed = fmaxf(-0.1f, bg->stars[i].speed + player_movement);
+                bg->stars[i].x -= total_speed;
+                
+                if(bg->stars[i].x < 0) {
+                    bg->stars[i].x = WINDOW_WIDTH;
+                    bg->stars[i].y = rand() % WINDOW_HEIGHT;
+                }
+            }
+            update_star_texture(renderer, bg);
+            update_counter = 0;
+        }
+    }
+    
+    // Draw gradient background
+    SDL_Rect bg_rect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
+    uint8_t alpha = (uint8_t)(bg->gradient_opacity * 25);
+    SDL_SetRenderDrawColor(renderer, 20, 15, 35, alpha);
+    SDL_RenderFillRect(renderer, &bg_rect);
+    
+    // Draw star texture
+    SDL_RenderCopy(renderer, bg->star_texture, NULL, NULL);
+}
 
 void renderer_cleanup(Renderer* renderer) {
     SDL_DestroyRenderer(renderer->renderer);
     SDL_DestroyWindow(renderer->window);
+    if (renderer->background) {
+        SDL_DestroyTexture(renderer->background->star_texture);
+        free(renderer->background);
+    }
 }
 
 void renderer_draw_score(Renderer* renderer, uint32_t score) {
@@ -180,6 +264,18 @@ void renderer_init_shapes(Renderer* renderer) {
     };
 
     memcpy(renderer->cock_pit, cock_pit, sizeof(cock_pit));
+
+    const int CIRCLE_X = 20;     // Position within cockpit area
+    const int CIRCLE_Y = -8;     // Slightly below cockpit top
+    const int RADIUS = 2;       // Small radius to fit cockpit
+    const int NUM_SEGMENTS = 16; // Number of segments for circle approximation
+    
+    // Generate circle points using sine/cosine
+    for(int i = 0; i < NUM_SEGMENTS; i++) {
+        float angle = (float)i * 2.0f * M_PI / NUM_SEGMENTS;
+        renderer->pilot_circle[i].x = CIRCLE_X + (int)(RADIUS * cosf(angle));
+        renderer->pilot_circle[i].y = CIRCLE_Y + (int)(RADIUS * sinf(angle));
+    }
 }
 
 // void renderer_draw_wave(Renderer* renderer, const WaveGenerator* wave, F22 camera_y_offset) {
@@ -224,7 +320,7 @@ static inline uint8_t lerp(uint8_t a, uint8_t b, float t) {
 
 // Simple 1D perlin-like noise for smooth random movement
 float smooth_noise(float y, float time, float frequency, float camera_offset) {
-    float scaled_offset = camera_offset * 0.25f;  // adjust this multiplier to taste
+    float scaled_offset = camera_offset * 0.55f;  // adjust this multiplier to taste
     
     // Add camera offset to both y and time for a flowing effect
     float y_offset = (y + scaled_offset) * frequency;
@@ -561,29 +657,58 @@ void renderer_draw_thrust(SDL_Renderer* sdl_renderer, const SDL_Point center, fl
 void renderer_draw_player(Renderer* renderer, const Player* player, F22 camera_y_offset, bool thrust_active) {
     ScreenPos pos = player_get_screen_position(player, camera_y_offset);
     SDL_Point center = {pos.x, pos.y};
+
     // Create temporary arrays for rotated points
     SDL_Point rotated_f22[32];
-    memcpy(rotated_f22, renderer->f22_shape, sizeof(renderer->f22_shape));
-    renderer_rotate_points(rotated_f22, 32, center, player->rotation);
-
-    // Draw F-22 shape
-    SDL_SetRenderDrawColor(renderer->renderer, 230, 230, 230, 255);
-    SDL_RenderDrawLines(renderer->renderer, rotated_f22, 32);
-
     SDL_Point rotated_left_wing[4];
-    memcpy(rotated_left_wing, renderer->left_wing, sizeof(renderer->left_wing));
-    renderer_rotate_points(rotated_left_wing, 4, center, player->rotation);
-    SDL_RenderDrawLines(renderer->renderer, rotated_left_wing, 4);
-
     SDL_Point rotated_left_tail[6];
-    memcpy(rotated_left_tail, renderer->left_tail, sizeof(renderer->left_tail));
-    renderer_rotate_points(rotated_left_tail, 6, center, player->rotation);
-    SDL_RenderDrawLines(renderer->renderer, rotated_left_tail, 6);
-
     SDL_Point rotated_cock_pit[5];
+    SDL_Point rotated_pilot[16];
+
+    // First copy all the points
+    memcpy(rotated_f22, renderer->f22_shape, sizeof(renderer->f22_shape));
+    memcpy(rotated_left_wing, renderer->left_wing, sizeof(renderer->left_wing));
+    memcpy(rotated_left_tail, renderer->left_tail, sizeof(renderer->left_tail));
     memcpy(rotated_cock_pit, renderer->cock_pit, sizeof(renderer->cock_pit));
+    memcpy(rotated_pilot, renderer->pilot_circle, sizeof(renderer->pilot_circle));
+
+    // Then rotate ALL points first
+    renderer_rotate_points(rotated_f22, 32, center, player->rotation);
+    renderer_rotate_points(rotated_left_wing, 4, center, player->rotation);
+    renderer_rotate_points(rotated_left_tail, 6, center, player->rotation);
     renderer_rotate_points(rotated_cock_pit, 5, center, player->rotation);
+    renderer_rotate_points(rotated_pilot, 16, center, player->rotation);
+
+    // Now fill with the rotated points
+    SDL_SetRenderDrawColor(renderer->renderer, 225, 225, 225, 255);
+    fill_polygon(renderer->renderer, rotated_f22, 32);
+    fill_polygon(renderer->renderer, rotated_left_wing, 4);
+    fill_polygon(renderer->renderer, rotated_left_tail, 6);
+    fill_polygon(renderer->renderer, rotated_cock_pit, 5);
+
+    // Finally draw outlines
+    SDL_SetRenderDrawColor(renderer->renderer, 50, 50, 50, 255);
+    SDL_RenderDrawLines(renderer->renderer, rotated_f22, 32);
+    SDL_RenderDrawLines(renderer->renderer, rotated_left_wing, 4);
+    SDL_RenderDrawLines(renderer->renderer, rotated_left_tail, 6);
     SDL_RenderDrawLines(renderer->renderer, rotated_cock_pit, 5);
+
+
+
+
+    
+    // Draw pilot with a different color (maybe dark gray to show silhouette)
+    SDL_SetRenderDrawColor(renderer->renderer, 50, 50, 50, 255);
+    // SDL_SetRenderDrawColor(renderer->renderer, 250, 250, 250, 255);
+    for(int i = 0; i < 15; i++) {
+        SDL_RenderDrawLine(renderer->renderer, 
+            rotated_pilot[i].x, rotated_pilot[i].y,
+            rotated_pilot[i + 1].x, rotated_pilot[i + 1].y);
+    }
+    // Connect last point to first to close the circle
+    SDL_RenderDrawLine(renderer->renderer,
+        rotated_pilot[15].x, rotated_pilot[15].y,
+        rotated_pilot[0].x, rotated_pilot[0].y);
 
     if (thrust_active) {
         float time = SDL_GetTicks() / 1000.0f;  // get current time for animation
@@ -636,6 +761,7 @@ void renderer_draw_frame(Renderer* renderer, const GameState* state, bool thrust
     // Clear screen
     SDL_SetRenderDrawColor(renderer->renderer, 10, 10, 10, 255);
     SDL_RenderClear(renderer->renderer);
+    draw_background(renderer->renderer, renderer->background, state);
 
     if (state->state == GAME_STATE_WAITING) {
         // Draw simple waiting state

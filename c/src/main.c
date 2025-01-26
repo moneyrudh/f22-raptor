@@ -4,6 +4,7 @@
 #include "renderer.h"
 #include "missile.h"
 #include <stdio.h>
+#include <time.h>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -44,10 +45,11 @@ void handle_input(GameContext* ctx) {
                     case SDLK_SPACE:
                     case SDLK_UP:
                         ctx->thrust_active = true;
+                        sound_system_start_engine(&ctx->game_state.sound_system);
                         break;
-                    case SDLK_ESCAPE:
-                        ctx->quit = true;
-                        break;
+                    // case SDLK_ESCAPE:
+                    //     ctx->quit = true;
+                    //     break;
                     // case SDLK_f:
                     //     if (ctx->game_state.state == GAME_STATE_PLAYING) {
                     //         missile_system_fire(&ctx->game_state.missile_system, &ctx->game_state.player);
@@ -60,6 +62,7 @@ void handle_input(GameContext* ctx) {
                     case SDLK_SPACE:
                     case SDLK_UP:
                         ctx->thrust_active = false;
+                        sound_system_stop_engine(&ctx->game_state.sound_system);
                         break;
                 }
                 break;
@@ -108,11 +111,12 @@ void main_loop(void* arg) {
 }
 
 int main() {
+    srand(time(NULL));  // seed random for track selection
     #ifdef __EMSCRIPTEN__
     setvbuf(stdout, NULL, _IOLBF, 0);
     #endif
 
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
         SDL_Log("SDL init failed: %s", SDL_GetError());
         return 1;
     }

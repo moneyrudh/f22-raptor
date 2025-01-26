@@ -16,6 +16,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/ani/Desktop/Anirudh/f22raptor/c/src/missile.c" "CMakeFiles/f22_game.dir/src/missile.c.o" "gcc" "CMakeFiles/f22_game.dir/src/missile.c.o.d"
   "/Users/ani/Desktop/Anirudh/f22raptor/c/src/renderer.c" "CMakeFiles/f22_game.dir/src/renderer.c.o" "gcc" "CMakeFiles/f22_game.dir/src/renderer.c.o.d"
   "/Users/ani/Desktop/Anirudh/f22raptor/c/src/smoke.c" "CMakeFiles/f22_game.dir/src/smoke.c.o" "gcc" "CMakeFiles/f22_game.dir/src/smoke.c.o.d"
+  "/Users/ani/Desktop/Anirudh/f22raptor/c/src/sound.c" "CMakeFiles/f22_game.dir/src/sound.c.o" "gcc" "CMakeFiles/f22_game.dir/src/sound.c.o.d"
   "/Users/ani/Desktop/Anirudh/f22raptor/c/src/wave.c" "CMakeFiles/f22_game.dir/src/wave.c.o" "gcc" "CMakeFiles/f22_game.dir/src/wave.c.o.d"
   )
 

@@ -30,6 +30,9 @@
                 right: 2px;
                 top: 2px;
                 background-color: transparent;
+                background: transparent;
+                border: none;
+                box-shadow: none;
                 pointer-events: none;
                 outline: none;
             }
@@ -346,20 +349,21 @@
                     
                     const submitBtn = document.querySelector('.submit-btn');
                     const noBtn = document.querySelector('.no-btn');
+                    const leaderboardBtn = document.getElementById('leaderboard-btn');
                     
+                    let state = 0;
                     let finalScore = 0;
                     let inputValue = '';
                     let allTimeScores = undefined;
                     let dailyScores = undefined;
                     
                     modal.classList.add('hidden');
-                    modal.addEventListener('mousedown', (e) => {
-                        e.stopPropagation();
-                    });
 
+                    usernameInput.value = '';
                     usernameInput.disabled = true;
 
                     const keyHandler = (e) => {
+                        if (state == 0) return;
                         e.preventDefault();
 
                         if (e.key === 'Backspace') {
@@ -381,7 +385,7 @@
                     
                     document.addEventListener('keydown', keyHandler);
 
-                    document.getElementById('leaderboard-btn').onclick = async () => {
+                    leaderboardBtn.onclick = async () => {
                         const modal = document.getElementById('leaderboard-modal');
                         modal.style.display = 'flex';
                         leaderboardBtn.disabled = true;
@@ -470,6 +474,7 @@
                                 const error = await submitRes.json();
                                 errorMsg.textContent = error.error || 'Failed to submit score';
                                 errorMsg.classList.remove('hidden');
+                                usernameInput.value = '';
                                 submitBtn.disabled = false;
                                 noBtn.disabled = false;
                                 return;
@@ -482,6 +487,7 @@
                             buttonsContainer.querySelectorAll('button').forEach(btn => btn.style.display = 'none');
                             successMsg.textContent = `submitted (${submitData.submitCount}/3)`;
                             successMsg.classList.remove('hidden');
+                            usernameInput.value = '';
 
                             // Success! Reload the game
                             document.getElementById('canvas').style.pointerEvents = 'auto';
@@ -534,9 +540,11 @@
                         modal.classList.remove('hidden');
                         document.querySelector('.score-value').textContent = finalScore;
                         document.getElementById('canvas').style.pointerEvents = 'none';
+                        usernameInput.value = '';
                         usernameInput.disabled = false;
                         setTimeout(() => {
                             usernameInput.focus();
+                            state = 1;
                         }, 100);
                     };
                     
@@ -571,6 +579,7 @@
                     
                     drawScore();
                     if (!gameStarted) drawStartText();
+                    document.getElementById("controls").click();
                 }
             };
         </script>

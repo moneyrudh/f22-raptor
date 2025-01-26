@@ -1,5 +1,6 @@
 #include "asteroid.h"
 #include "renderer.h"
+#include "player.h"
 #include <math.h>
 
 #define min(a,b) (a < b ? a : b)
@@ -260,9 +261,9 @@ void asteroid_system_render(const AsteroidSystem* system, SDL_Renderer* renderer
                 float blend_factor = color_factor * trail_fade;
 
                 // Reddish-orange color scheme
-                uint8_t r = blend_factor > 0.001f ? lerp(150, 255, blend_factor) : 150;
-                uint8_t g = blend_factor > 0.001f ? lerp(150, 50, blend_factor) : 150;
-                uint8_t b = blend_factor > 0.001f ? lerp(150, 0, blend_factor) : 150;
+                uint8_t r = blend_factor > 0.001f ? lerp(150, 180, blend_factor) : 200;
+                uint8_t g = blend_factor > 0.001f ? lerp(150, 50, blend_factor) : 200;
+                uint8_t b = blend_factor > 0.001f ? lerp(150, 255, blend_factor) : 200;
                 
                 // Violet color scheme (uncomment to use)
                 // uint8_t r = blend_factor > 0.001f ? lerp(150, 180, blend_factor) : 150;
@@ -270,7 +271,7 @@ void asteroid_system_render(const AsteroidSystem* system, SDL_Renderer* renderer
                 // uint8_t b = blend_factor > 0.001f ? lerp(150, 255, blend_factor) : 150;
                 
                 
-                SDL_SetRenderDrawColor(renderer, r, g, b, alpha);
+                SDL_SetRenderDrawColor(renderer, r, g, b, blend_factor > 0.001f ? max(255, 255 - 0.1f * alpha) : max(0, 255 - alpha * 2));
                 SDL_RenderDrawLine(renderer, 
                     trail[j-1].x, trail[j-1].y,
                     trail[j].x, trail[j].y);
@@ -286,7 +287,11 @@ void asteroid_system_render(const AsteroidSystem* system, SDL_Renderer* renderer
             transformed_outline[j].y = asteroid_pos.y + (int)(px * sin_a + py * cos_a);
         }
 
-        SDL_SetRenderDrawColor(renderer, 250, 250, 250, 255);
+        // SDL_SetRenderDrawColor(renderer, 250, 250, 250, 255); // Dark gray fill
+        SDL_SetRenderDrawColor(renderer, 92,72,112, 255); // Dark gray fill
+        fill_polygon(renderer, transformed_outline, system->asteroids[i].num_points);
+
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderDrawLines(renderer, transformed_outline, system->asteroids[i].num_points);
         SDL_RenderDrawLine(renderer,
             transformed_outline[system->asteroids[i].num_points-1].x,

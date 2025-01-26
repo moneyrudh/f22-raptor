@@ -13,6 +13,7 @@ add_executable(f22_game
     src/missile.c
     src/explosion.c
     src/smoke.c
+    src/sound.c
 )
 
 if(EMSCRIPTEN)
@@ -20,12 +21,16 @@ if(EMSCRIPTEN)
     
     set(COMPILE_FLAGS 
         "-sUSE_SDL=2 \
+         -sUSE_SDL_MIXER=2 \
          -sWASM=1 \
          -sALLOW_MEMORY_GROWTH=1 \
          -sPRINTF_LONG_DOUBLE=1 \
          -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap'] \
          -sEXPORTED_FUNCTIONS=['_main','_malloc','_free'] \
          -sASYNCIFY \
+         -sSTACK_SIZE=131072 \
+         -sSDL2_MIXER_FORMATS=['mp3'] \
+         --preload-file ${CMAKE_SOURCE_DIR}/assets@/assets \
          --shell-file ${CMAKE_SOURCE_DIR}/template.html"
     )
     
@@ -34,5 +39,11 @@ if(EMSCRIPTEN)
 else()
     find_package(SDL2 REQUIRED)
     find_package(SDL2_ttf REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2 SDL2::SDL2main SDL2_ttf::SDL2_ttf)
+    find_package(SDL2_mixer REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE 
+        SDL2::SDL2 
+        SDL2::SDL2main 
+        SDL2_ttf::SDL2_ttf
+        SDL2_mixer::SDL2_mixer
+    )
 endif()

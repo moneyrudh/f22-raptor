@@ -6,5 +6,5 @@ C_DEFINES =
 
 C_INCLUDES = 
 
-C_FLAGS =  -sUSE_SDL=2          -sWASM=1          -sALLOW_MEMORY_GROWTH=1          -sPRINTF_LONG_DOUBLE=1          -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap']          -sEXPORTED_FUNCTIONS=['_main','_malloc','_free']          -sASYNCIFY          --shell-file /Users/ani/Desktop/Anirudh/f22raptor/c/template.html -std=gnu11
+C_FLAGS =  -sUSE_SDL=2          -sUSE_SDL_MIXER=2          -sWASM=1          -sALLOW_MEMORY_GROWTH=1          -sPRINTF_LONG_DOUBLE=1          -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap']          -sEXPORTED_FUNCTIONS=['_main','_malloc','_free']          -sASYNCIFY          -sSTACK_SIZE=131072          -sSDL2_MIXER_FORMATS=['mp3']          --preload-file /Users/ani/Desktop/Anirudh/f22raptor/c/assets@/assets          --shell-file /Users/ani/Desktop/Anirudh/f22raptor/c/template.html -std=gnu11
 
