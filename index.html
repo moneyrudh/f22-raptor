@@ -1,21 +1,42 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-    <title>F-22 Game</title>
-</head>
-<body>
-    <canvas id="game-canvas"></canvas>
-    <script>
-        WebAssembly.instantiateStreaming(
-            fetch('zig-out/bin/f22-raptor.wasm'),
-            {
-                env: {
-                    // We'll add required imports here
-                }
-            }
-        ).then(obj => {
-            obj.instance.exports.main();
-        });
-    </script>
-</body>
+    <head>
+        <title>F-22 WASM Test</title>
+    </head>
+    <body>
+        <div id="output"></div>
+        <script type="text/javascript">
+            var Module = {
+                // Specify the location of the .wasm file
+                locateFile: function (path) {
+                    if (path.endsWith(".wasm")) {
+                        return "f22-raptor.wasm"; // Path to your .wasm file
+                    }
+                    return path;
+                },
+                print: function (text) {
+                    document.getElementById("output").innerHTML +=
+                        text + "<br>";
+                    console.log(text);
+                },
+                printErr: function (text) {
+                    document.getElementById("output").innerHTML +=
+                        "Error: " + text + "<br>";
+                    console.error(text);
+                },
+                onRuntimeInitialized: function () {
+                    console.log("WASM initialized!");
+                    // Test our add function (if it exists)
+                    if (Module._add) {
+                        console.log("5 + 3 =", Module._add(5, 3));
+                    }
+                    // Call start (if it exists)
+                    if (Module._start) {
+                        Module._start();
+                    }
+                },
+            };
+        </script>
+        <script async type="text/javascript" src="f22-raptor.js"></script>
+    </body>
 </html>
