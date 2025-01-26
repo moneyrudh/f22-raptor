@@ -1,5 +1,5 @@
 {
     "version": 2,
-    "buildCommand": "./build.sh",
-    "outputDirectory": "build"
+    "buildCommand": "bash ./build.sh",
+    "outputDirectory": "public"
 }
