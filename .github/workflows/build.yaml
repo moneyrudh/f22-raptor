@@ -1,22 +1,22 @@
-name: Build and Deploy
-on:
-  push:
-    branches: [ master ]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup Emscripten
-        uses: mymindstorm/setup-emsdk@v11
-      - name: Build
-        run: |
-          mkdir -p public
-          cd public
-          emcmake cmake ..
-          emmake make
-          cp -r ../assets ./
-          echo "Build output files:"
-          ls -la
-          echo "Contents of public directory:"
-          ls -la public/
+# name: Build and Deploy
+# on:
+#   push:
+#     branches: [ master ]
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: Setup Emscripten
+#         uses: mymindstorm/setup-emsdk@v11
+#       - name: Build
+#         run: |
+#           mkdir -p public
+#           cd public
+#           emcmake cmake ..
+#           emmake make
+#           cp -r ../assets ./
+#           echo "Build output files:"
+#           ls -la
+#           echo "Contents of public directory:"
+#           ls -la public/

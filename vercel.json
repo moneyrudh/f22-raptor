@@ -1,10 +1,5 @@
 {
     "version": 2,
-    "builds": [
-      { "src": "public/**/*", "use": "@vercel/static" }
-    ],
-    "routes": [
-      { "src": "/", "dest": "/public/f22_game.html" },
-      { "src": "/(.*)", "dest": "/public/$1" }
-    ]
-  }
+    "buildCommand": "wget https://github.com/emscripten-core/emsdk/archive/main.tar.gz && tar -xvf main.tar.gz && cd emsdk-main && ./emsdk install latest && ./emsdk activate latest && source ./emsdk_env.sh && cd .. && mkdir build && cd build && emcmake cmake .. && emmake make",
+    "outputDirectory": "build"
+}
