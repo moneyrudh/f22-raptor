@@ -1,5 +1,0 @@
-cd c/build
-emcmake cmake ..
-emmake make
-
-run http server on 8000 @ c/build

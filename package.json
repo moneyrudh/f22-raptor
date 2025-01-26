@@ -1,0 +1,7 @@
+{
+    "name": "f22-game",
+    "private": true,
+    "scripts": {
+      "build": "bash ./build.sh"
+    }
+  }
