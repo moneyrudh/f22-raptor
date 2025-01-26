@@ -17,6 +17,7 @@ add_executable(f22_game
 )
 
 if(EMSCRIPTEN)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/public)
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
     
     set(COMPILE_FLAGS 

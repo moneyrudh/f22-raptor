@@ -16,3 +16,7 @@ jobs:
           emcmake cmake ..
           emmake make
           cp -r ../assets ./
+          echo "Build output files:"
+          ls -la
+          echo "Contents of public directory:"
+          ls -la public/
