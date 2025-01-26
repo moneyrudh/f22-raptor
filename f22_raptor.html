@@ -294,7 +294,7 @@
                 width: 1300px;
                 left: 50%;
                 transform: translateX(-50%);
-                display: flex;
+                display: none;
                 justify-content: flex-start;
                 bottom: 40px;
                 gap: 16px;
@@ -662,6 +662,8 @@
                             }
                         });
                     });
+
+                    document.querySelector('.sound-controls').style.display = 'flex';
                 }
             };
         </script>
