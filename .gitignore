@@ -26,3 +26,5 @@ zig-out/
 
 # Project specific
 f22-raptor
+
+.DS_Store
