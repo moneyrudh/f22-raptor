@@ -1,10 +1,13 @@
 // sound.c
 #include "sound.h"
 #include <SDL.h>
+#include <emscripten.h>
 
 SoundSystem sound_system_create(void) {
     SoundSystem system = {0};
     system.initialized = false;
+    system.sfx_volume = 75;
+    system.music_volume = 50;
     return system;
 }
 
@@ -39,7 +42,7 @@ static void play_random_track(SoundSystem* system) {
     }
     printf("NOW PLAYING: %s", path);
 
-    Mix_VolumeMusic(MUSIC_VOLUME);
+    Mix_VolumeMusic(system->music_volume);
     Mix_PlayMusic(system->current_music, 1);  // play once
     system->current_track = next_track;
 }
@@ -79,9 +82,10 @@ void sound_system_init(SoundSystem* system) {
         printf("Failed to load game over sound: %s\n", Mix_GetError());
     }
 
-    if (system->f22_engine) Mix_VolumeChunk(system->f22_engine, ENGINE_VOLUME);
-    if (system->collision) Mix_VolumeChunk(system->collision, COLLISION_VOLUME);
-    if (system->game_over) Mix_VolumeChunk(system->game_over, GAME_OVER_VOLUME);
+    if (system->f22_engine) Mix_VolumeChunk(system->f22_engine, system->sfx_volume);
+    if (system->collision) Mix_VolumeChunk(system->collision, system->sfx_volume);
+    if (system->game_over) Mix_VolumeChunk(system->game_over, system->sfx_volume);
+    Mix_VolumeMusic(system->music_volume);
 
     // Set up music finished callback
     Mix_HookMusicFinished(music_finished_callback);
@@ -187,4 +191,29 @@ void sound_system_play_game_over(SoundSystem* system) {
     if (system->game_over) {
         Mix_PlayChannel(-1, system->game_over, 0);
     }
+}
+
+EMSCRIPTEN_KEEPALIVE
+void setSFXVolume(int volume) {
+    if (!g_sound_system) return;
+    
+    // Store the new volume in the system
+    g_sound_system->sfx_volume = volume;
+    
+    // Update all sound effects
+    if (g_sound_system->f22_engine) 
+        Mix_VolumeChunk(g_sound_system->f22_engine, volume);
+    if (g_sound_system->collision) 
+        Mix_VolumeChunk(g_sound_system->collision, volume);
+    if (g_sound_system->game_over) 
+        Mix_VolumeChunk(g_sound_system->game_over, volume);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void setMusicVolume(int volume) {
+    if (!g_sound_system) return;
+    
+    // Store the new volume in the system
+    g_sound_system->music_volume = volume;
+    Mix_VolumeMusic(volume);
 }

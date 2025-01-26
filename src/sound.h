@@ -4,11 +4,14 @@
 
 #include <SDL_mixer.h>
 #include <stdbool.h>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
-#define NUM_MUSIC_TRACKS 8
-#define ENGINE_VOLUME 50     // 25% volume (0-128 range)
-#define COLLISION_VOLUME 75  // 75% volume
-#define MUSIC_VOLUME 32      // 25% volume
+#define NUM_MUSIC_TRACKS 7
+#define ENGINE_VOLUME 75     // 25% volume (0-128 range)
+#define COLLISION_VOLUME 50
+#define MUSIC_VOLUME 50
 #define GAME_OVER_VOLUME 50
 
 typedef struct {
@@ -21,6 +24,8 @@ typedef struct {
     int engine_channel;       // keep track of which channel plays engine
     bool initialized;
     int current_track;
+    int sfx_volume;
+    int music_volume;
 } SoundSystem;
 
 static SoundSystem* g_sound_system = NULL;
@@ -42,5 +47,8 @@ void sound_system_play_game_over(SoundSystem* system);
 SoundSystem* get_sound_system();
 void set_sound_system(SoundSystem* system);
 void play_random();
+
+void setSFXVolume(int volume);
+void setMusicVolume(int volume);
 
 #endif
