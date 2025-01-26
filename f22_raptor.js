@@ -31,7 +31,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmpt_l1_gdt.js
+// include: /tmp/tmp2o3h45zp.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -50,8 +50,8 @@ if (ENVIRONMENT_IS_NODE) {
         // web worker
         PACKAGE_PATH = encodeURIComponent(location.pathname.substring(0, location.pathname.lastIndexOf('/')) + '/');
       }
-      var PACKAGE_NAME = 'f22_game.data';
-      var REMOTE_PACKAGE_BASE = 'f22_game.data';
+      var PACKAGE_NAME = 'f22_raptor.data';
+      var REMOTE_PACKAGE_BASE = 'f22_raptor.data';
       var REMOTE_PACKAGE_NAME = Module['locateFile'] ? Module['locateFile'](REMOTE_PACKAGE_BASE, '') : REMOTE_PACKAGE_BASE;
 var REMOTE_PACKAGE_SIZE = metadata['remote_package_size'];
 
@@ -187,10 +187,10 @@ Module['FS_createPath']("/assets/sounds", "music", true, true);
           var files = metadata['files'];
           for (var i = 0; i < files.length; ++i) {
             DataRequest.prototype.requests[files[i].filename].onload();
-          }          Module['removeRunDependency']('datafile_f22_game.data');
+          }          Module['removeRunDependency']('datafile_f22_raptor.data');
 
       };
-      Module['addRunDependency']('datafile_f22_game.data');
+      Module['addRunDependency']('datafile_f22_raptor.data');
 
       Module['preloadResults'] ??= {};
 
@@ -214,21 +214,21 @@ Module['FS_createPath']("/assets/sounds", "music", true, true);
 
   })();
 
-// end include: /tmp/tmpt_l1_gdt.js
-// include: /tmp/tmp0cmww504.js
+// end include: /tmp/tmp2o3h45zp.js
+// include: /tmp/tmpwlqkg5vq.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmp0cmww504.js
-// include: /tmp/tmpq8ce9ugr.js
+  // end include: /tmp/tmpwlqkg5vq.js
+// include: /tmp/tmpx6t4837j.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmpq8ce9ugr.js
+  // end include: /tmp/tmpx6t4837j.js
 
 
 // Sometimes an existing Module object exists with properties
@@ -905,7 +905,7 @@ function createExportWrapper(name, nargs) {
 
 var wasmBinaryFile;
 function findWasmBinary() {
-    var f = 'f22_game.wasm';
+    var f = 'f22_raptor.wasm';
     if (!isDataURI(f)) {
       return locateFile(f);
     }
