@@ -1,35 +1,19 @@
 name: Build and Deploy
-
 on:
   push:
     branches: [ master ]
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
       - name: Setup Emscripten
         uses: mymindstorm/setup-emsdk@v11
-
       - name: Build
         run: |
-          mkdir build
-          cd build
+          mkdir -p public
+          cd public
           emcmake cmake ..
           emmake make
-
-      - name: Setup public directory
-        run: |
-          rm -rf public/*
-          mkdir -p public
-          cp build/f22_game.* public/
-          cp -r assets public/
-
-      - name: Deploy to Github Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: public
-          branch: gh-pages
-          clean: true
+          cp f22_game.* ./
+          cp -r ../assets ./
