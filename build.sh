@@ -1,14 +1,12 @@
 #!/bin/bash
-
-# make build dir if it doesn't exist
-mkdir -p build
-
-# setup emscripten build
+curl -L https://github.com/emscripten-core/emsdk/archive/main.tar.gz -o emsdk.tar.gz
+tar -xf emsdk.tar.gz
+cd emsdk-main
+./emsdk install latest
+./emsdk activate latest
+source ./emsdk_env.sh
+cd ..
+mkdir build
 cd build
 emcmake cmake ..
 emmake make
-
-# copy built files to public
-mkdir -p ../public
-cp f22_game.* ../public/
-cp -r ../assets ../public/
