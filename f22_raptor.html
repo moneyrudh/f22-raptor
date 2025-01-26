@@ -45,7 +45,6 @@
                 outline: none;
             }
             #controls {
-                position: fixed;
                 bottom: 40px;
                 color: white;
                 font-family: 'Press Start 2P', monospace;
@@ -53,6 +52,10 @@
                 font-weight: 300;
                 text-align: center;
                 width: 100%;
+            }
+            #controls, .sound-controls {
+                position: fixed;
+                bottom: 40px;
             }
             #submit-modal {
                 position: fixed;
@@ -208,7 +211,7 @@
                 left: 50%;
                 transform: translate(-50%, -50%);
                 width: 1300px;
-                height: 796px;
+                height: 800px;
                 background: rgba(0, 0, 0, 0.95);
                 display: flex;
                 font-family: 'Press Start 2P';
@@ -286,6 +289,52 @@
             .close-button:hover {
                 color: #ff3e3e;
             }
+
+            .sound-controls {
+                width: 1300px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                justify-content: flex-start;
+                bottom: 40px;
+                gap: 16px;
+            }
+
+            .switch-container {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-family: 'Press Start 2P';
+                color: white;
+                font-size: 12px;
+            }
+
+            .switch {
+                width: 48px;
+                height: 24px;
+                background: #333;
+                border: 2px solid white;
+                cursor: pointer;
+                position: relative;
+            }
+
+            .switch-knob {
+                width: 20px;
+                height: 20px;
+                background: white;
+                position: absolute;
+                transition: left 0.2s;
+            }
+
+            .switch[data-on="true"] .switch-knob {
+                left: 26px;
+                background: #50cb13;
+            }
+
+            .switch[data-on="false"] .switch-knob {
+                left: 2px;
+                background: #ff3e3e;
+            }
         </style>
     </head>
     <body>
@@ -294,9 +343,23 @@
             <canvas id="textCanvas"></canvas>
             <canvas id="startTextCanvas"></canvas>
         </div>
+        <div class="sound-controls">
+            <div class="switch-container">
+                <span>sfx</span>
+                <div class="switch" data-on="true" id="sfx-switch">
+                    <div class="switch-knob"></div>
+                </div>
+            </div>
+            <div class="switch-container">
+                <span>music</span>
+                <div class="switch" data-on="true" id="music-switch">
+                    <div class="switch-knob"></div>
+                </div>
+            </div>
+        </div>
         <div id="game-header">
             <div class="title">f22raptor</div>
-            <button id="leaderboard-btn">leaderboard</button>
+            <button class="leaderboard-btn" id="leaderboard-btn">leaderboard</button>
             <div class="credit">made by <a href="https://x.com/moneyrudh" target="_blank">bluedot</a></div>
         </div>
         <div id="submit-modal" class="hidden">
@@ -349,7 +412,7 @@
                     
                     const submitBtn = document.querySelector('.submit-btn');
                     const noBtn = document.querySelector('.no-btn');
-                    const leaderboardBtn = document.getElementById('leaderboard-btn');
+                    const leaderboardBtn = document.querySelector('.leaderboard-btn');
                     
                     let state = 0;
                     let finalScore = 0;
@@ -385,10 +448,11 @@
                     
                     document.addEventListener('keydown', keyHandler);
 
-                    leaderboardBtn.onclick = async () => {
+                    leaderboardBtn.addEventListener('click', async () => {
                         const modal = document.getElementById('leaderboard-modal');
-                        modal.style.display = 'flex';
+                        if (modal.style.display === 'flex') return;  // prevent multiple opens
                         leaderboardBtn.disabled = true;
+                        modal.style.display = 'flex';
                          
                         document.querySelector('.close-button').onclick = () => {
                             modal.style.display = 'none';
@@ -398,8 +462,8 @@
                         if (allTimeScores === undefined || dailyScores === undefined) {
                             // fetch both leaderboards
                             const [allTime, daily] = await Promise.all([
-                                fetch('http://localhost:3000/all_time').then(r => r.json()),
-                                fetch('http://localhost:3000/get_daily').then(r => r.json())
+                                fetch('https://f22-server.vercel.app/all_time').then(r => r.json()),
+                                fetch('https://f22-server.vercel.app/get_daily').then(r => r.json())
                             ]);
                             allTimeScores = allTime;
                             dailyScores = daily;
@@ -430,7 +494,8 @@
 
                         renderScores(allTimeScores, 'alltime-scores');
                         renderScores(dailyScores, 'daily-scores');
-                    };
+                        leaderboardBtn.disabled = true;
+                    });
                     // Handle Submit button
                     submitBtn.addEventListener('click', async () => {
                         submitBtn.disabled = true;
@@ -449,7 +514,7 @@
                         
                         try {
                             // First verify the user exists
-                            const verifyRes = await fetch(`http://localhost:3000/verify/${username.toString()}`);
+                            const verifyRes = await fetch(`https://f22-server.vercel.app/verify/${username.toString()}`);
                             const verifyData = await verifyRes.json();
                             
                             if (!verifyData.valid) {
@@ -461,7 +526,7 @@
                             }
 
                             // If verified, submit the score
-                            const submitRes = await fetch('http://localhost:3000/submission', {
+                            const submitRes = await fetch('https://f22-server.vercel.app/submission', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ 
@@ -580,6 +645,23 @@
                     drawScore();
                     if (!gameStarted) drawStartText();
                     document.getElementById("controls").click();
+
+                    // add this inside Module.onRuntimeInitialized
+                    const sfxSwitch = document.getElementById('sfx-switch');
+                    const musicSwitch = document.getElementById('music-switch');
+
+                    [sfxSwitch, musicSwitch].forEach(switchEl => {
+                        switchEl.addEventListener('click', () => {
+                            const isOn = switchEl.dataset.on === 'true';
+                            switchEl.dataset.on = (!isOn).toString();
+                            
+                            if (switchEl.id === 'sfx-switch') {
+                            Module._setSFXVolume(isOn ? 0 : 75);
+                            } else {
+                            Module._setMusicVolume(isOn ? 0 : 50);
+                            }
+                        });
+                    });
                 }
             };
         </script>

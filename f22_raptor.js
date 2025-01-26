@@ -31,7 +31,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmp2o3h45zp.js
+// include: /tmp/tmp87sezw5i.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -214,21 +214,21 @@ Module['FS_createPath']("/assets/sounds", "music", true, true);
 
   })();
 
-// end include: /tmp/tmp2o3h45zp.js
-// include: /tmp/tmpwlqkg5vq.js
+// end include: /tmp/tmp87sezw5i.js
+// include: /tmp/tmpuo9g59bd.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmpwlqkg5vq.js
-// include: /tmp/tmpx6t4837j.js
+  // end include: /tmp/tmpuo9g59bd.js
+// include: /tmp/tmp04s1njbz.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmpx6t4837j.js
+  // end include: /tmp/tmp04s1njbz.js
 
 
 // Sometimes an existing Module object exists with properties
@@ -10133,6 +10133,8 @@ createWasm();
 var ___wasm_call_ctors = createExportWrapper('__wasm_call_ctors', 0);
 var _main = Module['_main'] = createExportWrapper('main', 2);
 var _free = Module['_free'] = createExportWrapper('free', 1);
+var _setSFXVolume = Module['_setSFXVolume'] = createExportWrapper('setSFXVolume', 1);
+var _setMusicVolume = Module['_setMusicVolume'] = createExportWrapper('setMusicVolume', 1);
 var _malloc = Module['_malloc'] = createExportWrapper('malloc', 1);
 var _strerror = createExportWrapper('strerror', 1);
 var _fflush = createExportWrapper('fflush', 1);
