@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
-project(f22_game)
+project(f22_raptor)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(f22_game
+add_executable(f22_raptor
     src/main.c
     src/f22.c
     src/game_state.c
@@ -32,7 +32,7 @@ if(EMSCRIPTEN)
          -sSTACK_SIZE=131072 \
          -sSDL2_MIXER_FORMATS=['mp3'] \
          --preload-file ${CMAKE_SOURCE_DIR}/assets@/assets \
-         --shell-file ${CMAKE_SOURCE_DIR}/template.html"
+         --shell-file ${CMAKE_SOURCE_DIR}/index.html"
     )
     
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMPILE_FLAGS}")

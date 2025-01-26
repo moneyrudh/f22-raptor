@@ -28,3 +28,5 @@ zig-out/
 f22-raptor
 
 .DS_Store
+
+public/

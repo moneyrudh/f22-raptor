@@ -1,4 +1,7 @@
 {
     "version": 2,
-    "outputDirectory": "public"
+    "outputDirectory": "public",
+    "routes": [
+        { "src": "/", "dest": "/f22_raptor.html" }
+    ]
 }
