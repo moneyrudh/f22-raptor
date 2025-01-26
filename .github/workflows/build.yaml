@@ -15,5 +15,4 @@ jobs:
           cd public
           emcmake cmake ..
           emmake make
-          cp f22_game.* ./
           cp -r ../assets ./
