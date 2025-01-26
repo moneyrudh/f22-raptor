@@ -1,9 +1,10 @@
 {
     "version": 2,
     "builds": [
-      { "src": "public/**", "use": "@vercel/static" }
+      { "src": "public/**/*", "use": "@vercel/static" }
     ],
     "routes": [
+      { "src": "/", "dest": "/public/f22_game.html" },
       { "src": "/(.*)", "dest": "/public/$1" }
     ]
   }
