@@ -224,6 +224,7 @@
             background: rgba(0, 0, 0, 0.95);
             font-family: "Press Start 2P";
             display: none;
+            z-index: 20;
         }
 
         .leaderboard-section {
@@ -352,38 +353,39 @@
         }
 
         @media (max-width: 1350px) and (min-height: 600px) {
-    .canvas-container {
-        width: 80vw;  /* responsive width */
-        height: auto;  /* maintain aspect ratio */
-    }
+            .canvas-container {
+            width: 80vw; /* responsive width */
+            height: auto; /* maintain aspect ratio */
+            }
 
-    canvas {
-        width: 100%;  /* fill container */
-        height: auto;  /* maintain aspect ratio */
-    }
+            canvas {
+            width: 100%; /* fill container */
+            height: auto; /* maintain aspect ratio */
+            }
 
-    /* header should match canvas width */
-    #game-header {
-        width: 80vw;  /* match canvas container */
-        left: 50%;
-        transform: translateX(-50%);  /* center it */
-    }
+            /* header should match canvas width */
+            #game-header {
+            width: 80vw; /* match canvas container */
+            left: 50%;
+            transform: translateX(-50%); /* center it */
+            }
 
-    /* sound controls should also match */
-    .sound-controls {
-        width: 80vw;
-        left: 50%;
-        transform: translateX(-50%);
-    }
+            /* sound controls should also match */
+            .sound-controls {
+            width: 80vw;
+            left: 50%;
+            transform: translateX(-50%);
+            }
 
-    /* modals should scale with viewport */
-    #submit-modal, #leaderboard-modal {
-        width: 80vw;
-        height: auto;
-        aspect-ratio: 1300/800;  /* maintain game aspect ratio */
-    }
+            /* modals should scale with viewport */
+            #submit-modal,
+            #leaderboard-modal {
+            width: 80vw;
+            height: auto;
+            aspect-ratio: 1300/800; /* maintain game aspect ratio */
+            }
 
-    #textCanvas {
+            #textCanvas {
             position: absolute;
             top: 2px;
             right: 2px;
@@ -412,39 +414,113 @@
             }
 
             .title {
-        font-size: 2vw;  /* from 36px */
-    }
+            font-size: 2vw; /* from 36px */
+            }
 
-    .credit {
-        font-size: 1vw;  /* from 14px */
-    }
+            .credit {
+            font-size: 1vw; /* from 14px */
+            }
 
-    #leaderboard-btn {
-        font-size: 1.2vw;  /* from 18px */
-        padding: 0.5vw;   /* smaller padding for compact look */
-    }
+            #leaderboard-btn {
+            font-size: 1.2vw; /* from 18px */
+            padding: 0.5vw; /* smaller padding for compact look */
+            }
 
-    /* Sound controls */
-    .switch-container {
-        font-size: 0.9vw;  /* from 12px */
-        height: 20px;      /* fixed height works better for switches */
-    }
+            /* Sound controls */
+            .switch-container {
+            font-size: 0.9vw; /* from 12px */
+            height: 20px; /* fixed height works better for switches */
+            }
 
-    .switch {
-        width: 36px;      /* slightly smaller but fixed size */
-        height: 18px;     /* to maintain usability */
-    }
+            .switch {
+            width: 36px; /* slightly smaller but fixed size */
+            height: 18px; /* to maintain usability */
+            }
 
-    .switch-knob {
-        width: 14px;
-        height: 14px;
-    }
+            .switch-knob {
+            width: 14px;
+            height: 14px;
+            }
 
-    /* Controls text */
-    #controls {
-        font-size: 1vw;  /* from 15px */
-    }
-}
+            /* Controls text */
+            #controls {
+            font-size: 1vw; /* from 15px */
+            }
+
+            #submit-modal,
+            #leaderboard-modal {
+            width: 80vw;
+            height: calc(80vw * 800 / 1300); /* maintain aspect ratio */
+            padding: 5px;
+            box-sizing: border-box;
+            }
+
+            /* Scale modal content */
+            .score-label {
+            font-size: calc(32px * 0.8);
+            }
+
+            .score-value {
+            font-size: calc(60px * 0.8);
+            }
+
+            #username-input {
+            width: 60%;
+            font-size: calc(16px * 0.8);
+            padding: 8px;
+            }
+
+            .button-container {
+            width: 60%;
+            }
+
+            .modal-btn {
+            font-size: calc(14px * 0.8);
+            padding: 8px;
+            }
+
+            .leaderboard-section {
+            padding-top: 16px;
+            }
+
+            /* Leaderboard content scaling */
+            .leaderboard-section h2 {
+            font-size: 2vw;
+            margin-bottom: 12px;
+            }
+
+            .rank {
+            font-size: 1vw;
+            width: 20px;
+            }
+
+            .player-info {
+            gap: 1vw; /* reduced gap */
+            }
+
+            .player-info img {
+            width: 1vw;
+            height: 1vw;
+            }
+
+            .player-info a {
+            font-size: 1vw;
+            }
+
+            .score {
+            font-size: 1vw;
+            }
+
+            .close-button {
+            font-size: 18px;
+            padding: 6px;
+            }
+
+            .switch[data-on="true"] .switch-knob {
+            left: 20px;
+            background: #50cb13;
+            }
+        }
 
         @media (max-height: 600px) and (orientation: landscape) {
             body {
@@ -548,6 +624,142 @@
             left: 2px; /* adjusted position for smaller switch */
             }
         }
+
+        @media (max-width: 600px) and (orientation: portrait) {
+            .canvas-container {
+            display: none;
+            }
+
+            .rotate-warning {
+            display: flex !important;
+            }
+
+            .sound-controls {
+            display: none;
+            }
+
+            .switch-container {
+            display: none;
+            }
+
+            #controls {
+            display: none;
+            }
+
+            .leaderboard-section {
+            padding-top: 10px;
+            }
+
+            /* Leaderboard content scaling */
+            .leaderboard-section h2 {
+            font-size: 1vw;
+            margin-bottom: 10px;
+            }
+
+            .rank {
+            font-size: 1vw;
+            width: 5px;
+            }
+
+            .player-info {
+            gap: 5px; /* reduced gap */
+            }
+
+            .player-info img {
+            width: 0.5vw;
+            height: 0.5vw;
+            }
+
+            .player-info a {
+            font-size: 1vw;
+            }
+
+            .score {
+            font-size: 1vw;
+            }
+
+            .score-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+            }
+
+            .close-button {
+            font-size: 10px;
+            padding: 3px;
+            }
+
+            .switch[data-on="true"] .switch-knob {
+            left: 18px; /* adjusted position for smaller switch */
+            }
+
+            .switch[data-on="false"] .switch-knob {
+            left: 2px; /* adjusted position for smaller switch */
+            }
+        }
+
+        @media (max-width: 600px) {
+            /* Portrait mode */
+            /* @media (orientation: portrait) {
+                #leaderboard-modal {
+                    display: block;
+                    width: 90vw;
+                    height: 80vh;
+                    font-size: 14px;
+                    display: none;
+                }
+                } */
+
+            /* Landscape mode */
+            @media (orientation: landscape) {
+            #leaderboard-modal {
+                display: none !important;
+            }
+
+            #leaderboard-btn {
+                display: none;
+            }
+            }
+        }
+
+        .rotate-warning {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 15;
+        }
+
+        .warning-content {
+            text-align: center;
+            font-family: "Press Start 2P";
+            color: white;
+        }
+
+        .warning-text {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .warning-icon {
+            font-size: 48px;
+            animation: rotate 2s infinite linear;
+        }
+
+        @keyframes rotate {
+            from {
+            transform: rotate(0deg);
+            }
+            to {
+            transform: rotate(360deg);
+            }
+        }
         </style>
     </head>
     <body>
@@ -556,6 +768,12 @@
             <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
             <canvas id="textCanvas"></canvas>
             <canvas id="startTextCanvas"></canvas>
+        </div>
+        <div class="rotate-warning" style="display: none">
+            <div class="warning-content">
+            <div class="warning-text">Please rotate your device</div>
+            <div class="warning-icon">↻</div>
+            </div>
         </div>
         <div class="sound-controls">
             <div class="switch-container">
@@ -707,26 +925,28 @@
                 const html = scores
                     .map(
                     (score, i) => `
-                                    <div class="score-row">
-                                        <div class="rank" style="${getRankStyle(
-                                        i
-                                        )}">${i + 1}</div>
-                                        <div class="player-info">
-                                            <img src="${
-                                            score.profile_image ||
-                                            "/placeholder.png"
-                                            }" alt="">
-                                            <a href="${
-                                            score.profile_url
-                                            }" target="_blank" style="${getRankStyle(
+                                                <div class="score-row">
+                                                    <div class="rank" style="${getRankStyle(
+                                                    i
+                                                    )}">${i + 1}</div>
+                                                    <div class="player-info">
+                                                        <img src="${
+                                                        score.profile_image ||
+                                                        "/placeholder.png"
+                                                        }" alt="">
+                                                        <a href="${
+                                                        score.profile_url
+                                                        }" target="_blank" style="${getRankStyle(
                         i
                     )}">@${score.username}</a>
-                                        </div>
-                                        <div class="score" style="${getRankStyle(
-                                        i
-                                        )}">${Math.floor(score.score)}</div>
-                                    </div>
-                                `
+                                                    </div>
+                                                    <div class="score" style="${getRankStyle(
+                                                    i
+                                                    )}">${Math.floor(
+                        score.score
+                    )}</div>
+                                                </div>
+                                            `
                     )
                     .join("");
                 document.getElementById(containerId).innerHTML = html;
