@@ -351,41 +351,102 @@
             height: fit-content;
         }
 
-        @media (max-width: 1350px) and (min-height: 430px) {
-            .game-wrapper {
-            transform: scale(0.8);
-            transform-origin: center center;
+        @media (max-width: 1350px) and (min-height: 600px) {
+    .canvas-container {
+        width: 80vw;  /* responsive width */
+        height: auto;  /* maintain aspect ratio */
+    }
+
+    canvas {
+        width: 100%;  /* fill container */
+        height: auto;  /* maintain aspect ratio */
+    }
+
+    /* header should match canvas width */
+    #game-header {
+        width: 80vw;  /* match canvas container */
+        left: 50%;
+        transform: translateX(-50%);  /* center it */
+    }
+
+    /* sound controls should also match */
+    .sound-controls {
+        width: 80vw;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    /* modals should scale with viewport */
+    #submit-modal, #leaderboard-modal {
+        width: 80vw;
+        height: auto;
+        aspect-ratio: 1300/800;  /* maintain game aspect ratio */
+    }
+
+    #textCanvas {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 40%;
+            height: 20%;
+            background-color: transparent;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            pointer-events: none;
+            outline: none;
             }
 
-            #game-header {
-            width: 80vw; /* responsive width */
-            max-width: 1300px;
-            transform: scale(0.8);
-            transform-origin: top center;
+            #startTextCanvas {
+            position: absolute;
+            top: 40%;
+            right: 2px;
+            width: 40%;
+            height: 20%;
+            background-color: transparent;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            pointer-events: none;
+            outline: none;
             }
 
-            .sound-controls {
-            width: 80vw; /* responsive width */
-            max-width: 1300px;
-            bottom: 20px; /* adjusted for scaled size */
-            }
+            .title {
+        font-size: 2vw;  /* from 36px */
+    }
 
-            #controls {
-            font-size: 12px;
-            bottom: 20px;
-            }
+    .credit {
+        font-size: 1vw;  /* from 14px */
+    }
 
-            /* adjust modal sizes */
-            #submit-modal,
-            #leaderboard-modal {
-            width: 80vw;
-            max-width: 1300px;
-            height: auto;
-            aspect-ratio: 1300/800; /* maintain game aspect ratio */
-            }
-        }
+    #leaderboard-btn {
+        font-size: 1.2vw;  /* from 18px */
+        padding: 0.5vw;   /* smaller padding for compact look */
+    }
 
-        @media (max-height: 430px) and (orientation: landscape) {
+    /* Sound controls */
+    .switch-container {
+        font-size: 0.9vw;  /* from 12px */
+        height: 20px;      /* fixed height works better for switches */
+    }
+
+    .switch {
+        width: 36px;      /* slightly smaller but fixed size */
+        height: 18px;     /* to maintain usability */
+    }
+
+    .switch-knob {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* Controls text */
+    #controls {
+        font-size: 1vw;  /* from 15px */
+    }
+}
+
+        @media (max-height: 600px) and (orientation: landscape) {
             body {
             margin: 0;
             padding: 0;
