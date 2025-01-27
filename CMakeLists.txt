@@ -32,7 +32,7 @@ if(EMSCRIPTEN)
          -sSTACK_SIZE=131072 \
          -sSDL2_MIXER_FORMATS=['mp3'] \
          --preload-file ${CMAKE_SOURCE_DIR}/assets@/assets \
-         --shell-file ${CMAKE_SOURCE_DIR}/index.html"
+         --shell-file ${CMAKE_SOURCE_DIR}/template.html"
     )
     
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMPILE_FLAGS}")

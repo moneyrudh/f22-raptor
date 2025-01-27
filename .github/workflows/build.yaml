@@ -25,6 +25,7 @@ jobs:
           mkdir -p public
           cp build/f22_raptor.* public/
           cp -r assets public/
+          cp index.html public/
 
       - name: Deploy to Github Pages
         uses: JamesIves/github-pages-deploy-action@v4
