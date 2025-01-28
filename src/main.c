@@ -30,12 +30,12 @@ int eventFilter(void* userdata, SDL_Event* event) {
         /*initAudio();*/
 #ifdef __EMSCRIPTEN__
         EM_ASM({
-          if(SDL2.audioContext && SDL2.audioContext.currentTime == 0) {
+          if(Module.audioContext && Module.audioContext.currentTime == 0) {
             console.log("attempting to unlock");
-            var buffer = SDL2.audioContext.createBuffer(1, 1, 22050);
-            var source = SDL2.audioContext.createBufferSource();
+            var buffer = Module.audioContext.createBuffer(1, 1, 22050);
+            var source = Module.audioContext.createBufferSource();
             source.buffer = buffer;
-            source.connect(SDL2.audioContext.destination);
+            source.connect(Module.audioContext.destination);
             source.noteOn(0);
           }
         });
