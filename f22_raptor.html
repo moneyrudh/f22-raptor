@@ -769,9 +769,6 @@
             <canvas id="textCanvas"></canvas>
             <canvas id="startTextCanvas"></canvas>
         </div>
-        <div id="audio-prompt" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); padding: 20px; border-radius: 4px; font-family: 'Press Start 2P'; color: white; text-align: center; cursor: pointer;">
-            <div>Tap to enable sound</div>
-        </div>
         <div class="rotate-warning" style="display: none">
             <div class="warning-content">
             <div class="warning-text">Please rotate your device</div>
@@ -869,7 +866,6 @@
                 
                 audioInitialized = true;
                 Module.audioContext = audioContext;
-                
             } catch (e) {
                 console.error('Audio init failed:', e);
             }
@@ -1211,15 +1207,6 @@
 
             document.querySelector(".sound-controls").style.display = "flex";
 
-            const audioPrompt = document.getElementById('audio-prompt');
-            if (/iPhone|iPad|iPod|Safari/i.test(navigator.userAgent) && !audioInitialized) {
-                audioPrompt.style.display = 'block';
-                
-                audioPrompt.addEventListener('click', () => {
-                    initAudioContext();
-                    audioPrompt.style.display = 'none';
-                });
-            }
             ['click', 'touchstart', 'touchend', 'mousedown', 'keydown'].forEach(event => {
             document.addEventListener(event, function() {
                 if (!audioInitialized) {
