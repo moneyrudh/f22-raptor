@@ -31,11 +31,6 @@ int eventFilter(void* userdata, SDL_Event* event) {
             EM_ASM({
                 if (!audioInitialized) {
                     initAudioContext();
-                    setTimeout(function() {
-                        if (typeof Module._playRandom === 'function') {
-                            Module._playRandom();
-                        }
-                    }, 100);
                 }
             });
             break;
