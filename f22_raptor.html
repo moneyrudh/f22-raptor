@@ -834,38 +834,41 @@
         <script>
         // Add this right after your Module declaration, before the canvas setup
         let audioContext = null;
-            let audioInitialized = false;
+        let audioInitialized = false;
 
-            function initAudioContext() {
+        function initAudioContext() {
             if (audioInitialized) return;
             
             try {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Create unlock promise
+                const unlockAudio = async () => {
+                    if (audioContext.state === 'suspended') {
+                        const unlockBuffer = audioContext.createBuffer(1, 1, 22050);
+                        const source = audioContext.createBufferSource();
+                        source.buffer = unlockBuffer;
+                        source.connect(audioContext.destination);
+                        await source.start(0);
+                        return new Promise(resolve => setTimeout(resolve, 50));
+                    }
+                    return Promise.resolve();
+                };
+
+                // Attempt unlock and only then initialize audio
+                unlockAudio().then(() => {
+                    audioInitialized = true;
+                    Module.audioContext = audioContext;
+                    if (typeof Module._playRandom === 'function') {
+                        Module._playRandom();
+                    }
+                });
+
                 audioContext.addEventListener('statechange', () => {
                     if (audioContext.state === 'suspended') {
                         audioContext.resume();
                     }
                 });
-                // iOS Safari specific unlocker
-                if (audioContext.state === 'suspended') {
-                const unlockBuffer = audioContext.createBuffer(1, 1, 22050);
-                const unlockSource = audioContext.createOscillator();
-                const unlockGain = audioContext.createGain();
-                
-                unlockGain.gain.value = 0.001; // super quiet
-                unlockSource.connect(unlockGain);
-                unlockGain.connect(audioContext.destination);
-                unlockSource.start(0);
-                unlockSource.stop(0.001);
-                }
-                
-                Module.audioContext = audioContext;
-                audioInitialized = true;
-                
-                // Start music once audio is initialized
-                if (typeof Module._playRandom === 'function') {
-                Module._playRandom();
-                }
             } catch (e) {
                 console.error('Audio init failed:', e);
             }
@@ -1216,6 +1219,13 @@
                     audioPrompt.style.display = 'none';
                 });
             }
+            ['click', 'touchstart', 'touchend', 'mousedown', 'keydown'].forEach(event => {
+            document.addEventListener(event, function() {
+                if (!audioInitialized) {
+                initAudioContext();
+                }
+            }, {once: true});  // important: only need first interaction
+            });
             },
         };
         </script>
