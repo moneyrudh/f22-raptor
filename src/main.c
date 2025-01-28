@@ -23,6 +23,28 @@ typedef struct {
     float frame_time;          // Target time per frame in ms
 } GameContext;
 
+int eventFilter(void* userdata, SDL_Event* event) {
+    switch(event->type){
+      case SDL_FINGERDOWN:
+      case SDL_MOUSEBUTTONDOWN:
+        /*initAudio();*/
+#ifdef __EMSCRIPTEN__
+        EM_ASM({
+          if(SDL2.audioContext && SDL2.audioContext.currentTime == 0) {
+            console.log("attempting to unlock");
+            var buffer = SDL2.audioContext.createBuffer(1, 1, 22050);
+            var source = SDL2.audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.connect(SDL2.audioContext.destination);
+            source.noteOn(0);
+          }
+        });
+#endif
+        break;
+    }
+    return 1;
+}
+
 void handle_input(GameContext* ctx) {
     if (ctx->game_state.state == GAME_STATE_OVER) return;
     SDL_Event event;
@@ -128,6 +150,8 @@ int main() {
         SDL_Log("SDL init failed: %s", SDL_GetError());
         return 1;
     }
+
+    SDL_SetEventFilter(eventFilter, NULL);
 
     // Initialize context with new timing variables
     GameContext ctx = {
