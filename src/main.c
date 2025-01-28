@@ -32,7 +32,6 @@ void handle_input(GameContext* ctx) {
                 ctx->quit = true;
                 break;
             case SDL_MOUSEBUTTONDOWN:
-            case SDL_FINGERDOWN:
                 game_state_handle_click(&ctx->game_state, event.button.x, event.button.y);
                 #ifdef __EMSCRIPTEN__
                 EM_ASM(
@@ -45,7 +44,6 @@ void handle_input(GameContext* ctx) {
                 switch (event.key.keysym.sym) {
                     case SDLK_SPACE:
                     case SDLK_UP:
-                    case SDL_FINGERDOWN:
                         ctx->thrust_active = true;
                         sound_system_start_engine(&ctx->game_state.sound_system);
                         break;
@@ -59,11 +57,18 @@ void handle_input(GameContext* ctx) {
                     //     break;
                 }
                 break;
+            case SDL_FINGERDOWN:
+                ctx->thrust_active = true;
+                sound_system_start_engine(&ctx->game_state.sound_system);
+                break;
+            case SDL_FINGERUP:
+                ctx->thrust_active = false;
+                sound_system_stop_engine(&ctx->game_state.sound_system);
+                break;
             case SDL_KEYUP:
                 switch (event.key.keysym.sym) {
                     case SDLK_SPACE:
                     case SDLK_UP:
-                    case SDL_FINGERDOWN:
                         ctx->thrust_active = false;
                         sound_system_stop_engine(&ctx->game_state.sound_system);
                         break;
