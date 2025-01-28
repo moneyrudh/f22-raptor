@@ -769,6 +769,9 @@
             <canvas id="textCanvas"></canvas>
             <canvas id="startTextCanvas"></canvas>
         </div>
+        <div id="audio-prompt" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); padding: 20px; border-radius: 4px; font-family: 'Press Start 2P'; color: white; text-align: center; cursor: pointer;">
+            <div>Tap to enable sound</div>
+        </div>
         <div class="rotate-warning" style="display: none">
             <div class="warning-content">
             <div class="warning-text">Please rotate your device</div>
@@ -829,17 +832,67 @@
         </div>
         <div id="controls">hold space / up - thrust</div>
         <script>
+        // Add this right after your Module declaration, before the canvas setup
+        let audioContext = null;
+            let audioInitialized = false;
+
+            function initAudioContext() {
+            if (audioInitialized) return;
+            
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                audioContext.addEventListener('statechange', () => {
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+                });
+                // iOS Safari specific unlocker
+                if (audioContext.state === 'suspended') {
+                const unlockBuffer = audioContext.createBuffer(1, 1, 22050);
+                const unlockSource = audioContext.createOscillator();
+                const unlockGain = audioContext.createGain();
+                
+                unlockGain.gain.value = 0.001; // super quiet
+                unlockSource.connect(unlockGain);
+                unlockGain.connect(audioContext.destination);
+                unlockSource.start(0);
+                unlockSource.stop(0.001);
+                }
+                
+                Module.audioContext = audioContext;
+                audioInitialized = true;
+                
+                // Start music once audio is initialized
+                if (typeof Module._playRandom === 'function') {
+                Module._playRandom();
+                }
+            } catch (e) {
+                console.error('Audio init failed:', e);
+            }
+        }
         var Module = {
             canvas: (function () {
-            var canvas = document.getElementById("canvas");
-            canvas.addEventListener(
-                "webglcontextlost",
-                function (e) {
-                e.preventDefault();
-                },
-                false
-            );
-            return canvas;
+                var canvas = document.getElementById("canvas");
+                canvas.addEventListener(
+                    "webglcontextlost",
+                    function (e) {
+                    e.preventDefault();
+                    },
+                    false
+                );
+                canvas.addEventListener("click", function() {
+                    if (!audioInitialized) {
+                        initAudioContext();
+                    }
+                }, false);
+
+                // Also add touch handler for mobile
+                canvas.addEventListener("touchstart", function() {
+                    if (!audioInitialized) {
+                        initAudioContext();
+                    }
+                    }, false);
+                return canvas;
             })(),
             onRuntimeInitialized: function () {
             const modal = document.getElementById("submit-modal");
@@ -1137,15 +1190,32 @@
                 const isOn = switchEl.dataset.on === "true";
                 switchEl.dataset.on = (!isOn).toString();
 
+                if (!audioInitialized) {
+                    initAudioContext();
+                }
+
                 if (switchEl.id === "sfx-switch") {
                     Module._setSFXVolume(isOn ? 0 : 75);
                 } else {
                     Module._setMusicVolume(isOn ? 0 : 50);
+                    if (!isOn && typeof Module._playRandom === 'function') {
+                        Module._playRandom();
+                    }
                 }
                 });
             });
 
             document.querySelector(".sound-controls").style.display = "flex";
+
+            const audioPrompt = document.getElementById('audio-prompt');
+            if (/iPhone|iPad|iPod|Safari/i.test(navigator.userAgent) && !audioInitialized) {
+                audioPrompt.style.display = 'block';
+                
+                audioPrompt.addEventListener('click', () => {
+                    initAudioContext();
+                    audioPrompt.style.display = 'none';
+                });
+            }
             },
         };
         </script>
