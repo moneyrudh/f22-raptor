@@ -837,35 +837,35 @@
             if (audioInitialized) return;
             
             try {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                audioContext = new (window.AudioContext || window.webkitAudioContext)({
+                  sampleRate: 44100,
+                  latencyHint: 'interactive',
+                });
                 
-                // Create unlock promise
-                const unlockAudio = async () => {
-                    if (audioContext.state === 'suspended') {
-                        const unlockBuffer = audioContext.createBuffer(1, 1, 22050);
-                        const source = audioContext.createBufferSource();
-                        source.buffer = unlockBuffer;
-                        source.connect(audioContext.destination);
-                        await source.start(0);
-                        return new Promise(resolve => setTimeout(resolve, 50));
-                    }
-                    return Promise.resolve();
-                };
-
-                // Attempt unlock and only then initialize audio
-                unlockAudio().then(() => {
-                    audioInitialized = true;
-                    Module.audioContext = audioContext;
-                    if (typeof Module._playRandom === 'function') {
-                        Module._playRandom();
-                    }
-                });
-
-                audioContext.addEventListener('statechange', () => {
-                    if (audioContext.state === 'suspended') {
-                        audioContext.resume();
-                    }
-                });
+                if (audioContext.state === 'suspended' && /iPhone|iPad|iPod|Safari/i.test(navigator.userAgent)) {
+                    const resumeAudio = async () => {
+                        await audioContext.resume();
+                        
+                        // Remove the event listeners once audio is unlocked
+                        ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(event => {
+                            document.body.removeEventListener(event, resumeAudio);
+                        });
+                    };
+                    
+                    ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(event => {
+                        document.body.addEventListener(event, resumeAudio);
+                    });
+                }
+                
+                // Create and play a silent buffer to unlock audio
+                const silentBuffer = audioContext.createBuffer(1, 1, 22050);
+                const source = audioContext.createBufferSource();
+                source.buffer = silentBuffer;
+                source.connect(audioContext.destination);
+                source.start();
+                
+                audioInitialized = true;
+                Module.audioContext = audioContext;
             } catch (e) {
                 console.error('Audio init failed:', e);
             }
