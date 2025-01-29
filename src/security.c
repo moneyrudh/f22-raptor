@@ -11,8 +11,9 @@
 
 // Get key from environment during build
 static const unsigned char* get_secret_key(void) {
-    const char* env_key = getenv("SCORE_SECRET_KEY");
-    return (unsigned char*)env_key;
+    #ifdef SCORE_SECRET_KEY
+    return (unsigned char*)SCORE_SECRET_KEY;
+    #endif
 }
 
 
