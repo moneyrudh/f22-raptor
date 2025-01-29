@@ -17,7 +17,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          emcmake cmake -DSCORE_SECRET_KEY=${{ secrets.SCORE_SECRET_KEY }}
+          emcmake cmake -DSCORE_SECRET_KEY=${{ secrets.SCORE_SECRET_KEY }} ..
           emmake make
 
       - name: Setup public directory
