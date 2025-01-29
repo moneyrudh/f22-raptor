@@ -972,6 +972,11 @@
                     return;
                 }
 
+                if (e.key === "Enter") {
+                    submitBtn.click();
+                    return;
+                }
+
                 if (/^[a-zA-Z0-9_]$/.test(e.key) && inputValue.length < 15) {
                     inputValue += e.key;
                     usernameInput.value = inputValue;
@@ -1272,6 +1277,8 @@
                 }
             }, {once: true});  // important: only need first interaction
             });
+
+            document.getElementById("canvas").focus();
             },
         };
         </script>
