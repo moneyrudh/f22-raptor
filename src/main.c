@@ -55,6 +55,7 @@ void handle_input(GameContext *ctx)
             ctx->quit = true;
             break;
         case SDL_MOUSEBUTTONDOWN:
+        case SDLK_SPACE:
             if (ctx->game_state.state == GAME_STATE_OVER)
                 break;
             game_state_handle_click(&ctx->game_state, event.button.x, event.button.y);
@@ -65,6 +66,8 @@ void handle_input(GameContext *ctx)
 #endif
             break;
         case SDL_KEYDOWN:
+            if (ctx->game_state.state == GAME_STATE_WAITING)
+                break;
             switch (event.key.keysym.sym)
             {
             case SDLK_SPACE:

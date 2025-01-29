@@ -20,8 +20,15 @@ add_executable(f22_raptor
 if(EMSCRIPTEN)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/public)
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s ENVIRONMENT='SCORE_SECRET_KEY'")
-
+    # Handle secret key as a compile definition
+    if(DEFINED SCORE_SECRET_KEY)
+        message(STATUS "Using provided SCORE_SECRET_KEY")
+        target_compile_definitions(f22_raptor PRIVATE 
+            SCORE_SECRET_KEY="${SCORE_SECRET_KEY}")
+    else()
+        message(WARNING "SCORE_SECRET_KEY not provided")
+    endif()
+    
     set(COMPILE_FLAGS 
         "-sUSE_SDL=2 \
          -sUSE_SDL_MIXER=2 \

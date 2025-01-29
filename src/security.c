@@ -11,9 +11,17 @@
 
 // Get key from environment during build
 static const unsigned char* get_secret_key(void) {
+    printf("Debug: Checking for secret key...\n");
     #ifdef SCORE_SECRET_KEY
-    return (unsigned char*)SCORE_SECRET_KEY;
+        printf("Debug: SCORE_SECRET_KEY is defined!\n");
+        #define STRINGIZE(x) #x
+        #define STRINGIZE_VALUE_OF(x) STRINGIZE(x)
+        printf("Debug: Key value is: %s\n", STRINGIZE_VALUE_OF(SCORE_SECRET_KEY));
+        return (unsigned char*)STRINGIZE_VALUE_OF(SCORE_SECRET_KEY);
     #endif
+    printf("Debug: NO SECRET KEY DEFINED :(\n");
+    
+    return NULL;
 }
 
 
@@ -22,7 +30,8 @@ static void generate_signature(int score, uint64_t timestamp, char* output) {
     char data[256];
     snprintf(data, sizeof(data), "%d:%llu", score, timestamp);
     
-    const unsigned char* secret_key = get_secret_key();
+    // Store the key in a local array to ensure it stays valid
+    const unsigned char secret_key[] = SCORE_SECRET_KEY;
     
     unsigned char result[32] = {0};
     size_t data_len = strlen(data);
