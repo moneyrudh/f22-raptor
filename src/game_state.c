@@ -3,6 +3,7 @@
 #include "player.h"
 #include "config.h"
 #include "sound.h"
+#include "security.h"
 #include <math.h>
 #include <stdio.h>
 
@@ -93,7 +94,7 @@ void player_update(Player* player, const GameState* state, bool thrust, float de
         // When left of mid-screen:
         // Close to ghost (small normalized_distance) = move right
         // Far from ghost (large normalized_distance) = move left
-        float move_amount = (1.0f - normalized_distance) * 1.0f - normalized_distance * 6.0f;
+        float move_amount = (1.0f - normalized_distance) * 1.0f - normalized_distance * 5.0f;
         // float move_amount = 0.0f;
         // if (normalized_distance > 0.2f) {
         //     move_amount = 1.5f;
@@ -338,4 +339,30 @@ bool game_state_check_collisions(GameState* state) {
         }
     }
     return false;
+}
+
+void game_state_reset(GameState* state) {
+    // Stop sounds but don't recreate sound system
+    sound_system_stop_engine(&state->sound_system);
+    sound_system_stop_music(&state->sound_system);
+    
+    // Reset core state
+    state->state = GAME_STATE_WAITING;
+    state->player = player_init();  // small enough to recreate
+    state->score = 0;
+    state->camera_y_offset = f22_from_float(0.0f);
+    state->target_y_offset = f22_from_float(0.0f);
+    
+    // Reset subsystems in place
+    wave_reset(&state->wave);
+    asteroid_system_reset(&state->asteroid_system);
+    explosion_reset(&state->explosion);
+    smoke_system_reset(&state->smoke_system);
+    
+    // Reset scoring
+    state->scoring = (ScoringSystem){
+        .score = 0,
+        .current_precision = 0,
+        .score_rate = 0
+    };
 }

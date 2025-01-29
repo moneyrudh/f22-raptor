@@ -198,6 +198,10 @@
             display: none;
         }
 
+        #normal-message {
+            display: none;
+        }
+
         #leaderboard-btn {
             position: absolute;
             left: 50%;
@@ -352,6 +356,15 @@
             height: fit-content;
         }
 
+        @media (min-width: 1350px) {
+            #normal-message {
+            margin-top: 16px;
+            color: white;
+            font-size: 12px;
+            text-align: center;
+            }
+        }
+
         @media (max-width: 1350px) and (min-height: 600px) {
             .canvas-container {
             width: 80vw; /* responsive width */
@@ -447,7 +460,13 @@
             font-size: 1vw; /* from 15px */
             }
 
-            #submit-modal,
+            #submit-modal {
+            width: 80vw;
+            height: calc(100vw * 800 / 1300); /* maintain aspect ratio */
+            padding: 5px;
+            box-sizing: border-box;
+            }
+
             #leaderboard-modal {
             width: 80vw;
             height: calc(80vw * 800 / 1300); /* maintain aspect ratio */
@@ -815,6 +834,7 @@
         </div>
         <div id="success-message" class="hidden"></div>
         <div id="error-message" class="hidden"></div>
+        <div id="normal-message">escape to restart</div>
         </div>
         <div id="leaderboard-modal">
         <button class="close-button">×</button>
@@ -902,36 +922,66 @@
             const noBtn = document.querySelector(".no-btn");
             const leaderboardBtn = document.querySelector(".leaderboard-btn");
 
+            const remoteUrl = "https://f22-server.vercel.app";
+            const localUrl = "http://localhost:3000";
+            const serverUrl = localUrl;
+
             let state = 0;
             let finalScore = 0;
             let inputValue = "";
             let allTimeScores = undefined;
             let dailyScores = undefined;
+            let secureData = {};
 
             modal.classList.add("hidden");
 
             usernameInput.value = "";
             usernameInput.disabled = true;
 
+            function restartGame() {
+                Module._game_state_reset_main();
+                
+                // hide the modal
+                modal.classList.add("hidden");
+                
+                // re-enable canvas interaction
+                document.getElementById("canvas").style.pointerEvents = "auto";
+                
+                // reset game state in JS
+                state = 0;
+                score = 0;
+                gameStarted = false;
+                
+                // show start text again
+                startTextCanvas.style.display = "block";
+                Module.setGameState(0);
+            }
+
             const keyHandler = (e) => {
                 if (state == 0) return;
                 e.preventDefault();
 
                 if (e.key === "Backspace") {
-                inputValue = inputValue.slice(0, -1);
-                usernameInput.value = inputValue;
-                return;
+                    inputValue = inputValue.slice(0, -1);
+                    usernameInput.value = inputValue;
+                    return;
+                }
+
+                if (e.key === "Escape") {
+                    restartGame();
+                    return;
                 }
 
                 if (/^[a-zA-Z0-9_]$/.test(e.key) && inputValue.length < 15) {
-                inputValue += e.key;
-                usernameInput.value = inputValue;
+                    inputValue += e.key;
+                    usernameInput.value = inputValue;
                 }
             };
 
             // Handle No button
             noBtn.addEventListener("click", () => {
-                location.reload();
+                // location.reload();
+                restartGame();
             });
 
             document.addEventListener("keydown", keyHandler);
@@ -950,10 +1000,10 @@
                 if (allTimeScores === undefined || dailyScores === undefined) {
                 // fetch both leaderboards
                 const [allTime, daily] = await Promise.all([
-                    fetch("https://f22-server.vercel.app/all_time").then((r) =>
+                    fetch(`${serverUrl}/all_time`).then((r) =>
                     r.json()
                     ),
-                    fetch("https://f22-server.vercel.app/get_daily").then((r) =>
+                    fetch(`${serverUrl}/get_daily`).then((r) =>
                     r.json()
                     ),
                 ]);
@@ -978,29 +1028,15 @@
                 const html = scores
                     .map(
                     (score, i) => `
-                                                <div class="score-row">
-                                                    <div class="rank" style="${getRankStyle(
-                                                    i
-                                                    )}">${i + 1}</div>
-                                                    <div class="player-info">
-                                                        <img src="${
-                                                        score.profile_image ||
-                                                        "/placeholder.png"
-                                                        }" alt="">
-                                                        <a href="${
-                                                        score.profile_url
-                                                        }" target="_blank" style="${getRankStyle(
-                        i
-                    )}">@${score.username}</a>
-                                                    </div>
-                                                    <div class="score" style="${getRankStyle(
-                                                    i
-                                                    )}">${Math.floor(
-                        score.score
-                    )}</div>
-                                                </div>
-                                            `
-                    )
+                        <div class="score-row">
+                            <div class="rank" style="${getRankStyle(i)}">${i + 1}</div>
+                            <div class="player-info">
+                                <img src="${score.profile_image || "/placeholder.png"}" alt="">
+                                <a href="${score.profile_url}" target="_blank" style="${getRankStyle(i)}">@${score.username}</a>
+                            </div>
+                            <div class="score" style="${getRankStyle(i)}">${Math.floor(score.score)}</div>
+                        </div>
+                    `)
                     .join("");
                 document.getElementById(containerId).innerHTML = html;
                 };
@@ -1028,7 +1064,7 @@
                 try {
                 // First verify the user exists
                 const verifyRes = await fetch(
-                    `https://f22-server.vercel.app/verify/${username.toString()}`
+                    `${serverUrl}/verify/${username.toString()}`
                 );
                 const verifyData = await verifyRes.json();
 
@@ -1042,14 +1078,16 @@
 
                 // If verified, submit the score
                 const submitRes = await fetch(
-                    "https://f22-server.vercel.app/submission",
+                    `${serverUrl}/submission`,
                     {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        username,
-                        score: finalScore,
-                    }),
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            username,
+                            score: secureData.score,
+                            timestamp: secureData.timestamp,
+                            signature: secureData.signature
+                        }),
                     }
                 );
 
@@ -1127,19 +1165,39 @@
                 score = _score;
             };
 
-            Module.showGameOver = function (_score) {
-                console.log("SETTING FINAL SCORE AS:", _score);
-                finalScore = parseInt(_score);
+            Module.showGameOver = function (score, timestamp, signature) {
+                console.log("Game over with validated score:", score);
+                finalScore = score;  // we keep this for display
+                secureData = {
+                    score: score,
+                    timestamp: timestamp,
+                    signature: signature
+                };
                 modal.classList.remove("hidden");
-                document.querySelector(".score-value").textContent = finalScore;
+                document.querySelector(".score-value").textContent = score;
                 document.getElementById("canvas").style.pointerEvents = "none";
                 usernameInput.value = "";
                 usernameInput.disabled = false;
                 setTimeout(() => {
-                usernameInput.focus();
-                state = 1;
+                    usernameInput.focus();
+                    state = 1;
                 }, 100);
             };
+
+            // Module.showGameOver = function (_score) {
+            //     console.log("SETTING FINAL SCORE AS:", _score);
+            //     finalScore = parseInt(_score);
+            //     modal.classList.remove("hidden");
+            //     document.querySelector(".score-value").textContent = finalScore;
+            //     document.getElementById("canvas").style.pointerEvents = "none";
+            //     usernameInput.value = "";
+            //     usernameInput.disabled = false;
+            //     startTextCanvas.style.display = "block";
+            //     setTimeout(() => {
+            //     usernameInput.focus();
+            //     state = 1;
+            //     }, 100);
+            // };
 
             function drawScore() {
                 scoreCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);

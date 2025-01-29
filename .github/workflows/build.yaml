@@ -6,6 +6,8 @@ on:
 
 jobs:
   build:
+    env:
+      SCORE_SECRET_KEY: ${{ secrets.SCORE_SECRET_KEY }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

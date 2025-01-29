@@ -29,5 +29,6 @@ SmokeSystem smoke_system_init();
 void create_particle(SmokeParticle* particle, float x, float y);
 void smoke_system_start(SmokeSystem* system, const Player* player);
 void smoke_system_update(SmokeSystem* system, float delta_time);
+void smoke_system_reset(SmokeSystem* system);
 
 #endif

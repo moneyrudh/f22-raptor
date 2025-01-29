@@ -49,5 +49,6 @@ void create_spark(Spark* spark, float x, float y, float base_vx);
 void explosion_start(ExplosionSystem* system, const Player* player);
 void explosion_update(ExplosionSystem* system, float delta_time);
 void explosion_render(const ExplosionSystem* system, SDL_Renderer* renderer, F22 camera_y_offset);
+void explosion_reset(ExplosionSystem* system);
 
 #endif

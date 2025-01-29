@@ -14,12 +14,14 @@ add_executable(f22_raptor
     src/explosion.c
     src/smoke.c
     src/sound.c
+    src/security.c
 )
 
 if(EMSCRIPTEN)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/public)
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
-    
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s ENVIRONMENT='SCORE_SECRET_KEY'")
+
     set(COMPILE_FLAGS 
         "-sUSE_SDL=2 \
          -sUSE_SDL_MIXER=2 \

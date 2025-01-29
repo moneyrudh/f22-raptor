@@ -52,5 +52,6 @@ void game_state_start(GameState* state);
 void game_state_handle_click(GameState* state, int x, int y);
 void game_state_update(GameState* state, bool thrust_active, float delta_time);
 bool game_state_check_collisions(GameState* state);
+void game_state_reset(GameState* state);
 
 #endif // GAME_STATE_H

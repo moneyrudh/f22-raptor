@@ -58,7 +58,7 @@ WaveGenerator wave_init(void) {
             .current_duration = 0.5f + ((float)rand() / (float)RAND_MAX) * 1.0f,
             .is_rest_phase = false,
             .elapsed_time = 0.0f,
-            .phase_start_time = SDL_GetTicks() / 1000.0f
+            .phase_start_time = 0,//SDL_GetTicks() / 1000.0f
         }
     };
 
@@ -68,6 +68,30 @@ WaveGenerator wave_init(void) {
         wave.points[i].activated = false;
     }
     return wave;
+}
+
+void wave_reset(WaveGenerator* wave) {
+    // Reset but keep allocated memory
+    wave->num_points = GHOST_WIDTH;
+    wave->last_x = f22_from_float(0.0f);
+    wave->position_offset = 0.0f;
+    
+    // Reset ghost
+    wave->ghost.x = f22_from_float(GHOST_WIDTH - 1);
+    wave->ghost.y = f22_from_float(WINDOW_HEIGHT / 2);
+    wave->ghost.velocity_y = f22_from_float(0.0f);
+    wave->ghost.should_thrust = false;
+    wave->ghost.optimal_height = WINDOW_HEIGHT / 2;
+    wave->ghost.current_duration = 0.5f + ((float)rand() / (float)RAND_MAX) * 1.0f;
+    wave->ghost.is_rest_phase = false;
+    wave->ghost.elapsed_time = 0.0f;
+    
+    // Reset all points to center
+    for (int i = 0; i < GHOST_WIDTH; i++) {
+        wave->points[i].x = f22_from_float(i);
+        wave->points[i].y = f22_from_float(WINDOW_HEIGHT / 2);
+        wave->points[i].activated = false;
+    }
 }
 
 void wave_update_ghost(GhostPlayer* ghost, int player_y, float delta_time) {

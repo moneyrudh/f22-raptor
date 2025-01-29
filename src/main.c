@@ -3,8 +3,10 @@
 #include "game_state.h"
 #include "renderer.h"
 #include "missile.h"
+#include "security.h"
 #include <stdio.h>
 #include <time.h>
+#include "sound.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -22,7 +24,11 @@ typedef struct
     float accumulated_time; // Time between frames in seconds
     float target_fps;       // Target frame rate
     float frame_time;       // Target time per frame in ms
+    bool game_over_screen_showed;
+    bool exploded;
 } GameContext;
+
+static GameContext* g_game_context = NULL;
 
 int eventFilter(void* userdata, SDL_Event* event) {
     switch(event->type) {
@@ -39,11 +45,9 @@ int eventFilter(void* userdata, SDL_Event* event) {
 }
 
 void handle_input(GameContext *ctx)
-{
-    if (ctx->game_state.state == GAME_STATE_OVER)
-        return;
+{   
     SDL_Event event;
-    while (SDL_PollEvent(&event))
+    while (SDL_PollEvent(&event) && ctx->game_state.state != GAME_STATE_OVER)
     {
         switch (event.type)
         {
@@ -51,6 +55,8 @@ void handle_input(GameContext *ctx)
             ctx->quit = true;
             break;
         case SDL_MOUSEBUTTONDOWN:
+            if (ctx->game_state.state == GAME_STATE_OVER)
+                break;
             game_state_handle_click(&ctx->game_state, event.button.x, event.button.y);
 #ifdef __EMSCRIPTEN__
             EM_ASM(
@@ -89,6 +95,8 @@ void handle_input(GameContext *ctx)
             {
             case SDLK_SPACE:
             case SDLK_UP:
+                if (ctx->game_state.state == GAME_STATE_OVER)
+                    break;
                 ctx->thrust_active = false;
                 sound_system_stop_engine(&ctx->game_state.sound_system);
                 break;
@@ -101,6 +109,7 @@ void handle_input(GameContext *ctx)
 void main_loop(void *arg)
 {
     GameContext *ctx = (GameContext *)arg;
+
     const float FIXED_TIME_STEP = 1.0f / 60.0f;
 
     uint32_t current_time = SDL_GetTicks();
@@ -113,32 +122,66 @@ void main_loop(void *arg)
 
     while (ctx->accumulated_time >= FIXED_TIME_STEP)
     {
+        ctx->accumulated_time -= FIXED_TIME_STEP;
         handle_input(ctx);
         game_state_update(&ctx->game_state, ctx->thrust_active, FIXED_TIME_STEP);
 
         // Check collisions - but now we KEEP rendering
         if (game_state_check_collisions(&ctx->game_state))
         {
-#ifdef __EMSCRIPTEN__
+            #ifdef __EMSCRIPTEN__
             // Don't cancel the loop immediately
+                if (ctx->game_state.explosion.time >= EXPLOSION_DURATION)
+                {
+                    if (ctx->game_over_screen_showed) break;
+                    ctx->game_over_screen_showed = true;
+                    ScoreValidation validation = generate_score_validation((int)ctx->game_state.scoring.score);
+    
+                    // Copy signature to heap memory
+                    int str_len = strlen(validation.signature);
+                    char* sig_ptr = (char*)malloc(str_len + 1);
+                    strcpy(sig_ptr, validation.signature);
+                    
+                    // Pass the pointer to JS
+                    EM_ASM_({
+                        const sig = UTF8ToString($2);
+                        Module.showGameOver($0, $1, sig);
+                        _free($2); // Clean up memory
+                    }, validation.score, (int)validation.timestamp, sig_ptr);
+    
+                        
+                    // EM_ASM({ Module.showGameOver($0); }, (int)ctx->game_state.scoring.score);
+                    ctx->accumulated_time -= FIXED_TIME_STEP;
+                    break;
+                }
+            #else
             if (ctx->game_state.explosion.time >= EXPLOSION_DURATION)
             {
-                emscripten_cancel_main_loop();
-                EM_ASM({ Module.showGameOver($0); }, (int)ctx->game_state.scoring.score);
-                return;
-            }
-#else
-            if (ctx->game_state.explosion.time >= EXPLOSION_DURATION)
-            {
-                ctx->quit = true;
+                if (ctx->exploded) break;
+                ctx->exploded = true;
+                // ctx->quit = true;
                 printf("Game Over! Score: %u\n", ctx->game_state.score);
-                return;
+                ctx->accumulated_time -= FIXED_TIME_STEP;
+                break;
             }
 #endif
         }
 
         renderer_draw_frame(&ctx->renderer, &ctx->game_state, ctx->thrust_active);
-        ctx->accumulated_time -= FIXED_TIME_STEP;
+    }
+
+    // renderer_draw_frame(&ctx->renderer, &ctx->game_state, ctx->thrust_active);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void game_state_reset_main() {
+    // get our global GameContext
+    if (g_game_context) {
+        g_game_context->thrust_active = false;
+        game_state_reset(&g_game_context->game_state);
+        g_game_context->game_over_screen_showed = false;
+        g_game_context->exploded = false;
+        sound_system_start_engine(&g_game_context->game_state.sound_system);
     }
 }
 
@@ -166,8 +209,11 @@ int main()
         .delta_time = 0.0f,
         .accumulated_time = 0.0f,
         .target_fps = 60.0f,          // Set target frame rate
-        .frame_time = 1000.0f / 60.0f // Calculate ms per frame (33.33ms for 30fps)
+        .frame_time = 1000.0f / 60.0f, // Calculate ms per frame (33.33ms for 30fps)
+        .game_over_screen_showed = false,
+        .exploded = false
     };
+    g_game_context = &ctx;
 
     if (renderer_init(&ctx.renderer) < 0)
     {

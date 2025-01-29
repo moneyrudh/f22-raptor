@@ -60,5 +60,6 @@ void asteroid_system_update(AsteroidSystem* system, const WaveGenerator* wave);
 void asteroid_system_render(const AsteroidSystem* system, SDL_Renderer* renderer, F22 camera_y_offset, const Player* player);
 bool asteroid_system_check_collision(const AsteroidSystem* system, const Player* player);
 static void spawn_asteroid(AsteroidSystem* system, const WaveGenerator* wave, bool spawn_above, float layer_multiplier);
+void asteroid_system_reset(AsteroidSystem* system);
 
 #endif

@@ -23,6 +23,24 @@ ExplosionSystem explosion_init(void) {
     return system;
 }
 
+void explosion_reset(ExplosionSystem* system) {
+    // Reset main system state
+    system->active = false;
+    system->time = 0;
+    system->origin_x = f22_from_float(0);
+    system->origin_y = f22_from_float(0);
+    
+    // Clear all debris pieces
+    for (int i = 0; i < MAX_DEBRIS; i++) {
+        system->debris[i].active = false;
+    }
+    
+    // Clear all sparks
+    for (int i = 0; i < MAX_SPARKS; i++) {
+        system->sparks[i].active = false;
+    }
+}
+
 void create_debris_piece(Debris* debris, const SDL_Point* shape, int num_points, 
                         float x, float y, float base_vx, float spread) {
     debris->active = true;

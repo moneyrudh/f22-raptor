@@ -10,6 +10,19 @@ SmokeSystem smoke_system_init(void) {
     return system;
 }
 
+void smoke_system_reset(SmokeSystem* system) {
+    // Reset main system state
+    system->active = false;
+    system->time = 0;
+    system->origin_x = f22_from_float(0);
+    system->origin_y = f22_from_float(0);
+    
+    // Deactivate all particles
+    for (int i = 0; i < MAX_PARTICLES; i++) {
+        system->particles[i].active = false;
+    }
+}
+
 void create_particle(SmokeParticle* particle, float x, float y) {
     particle->active = true;
     particle->x = x;

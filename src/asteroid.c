@@ -72,6 +72,14 @@ AsteroidSystem asteroid_system_init(void) {
     return system;
 }
 
+void asteroid_system_reset(AsteroidSystem* system) {
+    // Keep the memory but reset all asteroids to inactive
+    system->spawn_timer = 0;
+    for (int i = 0; i < MAX_ASTEROIDS; i++) {
+        system->asteroids[i].active = false;
+    }
+}
+
 static void spawn_asteroid_layer(AsteroidSystem* system, const WaveGenerator* wave, float layer_multiplier) {
     // Randomly decide spawn pattern (0 = above, 1 = below, 2 = both)
     int spawn_pattern = rand() % 3;
@@ -312,114 +320,6 @@ void asteroid_system_render(const AsteroidSystem* system, SDL_Renderer* renderer
         }
     }
 }
-
-// void asteroid_system_render(const AsteroidSystem* system, SDL_Renderer* renderer, F22 camera_y_offset) {
-//     static uint32_t animation_timer = 0;
-//     animation_timer++;
-    
-//     for (int i = 0; i < MAX_ASTEROIDS; i++) {
-//         if (!system->asteroids[i].active) continue;
-
-//         float angle = system->asteroids[i].rotation * M_PI / 180.0f;
-//         float cos_a = cosf(angle);
-//         float sin_a = sinf(angle);
-//         float radius = ASTEROID_BASE_SIZE * system->asteroids[i].scale * 0.5f;
-//         ScreenPos pos = world_to_screen(system->asteroids[i].x, system->asteroids[i].y, camera_y_offset);
-
-//         // Create the continuous trail that wraps around the asteroid
-//         const int TRAIL_POINTS = 100;  // Reduced point count for sharper look
-//         SDL_Point trail[TRAIL_POINTS];
-        
-//         float time = animation_timer * 0.025f;
-//         float base_amplitude = radius * 0.2f;  // Reduced wave height
-//         float wave_frequency = 5.8f;  // Slightly increased for tighter waves
-//         for(int j = 0; j < TRAIL_POINTS; j++) {
-//             float t = j / (float)(TRAIL_POINTS - 1);
-//             float phi = t * 2.0f * M_PI;
-            
-//             // Key size change here: reduced multiplier from 1.5f to 0.8f
-//             float path_x = cosf(phi) * radius * 0.9f;  
-//             float path_y = sinf(phi) * radius * 0.7f;
-            
-//             // Enhanced wake segments by increasing amplitude at specific angles
-//             float wake_boost = 0;
-//             if (phi > 2.8f && phi < 3.5f) {  // Left wake
-//                 wake_boost = radius * 0.4f;
-//             } else if (phi < 0.7f) {  // Right wake
-//                 wake_boost = radius * 0.4f;
-//             }
-            
-//             float wave_amp = base_amplitude * (1.0f + sinf(phi + M_PI)) + wake_boost;
-//             float wave_phase = -time + t * 8.0f;
-//             float displacement = wave_amp * sinf(wave_phase * wave_frequency);
-            
-//             float tangent_x = -sinf(phi);
-//             float tangent_y = cosf(phi);
-//             float norm = sqrtf(tangent_x * tangent_x + tangent_y * tangent_y);
-//             tangent_x /= norm;
-//             tangent_y /= norm;
-            
-//             // Reduced stretch factor
-//             float stretch = 1.0f + powf(sinf(phi * 0.5f), 2) * 1.2f;
-            
-//             trail[j].x = pos.x + (path_x * stretch + displacement * tangent_x) + 10 * system->asteroids[i].scale;
-//             trail[j].y = pos.y + (path_y * stretch + displacement * tangent_y);
-//         }
-
-//         // Draw trail with enhanced contrast for wake segments
-//         for(int j = 0; j < TRAIL_POINTS - 1; j++) {
-//             float t = j / (float)(TRAIL_POINTS - 1);
-//             float phi = t * 2.0f * M_PI;
-            
-//             // Brighter alpha for wake segments
-//             uint8_t alpha = (uint8_t)(180.0f * (1.0f - powf(t, 0.5f)));
-//             if ((phi > 2.8f && phi < 3.5f) || (phi < 0.7f)) {
-//                 alpha = (uint8_t)min(255, alpha * 1.5f);
-//             }
-
-//             const float amplitude_factor = t;
-//             uint8_t r = lerp(200, 255, amplitude_factor);    // cyan to magenta
-//             uint8_t g = lerp(0, 100, amplitude_factor);
-//             uint8_t b = 80;
-            
-//             // SDL_SetRenderDrawColor(renderer, r, g, b, amplitude_factor/10);
-//             // SDL_SetRenderDrawColor(renderer, 255, 20, 20, alpha);
-//             SDL_SetRenderDrawColor(renderer, 150, 150, 150, alpha);
-//             SDL_RenderDrawLine(renderer, 
-//                 trail[j].x, trail[j].y,
-//                 trail[j + 1].x, trail[j + 1].y);
-//         }
-
-//         // Draw main asteroid shape
-//         SDL_Point transformed_outline[32];
-//         for (int j = 0; j < system->asteroids[i].num_points; j++) {
-//             float px = system->asteroids[i].points[j].x;
-//             float py = system->asteroids[i].points[j].y;
-//             transformed_outline[j].x = pos.x + (int)(px * cos_a - py * sin_a);
-//             transformed_outline[j].y = pos.y + (int)(px * sin_a + py * cos_a);
-//         }
-
-//         SDL_SetRenderDrawColor(renderer, 250, 250, 250, 255);
-//         SDL_RenderDrawLines(renderer, transformed_outline, system->asteroids[i].num_points);
-//         SDL_RenderDrawLine(renderer,
-//             transformed_outline[system->asteroids[i].num_points-1].x,
-//             transformed_outline[system->asteroids[i].num_points-1].y,
-//             transformed_outline[0].x,
-//             transformed_outline[0].y);
-
-//         // Draw crater details
-//         for (int j = 0; j < system->asteroids[i].num_crater_points; j += 5) {
-//             SDL_Point crater[5];
-//             for (int k = 0; k < 5; k++) {
-//                 float px = system->asteroids[i].craters[j + k].x;
-//                 float py = system->asteroids[i].craters[j + k].y;
-//                 crater[k].x = pos.x + (int)(px * cos_a - py * sin_a);
-//                 crater[k].y = pos.y + (int)(px * sin_a + py * cos_a);
-//             }
-//             SDL_RenderDrawLines(renderer, crater, 5);
-//         }
-//     }
-// }
 
 bool asteroid_system_check_collision(const AsteroidSystem* system, const Player* player) {
     const float PLAYER_RADIUS = 15.0f;  // match with game_state collision radius
