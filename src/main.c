@@ -55,26 +55,45 @@ void handle_input(GameContext *ctx)
             ctx->quit = true;
             break;
         case SDL_MOUSEBUTTONDOWN:
-        case SDLK_SPACE:
             if (ctx->game_state.state == GAME_STATE_OVER)
                 break;
-            game_state_handle_click(&ctx->game_state, event.button.x, event.button.y);
+            if (ctx->game_state.state == GAME_STATE_WAITING) {
+                game_state_handle_click(&ctx->game_state, event.button.x, event.button.y);
 #ifdef __EMSCRIPTEN__
-            EM_ASM(
-                Module.setGameState(1);
-                console.log("GAME HAS BEGUN"););
+                EM_ASM(
+                    Module.setGameState(1);
+                    console.log("GAME HAS BEGUN"););
 #endif
+            } else {
+                ctx->thrust_active = true;
+                sound_system_start_engine(&ctx->game_state.sound_system);
+            }
+            break;
+        case SDL_MOUSEBUTTONUP:
+            if (ctx->game_state.state == GAME_STATE_PLAYING) {
+                ctx->thrust_active = false;
+                sound_system_stop_engine(&ctx->game_state.sound_system);
+            }
             break;
         case SDL_KEYDOWN:
-            if (ctx->game_state.state == GAME_STATE_WAITING)
-                break;
             switch (event.key.keysym.sym)
             {
             case SDLK_SPACE:
             case SDLK_UP:
-                ctx->thrust_active = true;
-                sound_system_start_engine(&ctx->game_state.sound_system);
-                break;
+                if (ctx->game_state.state == GAME_STATE_OVER)
+                    break;
+                if (ctx->game_state.state == GAME_STATE_WAITING) {
+                    game_state_handle_click(&ctx->game_state, 0, 0);
+#ifdef __EMSCRIPTEN__
+                    EM_ASM(
+                        Module.setGameState(1);
+                        console.log("GAME HAS BEGUN"););
+#endif
+                } else {
+                    ctx->thrust_active = true;
+                    sound_system_start_engine(&ctx->game_state.sound_system);
+                    break;
+                }
                 // case SDLK_ESCAPE:
                 //     ctx->quit = true;
                 //     break;
