@@ -31,7 +31,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmp5uq1iimu.js
+// include: /tmp/tmplbi4mjvj.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -214,21 +214,21 @@ Module['FS_createPath']("/assets/sounds", "music", true, true);
 
   })();
 
-// end include: /tmp/tmp5uq1iimu.js
-// include: /tmp/tmps_rikrk7.js
+// end include: /tmp/tmplbi4mjvj.js
+// include: /tmp/tmpcg0o5x3q.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmps_rikrk7.js
-// include: /tmp/tmpw_heqzi0.js
+  // end include: /tmp/tmpcg0o5x3q.js
+// include: /tmp/tmpsmfgjh_0.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmpw_heqzi0.js
+  // end include: /tmp/tmpsmfgjh_0.js
 
 
 // Sometimes an existing Module object exists with properties
@@ -331,7 +331,7 @@ if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
   if (scriptDirectory.startsWith('blob:')) {
     scriptDirectory = '';
   } else {
-    scriptDirectory = scriptDirectory.substr(0, scriptDirectory.replace(/[?#].*/, '').lastIndexOf('/')+1);
+    scriptDirectory = scriptDirectory.slice(0, scriptDirectory.replace(/[?#].*/, '').lastIndexOf('/')+1);
   }
 
   if (!(typeof window == 'object' || typeof WorkerGlobalScope != 'undefined')) throw new Error('not compiled for this environment (did you build to HTML and try to run it not on the web, or set ENVIRONMENT to something - like node - and run it someplace else - like on the web?)');
@@ -506,7 +506,6 @@ var HEAP,
 
 var runtimeInitialized = false;
 
-// include: URIUtils.js
 // Prefix of data URIs emitted by SINGLE_FILE and related options.
 var dataURIPrefix = 'data:application/octet-stream;base64,';
 
@@ -521,7 +520,7 @@ var isDataURI = (filename) => filename.startsWith(dataURIPrefix);
  * @noinline
  */
 var isFileURI = (filename) => filename.startsWith('file://');
-// end include: URIUtils.js
+
 // include: runtime_shared.js
 // include: runtime_stack_check.js
 // Initializes the stack cookie. Called at the startup of main and at the startup of each thread in pthreads mode.
@@ -924,8 +923,7 @@ function getBinarySync(file) {
 
 async function getWasmBinary(binaryFile) {
   // If we don't have the binary yet, load it asynchronously using readAsync.
-  if (!wasmBinary
-      ) {
+  if (!wasmBinary) {
     // Fetch the binary using readAsync
     try {
       var response = await readAsync(binaryFile);
@@ -1071,24 +1069,25 @@ async function createWasm() {
 var ASM_CONSTS = {
   425896: () => { if (!audioInitialized) { initAudioContext(); } },  
  425947: () => { Module.setGameState(1); console.log("GAME HAS BEGUN"); },  
- 426002: ($0, $1, $2) => { const sig = UTF8ToString($2); Module.showGameOver($0, $1, sig); _free($2); },  
- 426081: ($0) => { Module.updateScore($0); },  
- 426109: ($0) => { var str = UTF8ToString($0) + '\n\n' + 'Abort/Retry/Ignore/AlwaysIgnore? [ariA] :'; var reply = window.prompt(str, "i"); if (reply === null) { reply = "i"; } return allocate(intArrayFromString(reply), 'i8', ALLOC_NORMAL); },  
- 426334: () => { if (typeof(AudioContext) !== 'undefined') { return true; } else if (typeof(webkitAudioContext) !== 'undefined') { return true; } return false; },  
- 426481: () => { if ((typeof(navigator.mediaDevices) !== 'undefined') && (typeof(navigator.mediaDevices.getUserMedia) !== 'undefined')) { return true; } else if (typeof(navigator.webkitGetUserMedia) !== 'undefined') { return true; } return false; },  
- 426715: ($0) => { if(typeof(Module['SDL2']) === 'undefined') { Module['SDL2'] = {}; } var SDL2 = Module['SDL2']; if (!$0) { SDL2.audio = {}; } else { SDL2.capture = {}; } if (!SDL2.audioContext) { if (typeof(AudioContext) !== 'undefined') { SDL2.audioContext = new AudioContext(); } else if (typeof(webkitAudioContext) !== 'undefined') { SDL2.audioContext = new webkitAudioContext(); } if (SDL2.audioContext) { if ((typeof navigator.userActivation) === 'undefined') { autoResumeAudioContext(SDL2.audioContext); } } } return SDL2.audioContext === undefined ? -1 : 0; },  
- 427267: () => { var SDL2 = Module['SDL2']; return SDL2.audioContext.sampleRate; },  
- 427335: ($0, $1, $2, $3) => { var SDL2 = Module['SDL2']; var have_microphone = function(stream) { if (SDL2.capture.silenceTimer !== undefined) { clearInterval(SDL2.capture.silenceTimer); SDL2.capture.silenceTimer = undefined; SDL2.capture.silenceBuffer = undefined } SDL2.capture.mediaStreamNode = SDL2.audioContext.createMediaStreamSource(stream); SDL2.capture.scriptProcessorNode = SDL2.audioContext.createScriptProcessor($1, $0, 1); SDL2.capture.scriptProcessorNode.onaudioprocess = function(audioProcessingEvent) { if ((SDL2 === undefined) || (SDL2.capture === undefined)) { return; } audioProcessingEvent.outputBuffer.getChannelData(0).fill(0.0); SDL2.capture.currentCaptureBuffer = audioProcessingEvent.inputBuffer; dynCall('vi', $2, [$3]); }; SDL2.capture.mediaStreamNode.connect(SDL2.capture.scriptProcessorNode); SDL2.capture.scriptProcessorNode.connect(SDL2.audioContext.destination); SDL2.capture.stream = stream; }; var no_microphone = function(error) { }; SDL2.capture.silenceBuffer = SDL2.audioContext.createBuffer($0, $1, SDL2.audioContext.sampleRate); SDL2.capture.silenceBuffer.getChannelData(0).fill(0.0); var silence_callback = function() { SDL2.capture.currentCaptureBuffer = SDL2.capture.silenceBuffer; dynCall('vi', $2, [$3]); }; SDL2.capture.silenceTimer = setInterval(silence_callback, ($1 / SDL2.audioContext.sampleRate) * 1000); if ((navigator.mediaDevices !== undefined) && (navigator.mediaDevices.getUserMedia !== undefined)) { navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(have_microphone).catch(no_microphone); } else if (navigator.webkitGetUserMedia !== undefined) { navigator.webkitGetUserMedia({ audio: true, video: false }, have_microphone, no_microphone); } },  
- 429028: ($0, $1, $2, $3) => { var SDL2 = Module['SDL2']; SDL2.audio.scriptProcessorNode = SDL2.audioContext['createScriptProcessor']($1, 0, $0); SDL2.audio.scriptProcessorNode['onaudioprocess'] = function (e) { if ((SDL2 === undefined) || (SDL2.audio === undefined)) { return; } if (SDL2.audio.silenceTimer !== undefined) { clearInterval(SDL2.audio.silenceTimer); SDL2.audio.silenceTimer = undefined; SDL2.audio.silenceBuffer = undefined; } SDL2.audio.currentOutputBuffer = e['outputBuffer']; dynCall('vi', $2, [$3]); }; SDL2.audio.scriptProcessorNode['connect'](SDL2.audioContext['destination']); if (SDL2.audioContext.state === 'suspended') { SDL2.audio.silenceBuffer = SDL2.audioContext.createBuffer($0, $1, SDL2.audioContext.sampleRate); SDL2.audio.silenceBuffer.getChannelData(0).fill(0.0); var silence_callback = function() { if ((typeof navigator.userActivation) !== 'undefined') { if (navigator.userActivation.hasBeenActive) { SDL2.audioContext.resume(); } } SDL2.audio.currentOutputBuffer = SDL2.audio.silenceBuffer; dynCall('vi', $2, [$3]); SDL2.audio.currentOutputBuffer = undefined; }; SDL2.audio.silenceTimer = setInterval(silence_callback, ($1 / SDL2.audioContext.sampleRate) * 1000); } },  
- 430203: ($0, $1) => { var SDL2 = Module['SDL2']; var numChannels = SDL2.capture.currentCaptureBuffer.numberOfChannels; for (var c = 0; c < numChannels; ++c) { var channelData = SDL2.capture.currentCaptureBuffer.getChannelData(c); if (channelData.length != $1) { throw 'Web Audio capture buffer length mismatch! Destination size: ' + channelData.length + ' samples vs expected ' + $1 + ' samples!'; } if (numChannels == 1) { for (var j = 0; j < $1; ++j) { setValue($0 + (j * 4), channelData[j], 'float'); } } else { for (var j = 0; j < $1; ++j) { setValue($0 + (((j * numChannels) + c) * 4), channelData[j], 'float'); } } } },  
- 430808: ($0, $1) => { var SDL2 = Module['SDL2']; var buf = $0 >>> 2; var numChannels = SDL2.audio.currentOutputBuffer['numberOfChannels']; for (var c = 0; c < numChannels; ++c) { var channelData = SDL2.audio.currentOutputBuffer['getChannelData'](c); if (channelData.length != $1) { throw 'Web Audio output buffer length mismatch! Destination size: ' + channelData.length + ' samples vs expected ' + $1 + ' samples!'; } for (var j = 0; j < $1; ++j) { channelData[j] = HEAPF32[buf + (j*numChannels + c)]; } } },  
- 431297: ($0) => { var SDL2 = Module['SDL2']; if ($0) { if (SDL2.capture.silenceTimer !== undefined) { clearInterval(SDL2.capture.silenceTimer); } if (SDL2.capture.stream !== undefined) { var tracks = SDL2.capture.stream.getAudioTracks(); for (var i = 0; i < tracks.length; i++) { SDL2.capture.stream.removeTrack(tracks[i]); } } if (SDL2.capture.scriptProcessorNode !== undefined) { SDL2.capture.scriptProcessorNode.onaudioprocess = function(audioProcessingEvent) {}; SDL2.capture.scriptProcessorNode.disconnect(); } if (SDL2.capture.mediaStreamNode !== undefined) { SDL2.capture.mediaStreamNode.disconnect(); } SDL2.capture = undefined; } else { if (SDL2.audio.scriptProcessorNode != undefined) { SDL2.audio.scriptProcessorNode.disconnect(); } if (SDL2.audio.silenceTimer !== undefined) { clearInterval(SDL2.audio.silenceTimer); } SDL2.audio = undefined; } if ((SDL2.audioContext !== undefined) && (SDL2.audio === undefined) && (SDL2.capture === undefined)) { SDL2.audioContext.close(); SDL2.audioContext = undefined; } },  
- 432303: ($0, $1, $2) => { var w = $0; var h = $1; var pixels = $2; if (!Module['SDL2']) Module['SDL2'] = {}; var SDL2 = Module['SDL2']; if (SDL2.ctxCanvas !== Module['canvas']) { SDL2.ctx = Module['createContext'](Module['canvas'], false, true); SDL2.ctxCanvas = Module['canvas']; } if (SDL2.w !== w || SDL2.h !== h || SDL2.imageCtx !== SDL2.ctx) { SDL2.image = SDL2.ctx.createImageData(w, h); SDL2.w = w; SDL2.h = h; SDL2.imageCtx = SDL2.ctx; } var data = SDL2.image.data; var src = pixels / 4; var dst = 0; var num; if (typeof CanvasPixelArray !== 'undefined' && data instanceof CanvasPixelArray) { num = data.length; while (dst < num) { var val = HEAP32[src]; data[dst ] = val & 0xff; data[dst+1] = (val >> 8) & 0xff; data[dst+2] = (val >> 16) & 0xff; data[dst+3] = 0xff; src++; dst += 4; } } else { if (SDL2.data32Data !== data) { SDL2.data32 = new Int32Array(data.buffer); SDL2.data8 = new Uint8Array(data.buffer); SDL2.data32Data = data; } var data32 = SDL2.data32; num = data32.length; data32.set(HEAP32.subarray(src, src + num)); var data8 = SDL2.data8; var i = 3; var j = i + 4*num; if (num % 8 == 0) { while (i < j) { data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; } } else { while (i < j) { data8[i] = 0xff; i = i + 4 | 0; } } } SDL2.ctx.putImageData(SDL2.image, 0, 0); },  
- 433771: ($0, $1, $2, $3, $4) => { var w = $0; var h = $1; var hot_x = $2; var hot_y = $3; var pixels = $4; var canvas = document.createElement("canvas"); canvas.width = w; canvas.height = h; var ctx = canvas.getContext("2d"); var image = ctx.createImageData(w, h); var data = image.data; var src = pixels / 4; var dst = 0; var num; if (typeof CanvasPixelArray !== 'undefined' && data instanceof CanvasPixelArray) { num = data.length; while (dst < num) { var val = HEAP32[src]; data[dst ] = val & 0xff; data[dst+1] = (val >> 8) & 0xff; data[dst+2] = (val >> 16) & 0xff; data[dst+3] = (val >> 24) & 0xff; src++; dst += 4; } } else { var data32 = new Int32Array(data.buffer); num = data32.length; data32.set(HEAP32.subarray(src, src + num)); } ctx.putImageData(image, 0, 0); var url = hot_x === 0 && hot_y === 0 ? "url(" + canvas.toDataURL() + "), auto" : "url(" + canvas.toDataURL() + ") " + hot_x + " " + hot_y + ", auto"; var urlBuf = _malloc(url.length + 1); stringToUTF8(url, urlBuf, url.length + 1); return urlBuf; },  
- 434759: ($0) => { if (Module['canvas']) { Module['canvas'].style['cursor'] = UTF8ToString($0); } },  
- 434842: () => { if (Module['canvas']) { Module['canvas'].style['cursor'] = 'none'; } },  
- 434911: () => { return window.innerWidth; },  
- 434941: () => { return window.innerHeight; }
+ 426002: () => { Module.setGameState(1); console.log("GAME HAS BEGUN"); },  
+ 426057: ($0, $1, $2) => { const sig = UTF8ToString($2); Module.showGameOver($0, $1, sig); _free($2); },  
+ 426136: ($0) => { Module.updateScore($0); },  
+ 426164: ($0) => { var str = UTF8ToString($0) + '\n\n' + 'Abort/Retry/Ignore/AlwaysIgnore? [ariA] :'; var reply = window.prompt(str, "i"); if (reply === null) { reply = "i"; } return allocate(intArrayFromString(reply), 'i8', ALLOC_NORMAL); },  
+ 426389: () => { if (typeof(AudioContext) !== 'undefined') { return true; } else if (typeof(webkitAudioContext) !== 'undefined') { return true; } return false; },  
+ 426536: () => { if ((typeof(navigator.mediaDevices) !== 'undefined') && (typeof(navigator.mediaDevices.getUserMedia) !== 'undefined')) { return true; } else if (typeof(navigator.webkitGetUserMedia) !== 'undefined') { return true; } return false; },  
+ 426770: ($0) => { if(typeof(Module['SDL2']) === 'undefined') { Module['SDL2'] = {}; } var SDL2 = Module['SDL2']; if (!$0) { SDL2.audio = {}; } else { SDL2.capture = {}; } if (!SDL2.audioContext) { if (typeof(AudioContext) !== 'undefined') { SDL2.audioContext = new AudioContext(); } else if (typeof(webkitAudioContext) !== 'undefined') { SDL2.audioContext = new webkitAudioContext(); } if (SDL2.audioContext) { if ((typeof navigator.userActivation) === 'undefined') { autoResumeAudioContext(SDL2.audioContext); } } } return SDL2.audioContext === undefined ? -1 : 0; },  
+ 427322: () => { var SDL2 = Module['SDL2']; return SDL2.audioContext.sampleRate; },  
+ 427390: ($0, $1, $2, $3) => { var SDL2 = Module['SDL2']; var have_microphone = function(stream) { if (SDL2.capture.silenceTimer !== undefined) { clearInterval(SDL2.capture.silenceTimer); SDL2.capture.silenceTimer = undefined; SDL2.capture.silenceBuffer = undefined } SDL2.capture.mediaStreamNode = SDL2.audioContext.createMediaStreamSource(stream); SDL2.capture.scriptProcessorNode = SDL2.audioContext.createScriptProcessor($1, $0, 1); SDL2.capture.scriptProcessorNode.onaudioprocess = function(audioProcessingEvent) { if ((SDL2 === undefined) || (SDL2.capture === undefined)) { return; } audioProcessingEvent.outputBuffer.getChannelData(0).fill(0.0); SDL2.capture.currentCaptureBuffer = audioProcessingEvent.inputBuffer; dynCall('vi', $2, [$3]); }; SDL2.capture.mediaStreamNode.connect(SDL2.capture.scriptProcessorNode); SDL2.capture.scriptProcessorNode.connect(SDL2.audioContext.destination); SDL2.capture.stream = stream; }; var no_microphone = function(error) { }; SDL2.capture.silenceBuffer = SDL2.audioContext.createBuffer($0, $1, SDL2.audioContext.sampleRate); SDL2.capture.silenceBuffer.getChannelData(0).fill(0.0); var silence_callback = function() { SDL2.capture.currentCaptureBuffer = SDL2.capture.silenceBuffer; dynCall('vi', $2, [$3]); }; SDL2.capture.silenceTimer = setInterval(silence_callback, ($1 / SDL2.audioContext.sampleRate) * 1000); if ((navigator.mediaDevices !== undefined) && (navigator.mediaDevices.getUserMedia !== undefined)) { navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(have_microphone).catch(no_microphone); } else if (navigator.webkitGetUserMedia !== undefined) { navigator.webkitGetUserMedia({ audio: true, video: false }, have_microphone, no_microphone); } },  
+ 429083: ($0, $1, $2, $3) => { var SDL2 = Module['SDL2']; SDL2.audio.scriptProcessorNode = SDL2.audioContext['createScriptProcessor']($1, 0, $0); SDL2.audio.scriptProcessorNode['onaudioprocess'] = function (e) { if ((SDL2 === undefined) || (SDL2.audio === undefined)) { return; } if (SDL2.audio.silenceTimer !== undefined) { clearInterval(SDL2.audio.silenceTimer); SDL2.audio.silenceTimer = undefined; SDL2.audio.silenceBuffer = undefined; } SDL2.audio.currentOutputBuffer = e['outputBuffer']; dynCall('vi', $2, [$3]); }; SDL2.audio.scriptProcessorNode['connect'](SDL2.audioContext['destination']); if (SDL2.audioContext.state === 'suspended') { SDL2.audio.silenceBuffer = SDL2.audioContext.createBuffer($0, $1, SDL2.audioContext.sampleRate); SDL2.audio.silenceBuffer.getChannelData(0).fill(0.0); var silence_callback = function() { if ((typeof navigator.userActivation) !== 'undefined') { if (navigator.userActivation.hasBeenActive) { SDL2.audioContext.resume(); } } SDL2.audio.currentOutputBuffer = SDL2.audio.silenceBuffer; dynCall('vi', $2, [$3]); SDL2.audio.currentOutputBuffer = undefined; }; SDL2.audio.silenceTimer = setInterval(silence_callback, ($1 / SDL2.audioContext.sampleRate) * 1000); } },  
+ 430258: ($0, $1) => { var SDL2 = Module['SDL2']; var numChannels = SDL2.capture.currentCaptureBuffer.numberOfChannels; for (var c = 0; c < numChannels; ++c) { var channelData = SDL2.capture.currentCaptureBuffer.getChannelData(c); if (channelData.length != $1) { throw 'Web Audio capture buffer length mismatch! Destination size: ' + channelData.length + ' samples vs expected ' + $1 + ' samples!'; } if (numChannels == 1) { for (var j = 0; j < $1; ++j) { setValue($0 + (j * 4), channelData[j], 'float'); } } else { for (var j = 0; j < $1; ++j) { setValue($0 + (((j * numChannels) + c) * 4), channelData[j], 'float'); } } } },  
+ 430863: ($0, $1) => { var SDL2 = Module['SDL2']; var buf = $0 >>> 2; var numChannels = SDL2.audio.currentOutputBuffer['numberOfChannels']; for (var c = 0; c < numChannels; ++c) { var channelData = SDL2.audio.currentOutputBuffer['getChannelData'](c); if (channelData.length != $1) { throw 'Web Audio output buffer length mismatch! Destination size: ' + channelData.length + ' samples vs expected ' + $1 + ' samples!'; } for (var j = 0; j < $1; ++j) { channelData[j] = HEAPF32[buf + (j*numChannels + c)]; } } },  
+ 431352: ($0) => { var SDL2 = Module['SDL2']; if ($0) { if (SDL2.capture.silenceTimer !== undefined) { clearInterval(SDL2.capture.silenceTimer); } if (SDL2.capture.stream !== undefined) { var tracks = SDL2.capture.stream.getAudioTracks(); for (var i = 0; i < tracks.length; i++) { SDL2.capture.stream.removeTrack(tracks[i]); } } if (SDL2.capture.scriptProcessorNode !== undefined) { SDL2.capture.scriptProcessorNode.onaudioprocess = function(audioProcessingEvent) {}; SDL2.capture.scriptProcessorNode.disconnect(); } if (SDL2.capture.mediaStreamNode !== undefined) { SDL2.capture.mediaStreamNode.disconnect(); } SDL2.capture = undefined; } else { if (SDL2.audio.scriptProcessorNode != undefined) { SDL2.audio.scriptProcessorNode.disconnect(); } if (SDL2.audio.silenceTimer !== undefined) { clearInterval(SDL2.audio.silenceTimer); } SDL2.audio = undefined; } if ((SDL2.audioContext !== undefined) && (SDL2.audio === undefined) && (SDL2.capture === undefined)) { SDL2.audioContext.close(); SDL2.audioContext = undefined; } },  
+ 432358: ($0, $1, $2) => { var w = $0; var h = $1; var pixels = $2; if (!Module['SDL2']) Module['SDL2'] = {}; var SDL2 = Module['SDL2']; if (SDL2.ctxCanvas !== Module['canvas']) { SDL2.ctx = Module['createContext'](Module['canvas'], false, true); SDL2.ctxCanvas = Module['canvas']; } if (SDL2.w !== w || SDL2.h !== h || SDL2.imageCtx !== SDL2.ctx) { SDL2.image = SDL2.ctx.createImageData(w, h); SDL2.w = w; SDL2.h = h; SDL2.imageCtx = SDL2.ctx; } var data = SDL2.image.data; var src = pixels / 4; var dst = 0; var num; if (typeof CanvasPixelArray !== 'undefined' && data instanceof CanvasPixelArray) { num = data.length; while (dst < num) { var val = HEAP32[src]; data[dst ] = val & 0xff; data[dst+1] = (val >> 8) & 0xff; data[dst+2] = (val >> 16) & 0xff; data[dst+3] = 0xff; src++; dst += 4; } } else { if (SDL2.data32Data !== data) { SDL2.data32 = new Int32Array(data.buffer); SDL2.data8 = new Uint8Array(data.buffer); SDL2.data32Data = data; } var data32 = SDL2.data32; num = data32.length; data32.set(HEAP32.subarray(src, src + num)); var data8 = SDL2.data8; var i = 3; var j = i + 4*num; if (num % 8 == 0) { while (i < j) { data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; } } else { while (i < j) { data8[i] = 0xff; i = i + 4 | 0; } } } SDL2.ctx.putImageData(SDL2.image, 0, 0); },  
+ 433826: ($0, $1, $2, $3, $4) => { var w = $0; var h = $1; var hot_x = $2; var hot_y = $3; var pixels = $4; var canvas = document.createElement("canvas"); canvas.width = w; canvas.height = h; var ctx = canvas.getContext("2d"); var image = ctx.createImageData(w, h); var data = image.data; var src = pixels / 4; var dst = 0; var num; if (typeof CanvasPixelArray !== 'undefined' && data instanceof CanvasPixelArray) { num = data.length; while (dst < num) { var val = HEAP32[src]; data[dst ] = val & 0xff; data[dst+1] = (val >> 8) & 0xff; data[dst+2] = (val >> 16) & 0xff; data[dst+3] = (val >> 24) & 0xff; src++; dst += 4; } } else { var data32 = new Int32Array(data.buffer); num = data32.length; data32.set(HEAP32.subarray(src, src + num)); } ctx.putImageData(image, 0, 0); var url = hot_x === 0 && hot_y === 0 ? "url(" + canvas.toDataURL() + "), auto" : "url(" + canvas.toDataURL() + ") " + hot_x + " " + hot_y + ", auto"; var urlBuf = _malloc(url.length + 1); stringToUTF8(url, urlBuf, url.length + 1); return urlBuf; },  
+ 434814: ($0) => { if (Module['canvas']) { Module['canvas'].style['cursor'] = UTF8ToString($0); } },  
+ 434897: () => { if (Module['canvas']) { Module['canvas'].style['cursor'] = 'none'; } },  
+ 434966: () => { return window.innerWidth; },  
+ 434996: () => { return window.innerHeight; }
 };
 function get_unix_timestamp() { return Math.floor(Date.now() / 1000); }
 
@@ -1204,7 +1203,7 @@ function get_unix_timestamp() { return Math.floor(Date.now() / 1000); }
       },
   normalize:(path) => {
         var isAbsolute = PATH.isAbs(path),
-            trailingSlash = path.substr(-1) === '/';
+            trailingSlash = path.slice(-1) === '/';
         // Normalize the path
         path = PATH.normalizeArray(path.split('/').filter((p) => !!p), !isAbsolute).join('/');
         if (!path && !isAbsolute) {
@@ -1225,7 +1224,7 @@ function get_unix_timestamp() { return Math.floor(Date.now() / 1000); }
         }
         if (dir) {
           // It has a dirname, strip trailing slash
-          dir = dir.substr(0, dir.length - 1);
+          dir = dir.slice(0, -1);
         }
         return root + dir;
       },
@@ -1271,8 +1270,8 @@ function get_unix_timestamp() { return Math.floor(Date.now() / 1000); }
         return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
       },
   relative:(from, to) => {
-        from = PATH_FS.resolve(from).substr(1);
-        to = PATH_FS.resolve(to).substr(1);
+        from = PATH_FS.resolve(from).slice(1);
+        to = PATH_FS.resolve(to).slice(1);
         function trim(arr) {
           var start = 0;
           for (; start < arr.length; start++) {
@@ -1430,13 +1429,13 @@ function get_unix_timestamp() { return Math.floor(Date.now() / 1000); }
       return outIdx - startIdx;
     };
   /** @type {function(string, boolean=, number=)} */
-  function intArrayFromString(stringy, dontAddNull, length) {
-    var len = length > 0 ? length : lengthBytesUTF8(stringy)+1;
-    var u8array = new Array(len);
-    var numBytesWritten = stringToUTF8Array(stringy, u8array, 0, u8array.length);
-    if (dontAddNull) u8array.length = numBytesWritten;
-    return u8array;
-  }
+  var intArrayFromString = (stringy, dontAddNull, length) => {
+      var len = length > 0 ? length : lengthBytesUTF8(stringy)+1;
+      var u8array = new Array(len);
+      var numBytesWritten = stringToUTF8Array(stringy, u8array, 0, u8array.length);
+      if (dontAddNull) u8array.length = numBytesWritten;
+      return u8array;
+    };
   var FS_stdin_getChar = () => {
       if (!FS_stdin_getChar_buffer.length) {
         var result = null;
@@ -1582,7 +1581,7 @@ function get_unix_timestamp() { return Math.floor(Date.now() / 1000); }
           }
         },
   fsync(tty) {
-          if (tty.output && tty.output.length > 0) {
+          if (tty.output?.length > 0) {
             out(UTF8ArrayToString(tty.output));
             tty.output = [];
           }
@@ -1619,7 +1618,7 @@ function get_unix_timestamp() { return Math.floor(Date.now() / 1000); }
           }
         },
   fsync(tty) {
-          if (tty.output && tty.output.length > 0) {
+          if (tty.output?.length > 0) {
             err(UTF8ArrayToString(tty.output));
             tty.output = [];
           }
@@ -2581,6 +2580,13 @@ function get_unix_timestamp() { return Math.floor(Date.now() / 1000); }
         stream.stream_ops?.dup?.(stream);
         return stream;
       },
+  doSetAttr(stream, node, attr) {
+        var setattr = stream?.stream_ops.setattr;
+        var arg = setattr ? stream : node;
+        setattr ??= node.node_ops.setattr;
+        FS.checkOpExists(setattr, 63)
+        setattr(arg, attr);
+      },
   chrdev_stream_ops:{
   open(stream) {
           var device = FS.getDevice(stream.node.rdev);
@@ -2996,8 +3002,24 @@ function get_unix_timestamp() { return Math.floor(Date.now() / 1000); }
         var getattr = FS.checkOpExists(node.node_ops.getattr, 63);
         return getattr(node);
       },
+  fstat(fd) {
+        var stream = FS.getStreamChecked(fd);
+        var node = stream.node;
+        var getattr = stream.stream_ops.getattr;
+        var arg = getattr ? stream : node;
+        getattr ??= node.node_ops.getattr;
+        FS.checkOpExists(getattr, 63)
+        return getattr(arg);
+      },
   lstat(path) {
         return FS.stat(path, true);
+      },
+  doChmod(stream, node, mode, dontFollow) {
+        FS.doSetAttr(stream, node, {
+          mode: (mode & 4095) | (node.mode & ~4095),
+          ctime: Date.now(),
+          dontFollow
+        });
       },
   chmod(path, mode, dontFollow) {
         var node;
@@ -3007,19 +3029,21 @@ function get_unix_timestamp() { return Math.floor(Date.now() / 1000); }
         } else {
           node = path;
         }
-        var setattr = FS.checkOpExists(node.node_ops.setattr, 63);
-        setattr(node, {
-          mode: (mode & 4095) | (node.mode & ~4095),
-          ctime: Date.now(),
-          dontFollow
-        });
+        FS.doChmod(null, node, mode, dontFollow);
       },
   lchmod(path, mode) {
         FS.chmod(path, mode, true);
       },
   fchmod(fd, mode) {
         var stream = FS.getStreamChecked(fd);
-        FS.chmod(stream.node, mode);
+        FS.doChmod(stream, stream.node, mode, false);
+      },
+  doChown(stream, node, dontFollow) {
+        FS.doSetAttr(stream, node, {
+          timestamp: Date.now(),
+          dontFollow
+          // we ignore the uid / gid for now
+        });
       },
   chown(path, uid, gid, dontFollow) {
         var node;
@@ -3029,19 +3053,30 @@ function get_unix_timestamp() { return Math.floor(Date.now() / 1000); }
         } else {
           node = path;
         }
-        var setattr = FS.checkOpExists(node.node_ops.setattr, 63);
-        setattr(node, {
-          timestamp: Date.now(),
-          dontFollow
-          // we ignore the uid / gid for now
-        });
+        FS.doChown(null, node, dontFollow);
       },
   lchown(path, uid, gid) {
         FS.chown(path, uid, gid, true);
       },
   fchown(fd, uid, gid) {
         var stream = FS.getStreamChecked(fd);
-        FS.chown(stream.node, uid, gid);
+        FS.doChown(stream, stream.node, false);
+      },
+  doTruncate(stream, node, len) {
+        if (FS.isDir(node.mode)) {
+          throw new FS.ErrnoError(31);
+        }
+        if (!FS.isFile(node.mode)) {
+          throw new FS.ErrnoError(28);
+        }
+        var errCode = FS.nodePermissions(node, 'w');
+        if (errCode) {
+          throw new FS.ErrnoError(errCode);
+        }
+        FS.doSetAttr(stream, node, {
+          size: len,
+          timestamp: Date.now()
+        });
       },
   truncate(path, len) {
         if (len < 0) {
@@ -3054,28 +3089,14 @@ function get_unix_timestamp() { return Math.floor(Date.now() / 1000); }
         } else {
           node = path;
         }
-        if (FS.isDir(node.mode)) {
-          throw new FS.ErrnoError(31);
-        }
-        if (!FS.isFile(node.mode)) {
-          throw new FS.ErrnoError(28);
-        }
-        var errCode = FS.nodePermissions(node, 'w');
-        if (errCode) {
-          throw new FS.ErrnoError(errCode);
-        }
-        var setattr = FS.checkOpExists(node.node_ops.setattr, 63);
-        setattr(node, {
-          size: len,
-          timestamp: Date.now()
-        });
+        FS.doTruncate(null, node, len);
       },
   ftruncate(fd, len) {
         var stream = FS.getStreamChecked(fd);
-        if ((stream.flags & 2097155) === 0) {
+        if (len < 0 || (stream.flags & 2097155) === 0) {
           throw new FS.ErrnoError(28);
         }
-        FS.truncate(stream.node, len);
+        FS.doTruncate(stream, stream.node, len);
       },
   utime(path, atime, mtime) {
         var lookup = FS.lookupPath(path, { follow: true });
@@ -4080,8 +4101,7 @@ function get_unix_timestamp() { return Math.floor(Date.now() / 1000); }
   function ___syscall_fstat64(fd, buf) {
   try {
   
-      var stream = SYSCALLS.getStreamFromFD(fd);
-      return SYSCALLS.writeStat(buf, FS.stat(stream.path));
+      return SYSCALLS.writeStat(buf, FS.fstat(fd));
     } catch (e) {
     if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
     return -e.errno;
@@ -4413,7 +4433,7 @@ function get_unix_timestamp() { return Math.floor(Date.now() / 1000); }
   
         var audioPlugin = {};
         audioPlugin['canHandle'] = function audioPlugin_canHandle(name) {
-          return !Module['noAudioDecoding'] && name.substr(-4) in { '.ogg': 1, '.wav': 1, '.mp3': 1 };
+          return !Module['noAudioDecoding'] && name.slice(-4) in { '.ogg': 1, '.wav': 1, '.mp3': 1 };
         };
         audioPlugin['handle'] = function audioPlugin_handle(byteArray, name, onload, onerror) {
           var done = false;
@@ -4461,7 +4481,7 @@ function get_unix_timestamp() { return Math.floor(Date.now() / 1000); }
               }
               return ret;
             }
-            audio.src = 'data:audio/x-' + name.substr(-3) + ';base64,' + encode64(byteArray);
+            audio.src = 'data:audio/x-' + name.slice(-3) + ';base64,' + encode64(byteArray);
             finish(audio); // we don't wait for confirmation this worked - but it's worth trying
           };
           audio.src = url;
@@ -4652,7 +4672,7 @@ function get_unix_timestamp() { return Math.floor(Date.now() / 1000); }
           'ogg': 'audio/ogg',
           'wav': 'audio/wav',
           'mp3': 'audio/mpeg'
-        }[name.substr(name.lastIndexOf('.')+1)];
+        }[name.slice(name.lastIndexOf('.')+1)];
       },
   getUserMedia(func) {
         window.getUserMedia ||= navigator['getUserMedia'] ||
@@ -4829,7 +4849,7 @@ function get_unix_timestamp() { return Math.floor(Date.now() / 1000); }
         }
         var w = wNative;
         var h = hNative;
-        if (Module['forcedAspectRatio'] && Module['forcedAspectRatio'] > 0) {
+        if (Module['forcedAspectRatio'] > 0) {
           if (w/h < Module['forcedAspectRatio']) {
             w = Math.round(h * Module['forcedAspectRatio']);
           } else {
@@ -5171,7 +5191,7 @@ function get_unix_timestamp() { return Math.floor(Date.now() / 1000); }
         }
         // Make sure the canvas object no longer refers to the context object so
         // there are no GC surprises.
-        if (GL.contexts[contextHandle] && GL.contexts[contextHandle].GLctx.canvas) {
+        if (GL.contexts[contextHandle]?.GLctx?.canvas) {
           GL.contexts[contextHandle].GLctx.canvas.GLctxObject = undefined;
         }
         GL.contexts[contextHandle] = null;
@@ -5624,7 +5644,7 @@ function get_unix_timestamp() { return Math.floor(Date.now() / 1000); }
       }
   
       if (!noSetTiming) {
-        if (fps && fps > 0) {
+        if (fps > 0) {
           _emscripten_set_main_loop_timing(0, 1000.0 / fps);
         } else {
           // Do rAF by rendering each frame (no decimating)
