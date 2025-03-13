@@ -40,10 +40,11 @@ if(EMSCRIPTEN)
          -sASYNCIFY \
          -sSTACK_SIZE=131072 \
          -sSDL2_MIXER_FORMATS=['mp3'] \
-         --preload-file ${CMAKE_SOURCE_DIR}/assets@/assets \
          --shell-file ${CMAKE_SOURCE_DIR}/template.html"
     )
-    
+ 
+    set(PRELOAD_FLAGS "--preload-file ${CMAKE_SOURCE_DIR}/assets@/assets --compression=1")
+ 
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMPILE_FLAGS}")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${COMPILE_FLAGS}")
 else()
