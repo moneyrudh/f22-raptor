@@ -24,15 +24,25 @@ jobs:
         run: |
           mkdir -p public
           # cp build/f22_raptor.* public/
-          cp build/public/* public/
           # cp -r assets public/
+          if [ -d "build/public" ] && [ "$(ls -A build/public)" ]; then
+            echo "Found build/public directory, copying contents..."
+            cp -r build/public/* public/
+          else
+            echo "Using direct build directory, copying Emscripten artifacts..."
+            cp build/f22_raptor.* public/
+          fi
+          
           cp index.html public/
-
+          
+          # Create a _headers file for Cloudflare
           echo "/*" > public/_headers
           echo "  Cross-Origin-Embedder-Policy: require-corp" >> public/_headers
           echo "  Cross-Origin-Opener-Policy: same-origin" >> public/_headers
-          echo "/*.data" >> public/_headers
-          echo "  Content-Type: application/octet-stream" >> public/_headers
+          
+          # Log the files we're deploying for debugging
+          echo "Files being deployed:"
+          ls -la public/
 
       - name: Deploy to Github Pages
         uses: JamesIves/github-pages-deploy-action@v4
