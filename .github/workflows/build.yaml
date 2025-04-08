@@ -23,9 +23,16 @@ jobs:
       - name: Setup public directory
         run: |
           mkdir -p public
-          cp build/f22_raptor.* public/
-          cp -r assets public/
+          # cp build/f22_raptor.* public/
+          cp build/public/* public/
+          # cp -r assets public/
           cp index.html public/
+
+          echo "/*" > public/_headers
+          echo "  Cross-Origin-Embedder-Policy: require-corp" >> public/_headers
+          echo "  Cross-Origin-Opener-Policy: same-origin" >> public/_headers
+          echo "/*.data" >> public/_headers
+          echo "  Content-Type: application/octet-stream" >> public/_headers
 
       - name: Deploy to Github Pages
         uses: JamesIves/github-pages-deploy-action@v4

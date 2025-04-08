@@ -40,6 +40,7 @@ if(EMSCRIPTEN)
          -sASYNCIFY \
          -sSTACK_SIZE=131072 \
          -sSDL2_MIXER_FORMATS=['mp3'] \
+         -sAUDIO_WORKLET=1 \
          --shell-file ${CMAKE_SOURCE_DIR}/template.html"
     )
  
