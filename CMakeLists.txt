@@ -43,10 +43,14 @@ if(EMSCRIPTEN)
          --shell-file ${CMAKE_SOURCE_DIR}/template.html"
     )
  
-    set(PRELOAD_FLAGS "--preload-file ${CMAKE_SOURCE_DIR}/assets@/assets --compression=1")
+    # Set preload and compression as separate options
+    set(PRELOAD_FLAGS "--preload-file ${CMAKE_SOURCE_DIR}/assets@/assets --use-preload-plugins")
+    set(COMPRESSION_FLAGS "-sLZ4=1")  # Using LZ4 compression for better performance
  
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMPILE_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${COMPILE_FLAGS}")
+    # Combine the flags properly
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMPILE_FLAGS} ${PRELOAD_FLAGS} ${COMPRESSION_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${COMPILE_FLAGS} ${PRELOAD_FLAGS} ${COMPRESSION_FLAGS}")
+
 else()
     find_package(SDL2 REQUIRED)
     find_package(SDL2_ttf REQUIRED)
