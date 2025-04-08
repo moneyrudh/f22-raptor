@@ -40,12 +40,7 @@ if(EMSCRIPTEN)
          -sASYNCIFY \
          -sSTACK_SIZE=131072 \
          -sSDL2_MIXER_FORMATS=['mp3'] \
-         -pthread \
-         -sSHARED_MEMORY=1 \
-         -matomics \
-         -mbulk-memory \
-         -sAUDIO_WORKLET=1 \
-         -sWASM_WORKERS=1 \
+         -sMIN_CHROME_VERSION=92 \
          --shell-file ${CMAKE_SOURCE_DIR}/template.html"
     )
  
